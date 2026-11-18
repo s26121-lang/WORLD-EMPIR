@@ -10,102 +10,160 @@
 .detailed-map-wrap{position:relative;width:100%;overflow:hidden;border:1px solid #31536d;border-radius:12px;background:#071827;line-height:0}.detailed-map-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair}.detailed-map-wrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.detailed-map-wrap .map-market-pin{pointer-events:all;cursor:pointer}.detailed-map-wrap .map-market-pin:hover circle{stroke:#fff;stroke-width:4}.map-legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 11px;background:#0c1d2e;border:1px solid var(--line);border-radius:9px;font-size:11px;color:var(--muted)}.map-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.map-note{font-size:12px;color:var(--muted);margin:8px 2px 12px}.map-status{padding:18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}.country.selected{border-color:var(--gold)}</style>
 </head>
 <body><main class="app">
-<header class="hero"><div class="top"><div><div class="eyebrow">GLOBAL BUSINESS & STRATEGY SIMULATOR</div><div class="brand">WORLD EMPIRE</div><div class="sub">BUILD YOUR GLOBAL EMPIRE · CONTROL THE MARKET</div></div><div class="year"><div class="eyebrow">FISCAL YEAR</div><strong id="year">2026</strong><div class="sub" id="day">DAY 1</div></div></div><div class="row" style="margin-top:18px"><span class="eyebrow">WORLD ECONOMY</span><b id="economyText">STABLE</b></div><div class="progress"><span id="economyBar" style="width:55%"></span></div></header>
-<section class="stats"><div class="stat"><small>AVAILABLE CASH</small><strong id="cash">$10.00M</strong><small>Liquid assets</small></div><div class="stat"><small>COMPANY VALUE</small><strong id="valuation">$25.00M</strong><small>Enterprise valuation</small></div><div class="stat"><small>DAILY NET PROFIT</small><strong id="profit">$0</strong><small id="incomeHint">Start building your business</small></div><div class="stat"><small>MARKETS ENTERED</small><strong id="marketCount">1</strong><small id="businessCount">0 businesses</small></div></section>
-<nav class="nav" id="nav"><button class="active" data-view="overview">OVERVIEW</button><button data-view="world">WORLD MAP</button><button data-view="business">BUSINESSES</button><button data-view="market">STOCK MARKET</button><button data-view="research">R&D</button><button data-view="trade">TRADE</button><button data-view="ranking">RANKINGS</button></nav>
-<div id="content"></div><div class="btnline"><button class="btn primary" id="advance">▶ ADVANCE 1 DAY</button><button class="secondary" id="auto">AUTO: OFF</button><button class="secondary" id="save">💾 SAVE GAME</button><button class="secondary" id="load">↩ LOAD GAME</button><button class="secondary" id="reset">NEW GAME</button></div>
-<div class="footer">WORLD EMPIRE v1.0 · Economic simulation · Save data stays in this browser</div></main><div id="toast" class="toast hidden"></div>
+<header class="hero"><div class="top"><div><div class="eyebrow">世界経済・企業経営シミュレーション</div><div class="brand">WORLD EMPIRE</div><div class="sub">世界規模の企業帝国を築き、市場を支配しよう</div></div><div class="year"><div class="eyebrow">会計年度</div><strong id="year">2026</strong><div class="sub" id="day">1日目</div></div></div><div class="row" style="margin-top:18px"><span class="eyebrow">世界経済</span><b id="economyText">安定</b></div><div class="progress"><span id="economyBar" style="width:55%"></span></div></header>
+<section class="stats"><div class="stat"><small>現金</small><strong id="cash">$10.00M</strong><small>流動資産</small></div><div class="stat"><small>企業価値</small><strong id="valuation">$25.00M</strong><small>企業評価額</small></div><div class="stat"><small>1日の純利益</small><strong id="profit">$0</strong><small id="incomeHint">事業を始めましょう</small></div><div class="stat"><small>進出国数</small><strong id="marketCount">1</strong><small id="businessCount">企業 0社</small></div></section>
+<nav class="nav" id="nav"><button class="active" data-view="overview">概要</button><button data-view="world">世界地図</button><button data-view="business">企業経営</button><button data-view="market">株式市場</button><button data-view="research">研究開発</button><button data-view="trade">物流ネットワーク</button><button data-view="ranking">ランキング</button></nav>
+<div id="content"></div><div class="btnline"><button class="btn primary" id="advance">▶ 1日進める</button><button class="secondary" id="auto">自動進行：OFF</button><button class="secondary" id="save">💾 セーブ</button><button class="secondary" id="load">↩ ロード</button><button class="secondary" id="reset">新しいゲーム</button></div>
+<div class="footer">WORLD EMPIRE v2.1 · 経済シミュレーション · セーブデータはこのブラウザに保存されます</div></main><div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/dist/d3-geo.min.js"></script>
 <script>
 (()=>{
-const $=id=>document.getElementById(id),money=n=>'$'+(n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':Math.round(n).toLocaleString());
-const countries=[['Japan','🇯🇵','Asia',1.1,5e6],['United States','🇺🇸','N. America',1.5,12e6],['China','🇨🇳','Asia',1.35,9e6],['Germany','🇩🇪','Europe',1.2,6.5e6],['United Kingdom','🇬🇧','Europe',1.15,6e6],['India','🇮🇳','Asia',1.25,4.5e6],['France','🇫🇷','Europe',1.05,5.2e6],['Brazil','🇧🇷','S. America',.95,3.8e6],['Australia','🇦🇺','Oceania',1.05,4.2e6],['South Korea','🇰🇷','Asia',1.1,4.8e6],['Canada','🇨🇦','N. America',1.08,5e6],['Singapore','🇸🇬','Asia',1.3,4e6]];
-const sectors=[['Manufacturing','🏭',3.5e6,180000],['Technology','💻',5e6,280000],['Logistics','🚢',2.8e6,150000],['Real Estate','🏢',4.2e6,190000],['Energy','⚡',6e6,310000]];
-const tech=[['Advanced Automation',1.5e6,'Manufacturing income +25%'],['AI Management',2.5e6,'All business income +15%'],['Global Logistics',3e6,'Trade route income +40%'],['Financial Engineering',4e6,'Company valuation +20%'],['Next-gen Materials',6e6,'Manufacturing income +30%'],['Quantum Computing',10e6,'Technology income +35%']];
-const fresh=()=>({cash:1e7,day:1,year:2026,economy:55,selected:'Japan',markets:['Japan'],businesses:[],routes:[],research:[],stocks:[100,102,99,105,103,108,110,107],history:[25],profit:0,auto:false,news:'WORLD EMPIRE INC. has been founded in Tokyo. Your first move will define the company.',rivals:[{name:'NOVA GLOBAL',sector:'Technology',value:42e6},{name:'APEX INDUSTRIES',sector:'Manufacturing',value:31e6},{name:'ORBITAL LOGISTICS',sector:'Logistics',value:18e6},{name:'SUMMIT CAPITAL',sector:'Finance',value:55e6},{name:'PACIFIC DYNAMICS',sector:'Energy',value:26e6}]});
-let s=fresh(),timer=null,current='overview';
-const val=()=>25e6+s.businesses.reduce((a,b)=>a+b.cost*1.15,0)+s.routes.length*1.2e6+s.research.length*1.5e6+(s.research.includes('Financial Engineering')?valBase()*.2:0);
-const valBase=()=>25e6+s.businesses.reduce((a,b)=>a+b.cost*1.15,0)+s.routes.length*1.2e6+s.research.length*1.5e6;
-const income=()=>s.businesses.reduce((a,b)=>a+b.income,0)+s.routes.reduce((a,b)=>a+b.income,0),expenses=()=>s.businesses.length*25000+s.routes.length*15000;
-const notify=t=>{let el=$('toast');el.textContent=typeof translateString==='function'?translateString(t):t;el.classList.remove('hidden');clearTimeout(notify.t);notify.t=setTimeout(()=>el.classList.add('hidden'),2600)};
+'use strict';
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(Math.abs(n)>=1e9?(n/1e9).toFixed(2)+'B':Math.abs(n)>=1e6?(n/1e6).toFixed(2)+'M':Math.round(n).toLocaleString());
+const countryNames={'Japan':'日本','United States':'アメリカ','China':'中国','Germany':'ドイツ','United Kingdom':'イギリス','India':'インド','France':'フランス','Brazil':'ブラジル','Australia':'オーストラリア','South Korea':'韓国','Canada':'カナダ','Singapore':'シンガポール'};
+const countries=[
+ ['Japan','🇯🇵','アジア',1.1,5e6],['United States','🇺🇸','北アメリカ',1.5,12e6],['China','🇨🇳','アジア',1.35,9e6],
+ ['Germany','🇩🇪','ヨーロッパ',1.2,6.5e6],['United Kingdom','🇬🇧','ヨーロッパ',1.15,6e6],['India','🇮🇳','アジア',1.25,4.5e6],
+ ['France','🇫🇷','ヨーロッパ',1.05,5.2e6],['Brazil','🇧🇷','南アメリカ',.95,3.8e6],['Australia','🇦🇺','オセアニア',1.05,4.2e6],
+ ['South Korea','🇰🇷','アジア',1.1,4.8e6],['Canada','🇨🇦','北アメリカ',1.08,5e6],['Singapore','🇸🇬','アジア',1.3,4e6]
+];
+const sectors=[
+ {id:'manufacturing',name:'製造業',icon:'🏭',cost:3.5e6,income:180000},
+ {id:'technology',name:'テクノロジー',icon:'💻',cost:5e6,income:280000},
+ {id:'logistics',name:'物流',icon:'🚢',cost:2.8e6,income:150000},
+ {id:'property',name:'不動産',icon:'🏢',cost:4.2e6,income:190000},
+ {id:'energy',name:'エネルギー',icon:'⚡',cost:6e6,income:310000}
+];
+const tech=[
+ {id:'automation',name:'高度自動化',cost:1.5e6,desc:'製造業の収益 +25%'},
+ {id:'ai',name:'AI経営管理',cost:2.5e6,desc:'全事業の収益 +15%'},
+ {id:'globalLogistics',name:'国際物流',cost:3e6,desc:'貿易ルートの収益 +40%'},
+ {id:'finance',name:'金融工学',cost:4e6,desc:'企業価値 +20%'},
+ {id:'materials',name:'次世代素材',cost:6e6,desc:'製造業の収益 +30%'},
+ {id:'quantum',name:'量子コンピューター',cost:10e6,desc:'テクノロジー事業の収益 +35%'}
+];
+const transport={
+ ship:{name:'船便',icon:'🚢',cost:1.5e6,income:120000,days:4,duration:17},
+ air:{name:'航空便',icon:'✈️',cost:2.8e6,income:220000,days:1,duration:9},
+ land:{name:'陸路',icon:'🚚',cost:.9e6,income:80000,days:2,duration:12}
+};
+const landPairs=['United States|Canada','Germany|France','Germany|United Kingdom','France|United Kingdom'];
+const isoMarket={'392':'Japan','840':'United States','156':'China','276':'Germany','826':'United Kingdom','356':'India','250':'France','076':'Brazil','036':'Australia','410':'South Korea','124':'Canada','702':'Singapore'};
+const marketLonLat={'Japan':[138,36],'United States':[-98,39],'China':[103,35],'Germany':[10.5,51],'United Kingdom':[-3,55],'India':[78,22],'France':[2,46],'Brazil':[-52,-10],'Australia':[134,-25],'South Korea':[127.5,36],'Canada':[-106,56],'Singapore':[103.8,1.3]};
+const fresh=()=>({
+ cash:1e7,day:1,year:2026,economy:55,selected:'Japan',markets:['Japan'],businesses:[],routes:[],research:[],
+ stocks:[100,102,99,105,103,108,110,107],history:[25],profit:0,shares:0,sharePrice:100000,
+ countryEconomy:Object.fromEntries(countries.map((n,i)=>[n[0],43+((i*17+23)%31)])),
+ news:'WORLD EMPIRE INC.を東京に設立しました。最初の事業を始めましょう。',
+ rivals:[
+  {name:'NOVA GLOBAL',sector:'テクノロジー',value:42e6},
+  {name:'APEX INDUSTRIES',sector:'製造業',value:31e6},
+  {name:'ORBITAL LOGISTICS',sector:'物流',value:18e6},
+  {name:'SUMMIT CAPITAL',sector:'金融',value:55e6},
+  {name:'PACIFIC DYNAMICS',sector:'エネルギー',value:26e6}
+ ],
+ routeFromDraft:'Japan',routeToDraft:'',routeModeDraft:'ship'
+});
+let s=fresh(),timer=null,current='overview',worldFeatures=null,worldPromise=null,worldProjection=null,worldHits=[];
+const notify=message=>{const el=$('toast');if(!el)return;el.textContent=message;el.classList.remove('hidden');clearTimeout(notify.timer);notify.timer=setTimeout(()=>el.classList.add('hidden'),2800);};
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function stats(){let p=income()-expenses();$('year').textContent=s.year;$('day').textContent='DAY '+s.day;$('cash').textContent=money(s.cash);$('valuation').textContent=money(val());$('profit').textContent=money(p);$('profit').className=p>=0?'positive':'negative';$('incomeHint').textContent='Revenue '+money(income())+' / day';$('marketCount').textContent=s.markets.length;$('businessCount').textContent=s.businesses.length+' businesses';$('economyText').textContent=s.economy>70?'BOOMING':s.economy<32?'RECESSION':'STABLE';$('economyBar').style.width=s.economy+'%';}
-function chart(){let c=$('chart');if(!c)return;let x=c.getContext('2d'),w=c.width=c.clientWidth*2,h=300,a=s.stocks.slice(-24),lo=Math.min(...a)-5,hi=Math.max(...a)+5;x.clearRect(0,0,w,h);x.strokeStyle='#29435c';for(let i=1;i<4;i++){x.beginPath();x.moveTo(0,h*i/4);x.lineTo(w,h*i/4);x.stroke()}x.beginPath();a.forEach((v,i)=>{let px=i*w/(a.length-1),py=h-18-(v-lo)/(hi-lo)*(h-36);i?x.lineTo(px,py):x.moveTo(px,py)});x.strokeStyle='#39d6a0';x.lineWidth=5;x.stroke();x.lineTo(w,h);x.lineTo(0,h);x.closePath();x.fillStyle='rgba(57,214,160,.13)';x.fill();}
-function panel(title,body){return '<section class="panel"><h2>'+title+'</h2>'+body+'</section>'}
-function portfolio(){return s.businesses.length?s.businesses.map(b=>'<div class="listitem row"><div><b>'+b.icon+' '+esc(b.sector)+'</b><div class="muted">'+esc(b.country)+'</div></div><div style="text-align:right"><b class="positive">'+money(b.income)+'/day</b><div class="tag">Investment '+money(b.cost)+'</div></div></div>').join(''):'<div class="muted">No businesses yet. Start with a factory or technology company in Japan.</div>'}
-function overview(){$('content').innerHTML='<div class="layout"><div>'+panel('CORPORATE PERFORMANCE','<div class="grid2"><div class="metric"><small class="muted">GLOBAL MARKET SHARE</small><b>'+(0.1+s.businesses.length*.08).toFixed(2)+'%</b></div><div class="metric"><small class="muted">TECHNOLOGY LEVEL</small><b>'+s.research.length+' / '+tech.length+'</b></div></div><canvas class="chart" id="chart"></canvas><div class="muted">Share price index · simulated daily history</div>')+panel('BUSINESS PORTFOLIO',portfolio())+'</div><div>'+panel('QUICK INVESTMENTS','<div class="cards">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:22px">'+a[1]+'</div><b>'+a[0]+'</b><div class="tag">From '+money(a[2])+'</div><button class="btn" style="margin-top:9px;width:100%" data-build="'+i+'">INVEST</button></div>').join('')+'</div>')+panel('MARKET INTELLIGENCE','<div class="notice">'+esc(s.news)+'</div><div class="listitem row"><span class="muted">World economic index</span><b>'+s.economy.toFixed(1)+'/100</b></div><div class="listitem row"><span class="muted">Active trade routes</span><b>'+s.routes.length+'</b></div><div class="listitem row"><span class="muted">Rival corporations</span><b>'+s.rivals.length+'</b></div>')+'</div></div>';chart();}
-function world(){let c=countries.find(x=>x[0]===s.selected)||countries[0];$('content').innerHTML=panel('GLOBAL EXPANSION · SELECT A MARKET','<div class="map"><svg viewBox="0 0 700 290" aria-label="Illustrative world map"><path d="M35 70L90 30 170 40 205 75 175 120 130 140 105 205 65 180 55 125 25 105Z"/><path d="M170 160L220 145 245 175 230 220 205 270 180 230Z"/><path d="M275 45L330 25 390 45 405 75 370 100 320 90 290 115 265 85Z"/><path d="M310 110L375 100 420 135 390 210 350 260 325 190 295 145Z"/><path d="M405 40L490 25 585 65 560 115 500 130 455 100 420 105 390 70Z"/><path d="M520 180L580 170 625 205 590 235 540 220Z"/><circle cx="150" cy="100" r="6"/><circle cx="340" cy="80" r="6"/><circle cx="465" cy="90" r="6"/><circle cx="530" cy="105" r="6"/><circle cx="365" cy="155" r="6"/><circle cx="205" cy="190" r="6"/></svg></div><p class="muted">Illustrative world map. Choose a market to inspect its entry cost.</p><div class="country-grid">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'"><div class="flag">'+n[1]+'</div><b>'+n[0]+'</b><div class="tag">'+n[2]+' · Index '+n[3].toFixed(2)+'</div><div class="tag">'+(s.markets.includes(n[0])?'✓ ENTERED':'Entry '+money(n[4]))+'</div></button>').join('')+'</div>')+panel('MARKET DETAILS','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+c[0]+'</div><div class="muted">'+c[2]+' · Market index '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><p class="muted">Entry fee covers registration and initial market setup.</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'MARKET ALREADY ENTERED':'ENTER MARKET')+'</button>');}
-function businesses(){$('content').innerHTML=panel('BUSINESS PORTFOLIO',portfolio())+panel('ESTABLISH A NEW BUSINESS','<div class="muted">Select a sector. New businesses earn recurring revenue each game day.</div><div class="grid2" style="margin-top:10px">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:23px">'+a[1]+'</div><b>'+a[0]+'</b><div class="tag">Base cost '+money(a[2])+' · Revenue '+money(a[3])+'/day</div><button class="btn" style="margin-top:9px" data-build="'+i+'">BUILD IN '+esc(s.selected.toUpperCase())+'</button></div>').join('')+'</div>');}
-function market(){$('content').innerHTML=panel('GLOBAL STOCK EXCHANGE','<div class="row"><div><div class="muted">WORLD EMPIRE INC. · WEI</div><div style="font-size:31px;font-weight:850">'+money(s.stocks.at(-1)*100000)+'</div></div><div class="'+(s.stocks.at(-1)>=s.stocks.at(-2)?'positive':'negative')+'">'+(s.stocks.at(-1)>=s.stocks.at(-2)?'▲':'▼')+' '+Math.abs((s.stocks.at(-1)-s.stocks.at(-2))/s.stocks.at(-2)*100).toFixed(2)+'%</div></div><canvas class="chart" id="chart"></canvas><div class="muted">Share price index · Updated each game day.</div>')+panel('RIVAL CORPORATIONS','<table class="table"><thead><tr><th>COMPANY</th><th>VALUATION</th><th>ACTION</th></tr></thead><tbody>'+s.rivals.map((r,i)=>'<tr><td><b>'+esc(r.name)+'</b><div class="tag">'+r.sector+'</div></td><td>'+money(r.value)+'</td><td><button class="btn gold" data-acquire="'+i+'">ACQUIRE · '+money(r.value*1.2)+'</button></td></tr>').join('')+'</tbody></table><p class="muted">Acquisitions cost 120% of estimated valuation. Acquired companies become subsidiaries and add daily revenue.</p>');chart();}
-function researchView(){$('content').innerHTML=panel('RESEARCH & DEVELOPMENT','<div class="muted">Invest in permanent technology bonuses.</div>'+tech.map((t,i)=>'<div class="listitem"><div class="row"><b>🔬 '+t[0]+'</b><b>'+(s.research.includes(t[0])?'<span class="positive">COMPLETED</span>':money(t[1]))+'</b></div><div class="muted">'+t[2]+'</div><button class="btn" style="margin-top:8px" data-tech="'+i+'" '+(s.research.includes(t[0])?'disabled':'')+'>'+(s.research.includes(t[0])?'COMPLETED':'FUND RESEARCH')+'</button></div>').join(''));}
-const routeCoords={'Japan':[540,112],'United States':[145,96],'China':[485,103],'Germany':[365,79],'United Kingdom':[345,70],'India':[440,145],'France':[350,94],'Brazil':[205,190],'Australia':[548,215],'South Korea':[515,118],'Canada':[160,55],'Singapore':[467,169]};
-const countryJa={'Japan':'日本','United States':'アメリカ','China':'中国','Germany':'ドイツ','United Kingdom':'イギリス','India':'インド','France':'フランス','Brazil':'ブラジル','Australia':'オーストラリア','South Korea':'韓国','Canada':'カナダ','Singapore':'シンガポール'};
-const transportModes={ship:{label:'船便',icon:'🚢',cost:1500000,income:120000,days:4,duration:15,desc:'大量輸送向け・低コスト'},air:{label:'航空便',icon:'✈️',cost:2800000,income:220000,days:1,duration:8,desc:'最速・高コスト'},land:{label:'陸路',icon:'🚚',cost:900000,income:80000,days:2,duration:11,desc:'近隣国向け・中コスト'}};
-const landPairs=['United States|Canada','Germany|France','Germany|United Kingdom','France|United Kingdom','China|India'];
-
-/* Detailed world geography: Natural Earth 1:50m country boundaries */
-const MARKET_ISO={'392':'Japan','840':'United States','156':'China','276':'Germany','826':'United Kingdom','356':'India','250':'France','076':'Brazil','036':'Australia','410':'South Korea','124':'Canada','702':'Singapore'};
-const MARKET_LONLAT={'Japan':[138,36],'United States':[-98,39],'China':[103,35],'Germany':[10.5,51],'United Kingdom':[-3,55],'India':[78,22],'France':[2,46],'Brazil':[-52,-10],'Australia':[134,-25],'South Korea':[127.5,36],'Canada':[-106,56],'Singapore':[103.8,1.3]};
-let detailedWorldFeatures=null,detailedWorldPromise=null,detailedWorldHits=[],detailedWorldProjection=null;
-function loadDetailedWorld(){
- if(detailedWorldFeatures)return Promise.resolve(detailedWorldFeatures);
- if(detailedWorldPromise)return detailedWorldPromise;
- if(!window.topojson||!window.d3||!window.d3.geoNaturalEarth1)return Promise.reject(new Error('地図描画ライブラリが読み込めません'));
- detailedWorldPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
- .then(r=>{if(!r.ok)throw new Error('地図データを取得できません');return r.json();})
- .then(topology=>{detailedWorldFeatures=topojson.feature(topology,topology.objects.countries).features;return detailedWorldFeatures;});
- return detailedWorldPromise;
+const valBase=()=>25e6+s.businesses.reduce((a,b)=>a+b.cost*1.15,0)+s.routes.length*1.2e6+s.research.length*1.5e6;
+const val=()=>valBase()+(s.research.includes('finance')?valBase()*.2:0);
+const countryMood=name=>s.countryEconomy[name]||50;
+const businessIncome=()=>s.businesses.reduce((sum,b)=>sum+b.income*(countryMood(b.country)/50),0);
+const routeIncome=()=>s.routes.reduce((sum,r)=>sum+r.income,0);
+const expenses=()=>s.businesses.length*25000+s.routes.length*15000;
+function stats(){
+ const p=businessIncome()+routeIncome()-expenses();
+ $('year').textContent=s.year;$('day').textContent=s.day+'日目';
+ $('cash').textContent=money(s.cash);$('valuation').textContent=money(val());$('profit').textContent=money(p);
+ $('profit').className=p>=0?'positive':'negative';
+ $('incomeHint').textContent='売上 '+money(businessIncome()+routeIncome())+' / 日';
+ $('marketCount').textContent=s.markets.length;$('businessCount').textContent=s.businesses.length+'社';
+ $('economyText').textContent=s.economy>70?'好景気':s.economy<32?'不況':'安定';
+ $('economyBar').style.width=s.economy+'%';
 }
-function detailedMapOverlay(svgId,showRoutes){
- const svg=$(svgId);if(!svg||!detailedWorldProjection)return;
- const xy=name=>{const ll=MARKET_LONLAT[name];return ll?detailedWorldProjection(ll):[700,325];};
+function chart(){
+ const c=$('chart');if(!c)return;const x=c.getContext('2d');if(!x)return;
+ const w=c.width=Math.max(320,c.clientWidth*2),h=300,a=s.stocks.slice(-24),lo=Math.min(...a)-5,hi=Math.max(...a)+5;
+ x.clearRect(0,0,w,h);x.strokeStyle='#29435c';
+ for(let i=1;i<4;i++){x.beginPath();x.moveTo(0,h*i/4);x.lineTo(w,h*i/4);x.stroke();}
+ x.beginPath();a.forEach((v,i)=>{const px=i*w/(a.length-1),py=h-18-(v-lo)/(hi-lo)*(h-36);i?x.lineTo(px,py):x.moveTo(px,py);});
+ x.strokeStyle='#39d6a0';x.lineWidth=5;x.stroke();x.lineTo(w,h);x.lineTo(0,h);x.closePath();x.fillStyle='rgba(57,214,160,.13)';x.fill();
+}
+function panel(title,body){return '<section class="panel"><h2>'+title+'</h2>'+body+'</section>';}
+function portfolio(){
+ if(!s.businesses.length)return '<div class="muted">まだ企業がありません。工場やテクノロジー企業を設立しましょう。</div>';
+ return s.businesses.map(b=>'<div class="listitem row"><div><b>'+b.icon+' '+esc(b.name)+'</b><div class="muted">'+(countryNames[b.country]||b.country)+' · レベル '+(b.level||1)+'</div></div><div style="text-align:right"><b class="positive">'+money(b.income)+'/日</b><div class="tag">投資額 '+money(b.cost)+'</div></div></div>').join('');
+}
+function overview(){
+ $('content').innerHTML='<div class="layout"><div>'+
+ panel('企業業績','<div class="grid2"><div class="metric"><small class="muted">世界市場シェア</small><b>'+(0.1+s.businesses.length*.08).toFixed(2)+'%</b></div><div class="metric"><small class="muted">研究開発レベル</small><b>'+s.research.length+' / '+tech.length+'</b></div></div><canvas class="chart" id="chart"></canvas><div class="muted">株価指数 · 日ごとの変化</div>')+
+ panel('企業ポートフォリオ',portfolio())+'</div><div>'+
+ panel('クイック投資','<div class="cards">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:22px">'+a.icon+'</div><b>'+a.name+'</b><div class="tag">投資額 '+money(a.cost)+'</div><button class="btn" style="margin-top:9px;width:100%" data-build="'+i+'">投資する</button></div>').join('')+'</div>')+
+ panel('市場情報','<div class="notice">'+esc(s.news)+'</div><div class="listitem row"><span class="muted">世界経済指数</span><b>'+s.economy.toFixed(1)+'/100</b></div><div class="listitem row"><span class="muted">稼働中の物流ルート</span><b>'+s.routes.length+'</b></div><div class="listitem row"><span class="muted">ライバル企業</span><b>'+s.rivals.length+'社</b></div>')+'</div></div>';
+ chart();
+}
+function loadWorldData(){
+ if(worldFeatures)return Promise.resolve(worldFeatures);
+ if(worldPromise)return worldPromise;
+ if(!window.topojson||!window.d3||!window.d3.geoNaturalEarth1)return Promise.reject(new Error('地図ライブラリが読み込まれていません'));
+ worldPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
+  .then(r=>{if(!r.ok)throw new Error('地図データを取得できません');return r.json();})
+  .then(topology=>{worldFeatures=topojson.feature(topology,topology.objects.countries).features;return worldFeatures;});
+ return worldPromise;
+}
+function mapOverlay(svgId,showRoutes){
+ const svg=$(svgId);if(!svg||!worldProjection)return;
+ const project=name=>marketLonLat[name]?worldProjection(marketLonLat[name]):[700,325];
  let out='';
  if(showRoutes){
-  s.routes.forEach(r=>{const a=xy(r.from),b=xy(r.to),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2-42,mode=transportModes[r.mode]||transportModes.ship,d='M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+b[0].toFixed(1)+' '+b[1].toFixed(1);
-   out+='<path d="'+d+'" fill="none" stroke="#f4c86d" stroke-width="3" stroke-dasharray="9 7" opacity=".9"/><text font-size="25" text-anchor="middle" dominant-baseline="central">'+ '<animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" rotate="auto" path="'+d+'"/>'+mode.icon+'</text>';
+  s.routes.forEach(r=>{
+   const a=project(r.from),b=project(r.to),mode=transport[r.mode]||transport.ship,mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2-40;
+   const path='M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+b[0].toFixed(1)+' '+b[1].toFixed(1);
+   out+='<path d="'+path+'" fill="none" stroke="#f4c86d" stroke-width="3" stroke-dasharray="9 7" opacity=".9"/>';
+   out+='<text font-size="25" text-anchor="middle" dominant-baseline="central"><animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" rotate="auto" path="'+path+'"/>'+mode.icon+'</text>';
   });
  }
- s.markets.forEach(name=>{const p=xy(name),country=countries.find(x=>x[0]===name),isFrom=s.routeFromDraft===name,isTo=s.routeToDraft===name;
-  out+='<g class="map-market-pin" data-route-country="'+name+'" transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+'"><circle r="12" fill="'+(isFrom?'#f0c66d':isTo?'#52aaff':'#198e9c')+'" stroke="#fff" stroke-width="2.5"/><text text-anchor="middle" y="5" font-size="15">'+(country?country[1]:'•')+'</text><text text-anchor="middle" y="-19" font-size="14" font-weight="700" fill="#fff" stroke="#071827" stroke-width="3" paint-order="stroke">'+(country?countryJa[name]||name:name)+'</text></g>';
+ s.markets.forEach(name=>{
+  const p=project(name),country=countries.find(x=>x[0]===name);
+  out+='<g transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"><circle r="11" fill="'+(s.selected===name?'#e8bd61':'#238f91')+'" stroke="#fff" stroke-width="2.5"/><text text-anchor="middle" y="5" font-size="14">'+(country?country[1]:'•')+'</text><text text-anchor="middle" y="-17" font-size="13" font-weight="700" fill="#fff" stroke="#071827" stroke-width="3" paint-order="stroke">'+(country?countryNames[name]:name)+'</text></g>';
  });
  svg.innerHTML=out;
 }
-function drawDetailedWorld(canvasId,svgId,showRoutes){
+function drawDetailedMap(canvasId,overlayId,logisticsMode){
  const canvas=$(canvasId);if(!canvas)return;
- const status=$(canvasId+'Status');
- if(status)status.textContent='詳しい国境線を読み込んでいます…';
- loadDetailedWorld().then(features=>{
+ const status=$(canvasId+'Status');if(status)status.textContent='詳細な国境データを読み込んでいます…';
+ loadWorldData().then(features=>{
   const ctx=canvas.getContext('2d');if(!ctx)return;
   const W=1400,H=650;canvas.width=W;canvas.height=H;
-  const projection=d3.geoNaturalEarth1().fitSize([W,H],{type:'Sphere'});
-  detailedWorldProjection=projection;
-  const path=d3.geoPath(projection),sphere={type:'Sphere'};
-  const ocean=ctx.createLinearGradient(0,0,0,H);ocean.addColorStop(0,'#0a2940');ocean.addColorStop(1,'#061827');ctx.fillStyle=ocean;ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.beginPath();path.context(ctx)(sphere);ctx.fillStyle='#0b263b';ctx.fill();
-  ctx.beginPath();path.context(ctx)(d3.geoGraticule10());ctx.strokeStyle='rgba(110,166,190,.19)';ctx.lineWidth=1;ctx.stroke();
-  detailedWorldHits=[];
-  const selectedId=Object.keys(MARKET_ISO).find(id=>MARKET_ISO[id]===s.selected);
+  const projection=d3.geoNaturalEarth1().fitSize([W,H],{type:'Sphere'});worldProjection=projection;
+  const path=d3.geoPath(projection),ocean=ctx.createLinearGradient(0,0,0,H);
+  ocean.addColorStop(0,'#0a2940');ocean.addColorStop(1,'#061827');ctx.fillStyle=ocean;ctx.fillRect(0,0,W,H);
+  ctx.beginPath();path.context(ctx)({type:'Sphere'});ctx.fillStyle='#0b263b';ctx.fill();
+  ctx.beginPath();path.context(ctx)(d3.geoGraticule10());ctx.strokeStyle='rgba(110,166,190,.2)';ctx.lineWidth=1;ctx.stroke();
+  worldHits=[];
+  const selectedId=Object.keys(isoMarket).find(id=>isoMarket[id]===s.selected);
   features.forEach(feature=>{
    if(!feature.geometry)return;
-   const id=String(feature.id||'').padStart(3,'0'),market=MARKET_ISO[id],d=path(feature);
-   if(!d)return;
+   const id=String(feature.id||'').padStart(3,'0'),market=isoMarket[id],d=path(feature);if(!d)return;
    const shape=new Path2D(d);
    if(id===selectedId)ctx.fillStyle='#d7ac54';
    else if(market&&s.markets.includes(market))ctx.fillStyle='#238b85';
    else if(market)ctx.fillStyle='#397b7d';
-   else {const palette=['#426e66','#4b766d','#3c6866','#51796c','#3c6570'];ctx.fillStyle=palette[(parseInt(id,10)||0)%palette.length];}
-   ctx.fill(shape,'evenodd');ctx.strokeStyle='rgba(190,220,215,.72)';ctx.lineWidth=1.15;ctx.stroke(shape);
-   if(market)detailedWorldHits.push({id,market,path:shape});
+   else{const palette=['#426e66','#4b766d','#3c6866','#51796c','#3c6570'];ctx.fillStyle=palette[(parseInt(id,10)||0)%palette.length];}
+   ctx.fill(shape,'evenodd');ctx.strokeStyle='rgba(190,220,215,.8)';ctx.lineWidth=1.15;ctx.stroke(shape);
+   worldHits.push({market:market||null,path:shape});
   });
-  ctx.restore();
-  detailedMapOverlay(svgId,showRoutes);
-  if(status)status.textContent='地図データ：Natural Earth 1:50m · 国境線を表示中';
+  mapOverlay(overlayId,logisticsMode);
+  if(status)status.textContent='国境線データ：Natural Earth 1:50m · 世界の国々を表示';
   canvas.onclick=e=>{
    const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*W/rect.width,y=(e.clientY-rect.top)*H/rect.height;
-   const hit=detailedWorldHits.slice().reverse().find(h=>ctx.isPointInPath(h.path,x,y));
-   if(!hit){return;}
-   if(canvasId==='tradeMapCanvas'){
+   const hit=worldHits.slice().reverse().find(h=>ctx.isPointInPath(h.path,x,y));if(!hit)return;
+   if(!hit.market){notify('この国はまだ経営対象外です。現在は12か国でプレイできます。');return;}
+   if(logisticsMode){
     if(!s.markets.includes(hit.market)){notify('この国へ先に進出してください。');return;}
     if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=hit.market;s.routeToDraft='';}
     else if(hit.market!==s.routeFromDraft)s.routeToDraft=hit.market;
@@ -113,146 +171,143 @@ function drawDetailedWorld(canvasId,svgId,showRoutes){
    }else{s.selected=hit.market;show('world');}
   };
  }).catch(err=>{
-  if(status)status.textContent='詳細地図を読み込めませんでした。インターネット接続を確認してページを再読み込みしてください。';
+  if(status)status.textContent='詳細地図を読み込めませんでした。ネット接続を確認して再読み込みしてください。';
   console.warn('WORLD EMPIRE map:',err);
  });
 }
-function routeMap(){return '<div class="detailed-map-wrap"><canvas id="tradeMapCanvas" aria-label="国境線付き物流マップ"></canvas><svg id="tradeMapOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="輸送ルートと乗り物"></svg></div><div class="map-status" id="tradeMapCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span>🚢 船便　✈️ 航空便　🚚 陸路</span></div>';}
+function world(){
+ const c=countries.find(x=>x[0]===s.selected)||countries[0],m=s.countryEconomy[c[0]]||50;
+ $('content').innerHTML=panel('詳細な世界地図 · 国をクリックして選択',
+ '<div class="detailed-map-wrap"><canvas id="worldCanvas" aria-label="国境線付き世界地図"></canvas><svg id="worldOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済みの国の拠点"></svg></div><div class="map-status" id="worldCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>その他の国</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックすると選択できます。現在、経営・進出に対応している国は12か国です。</p>'+
+ '<div class="grid3"><div class="metric"><small class="muted">進出国</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div><div class="metric"><small class="muted">景気見通し</small><b>'+(s.economy>65?'好景気':s.economy<35?'景気後退':'安定')+'</b></div></div>'+
+ '<div class="country-grid" style="margin-top:12px">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+n[0]+'"><div class="flag">'+n[1]+'</div><b>'+countryNames[n[0]]+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">景気指数 '+(s.countryEconomy[n[0]]||50)+'/100</div><div class="progress"><span style="width:'+(s.countryEconomy[n[0]]||50)+'%"></span></div></button>').join('')+'</div>')+
+ panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+countryNames[c[0]]+'</div><div class="muted">'+c[2]+' · 市場ポテンシャル '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">見通し</small><b class="'+(m>=50?'positive':'negative')+'">'+(m>=50?'成長中':'低迷')+'</b></div></div><p class="muted">各国の景気は、その国で活動する企業の収益に影響します。</p><button class="btn" data-enter="'+c[0]+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
+ drawDetailedMap('worldCanvas','worldOverlay',false);
+}
+function build(i){
+ const a=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=a.cost*c[3];
+ if(s.cash<cost){notify('資金が足りません。必要額：'+money(cost));return;}
+ let bonus=1;
+ if(s.research.includes('ai'))bonus+=.15;
+ if(s.research.includes('automation')&&a.id==='manufacturing')bonus+=.25;
+ if(s.research.includes('materials')&&a.id==='manufacturing')bonus+=.3;
+ if(s.research.includes('quantum')&&a.id==='technology')bonus+=.35;
+ s.cash-=cost;s.businesses.push({name:a.name,sector:a.name,icon:a.icon,country:s.selected,cost,income:a.income*c[3]*bonus,level:1,employees:12});
+ s.news=countryNames[s.selected]+'に'+a.name+'企業を設立しました。';stats();show('business');
+}
+function businesses(){
+ $('content').innerHTML=panel('企業ポートフォリオ · 経営管理',s.businesses.length?s.businesses.map((b,i)=>'<div class="listitem"><div class="row"><div><b>'+b.icon+' '+esc(b.name||b.sector)+'</b><div class="muted">'+(countryNames[b.country]||b.country)+' · レベル '+(b.level||1)+' · 従業員 '+(b.employees||12)+'人</div></div><div style="text-align:right"><b class="positive">'+money(b.income)+'/日</b><div class="tag">企業価値 '+money(b.cost*1.15)+'</div></div></div><div class="btnline"><button class="btn" data-upgrade-business="'+i+'">強化 · '+money(Math.max(500000,b.cost*.35*(b.level||1)))+'</button><button class="secondary" data-close-business="'+i+'">売却</button></div></div>').join(''):'<div class="muted">まだ企業がありません。下から事業を設立しましょう。</div>')+
+ panel('新しい事業を設立','<div class="muted">設立先：'+countryNames[s.selected]+' · 現地の景気は収益に影響します。</div><div class="grid2" style="margin-top:10px">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:23px">'+a.icon+'</div><b>'+a.name+'</b><div class="tag">投資額 '+money(a.cost*(countries.find(x=>x[0]===s.selected)||countries[0])[3])+' · 売上 '+money(a.income)+'/日</div><button class="btn" style="margin-top:9px" data-build="'+i+'">事業を設立</button></div>').join('')+'</div>');
+}
+function market(){
+ const price=s.sharePrice||100000,daily=(s.stocks[s.stocks.length-1]-s.stocks[s.stocks.length-2])/s.stocks[s.stocks.length-2]*100;
+ $('content').innerHTML=panel('世界株式市場 · 自社株式 WEI','<div class="row"><div><div class="muted">WEI · 仮想株価</div><div style="font-size:31px;font-weight:850">'+money(price)+'</div></div><div class="'+(daily>=0?'positive':'negative')+'">'+(daily>=0?'▲':'▼')+' '+Math.abs(daily).toFixed(2)+'%</div></div><canvas class="chart" id="chart"></canvas><div class="grid3"><div class="metric"><small class="muted">保有株数</small><b>'+s.shares.toLocaleString()+'株</b></div><div class="metric"><small class="muted">保有株評価額</small><b>'+money(s.shares*price)+'</b></div><div class="metric"><small class="muted">企業価値</small><b>'+money(val())+'</b></div></div><div class="btnline"><button class="btn green" data-shares="buy">10株購入 · '+money(price*10)+'</button><button class="secondary" data-shares="sell" '+(s.shares<10?'disabled':'')+'>10株売却</button></div>')+
+ panel('ライバル企業 · 買収と競争','<table class="table"><thead><tr><th>企業名</th><th>企業価値</th><th>操作</th></tr></thead><tbody>'+s.rivals.map((r,i)=>'<tr><td><b>'+esc(r.name)+'</b><div class="tag">'+r.sector+'</div></td><td>'+money(r.value)+'</td><td><button class="btn gold" data-acquire="'+i+'">買収 · '+money(r.value*1.2)+'</button></td></tr>').join('')+'</tbody></table><p class="muted">買収費用は推定企業価値の120%。買収企業はグループ会社になり、毎日収益を生みます。</p>');
+ chart();
+}
+function researchView(){
+ $('content').innerHTML=panel('研究開発 · 技術ツリー','<div class="muted">技術投資で会社全体の競争力を高めましょう。</div><div class="progress"><span style="width:'+s.research.length/tech.length*100+'%"></span></div>'+tech.map((t,i)=>'<div class="listitem"><div class="row"><b>🔬 '+t.name+'</b><b>'+(s.research.includes(t.id)?'<span class="positive">研究完了</span>':money(t.cost))+'</b></div><div class="muted">'+t.desc+'</div><button class="btn" style="margin-top:8px" data-tech="'+i+'" '+(s.research.includes(t.id)?'disabled':'')+'>'+(s.research.includes(t.id)?'完了':'研究に投資')+'</button></div>').join(''));
+}
+function routeMap(){
+ return '<div class="detailed-map-wrap"><canvas id="tradeCanvas" aria-label="詳細な物流ルート地図"></canvas><svg id="tradeOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="移動中の乗り物"></svg></div><div class="map-status" id="tradeCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span>🚢 船便　✈️ 航空便　🚚 陸路</span></div>';
+}
 function trade(){
  const from=s.routeFromDraft||'Japan',to=s.routeToDraft||'';
- const routesHtml=s.routes.length?s.routes.map((r,i)=>{const m=transportModes[r.mode]||transportModes.ship;return '<div class="listitem"><div class="row"><b>'+m.icon+' '+countryJa[r.from]+' → '+countryJa[r.to]+'</b><b class="positive">'+money(r.income)+'/日</b></div><div class="muted">'+m.label+' · 所要日数：約'+m.days+'日 · 運行中</div><div class="progress"><span style="width:100%"></span></div></div>';}).join(''):'<div class="muted">まだ物流ルートがありません。地図上の拠点を2つ選んで開設しましょう。</div>';
+ const routeList=s.routes.length?s.routes.map(r=>{const m=transport[r.mode]||transport.ship;return '<div class="listitem"><div class="row"><b>'+m.icon+' '+countryNames[r.from]+' → '+countryNames[r.to]+'</b><b class="positive">'+money(r.income)+'/日</b></div><div class="muted">'+m.name+' · 所要時間：約'+m.days+'日 · 運行中</div></div>';}).join(''):'<div class="muted">物流ルートはまだありません。地図上で出発地と目的地を選びましょう。</div>';
  $('content').innerHTML=panel('世界物流ネットワーク · リアルタイム運行',routeMap()+
- '<div class="grid2" style="margin-top:10px"><div class="metric"><small class="muted">出発地</small><b>'+(countryJa[from]||'未選択')+'</b><small>本社・支社・進出済み拠点</small></div><div class="metric"><small class="muted">目的地</small><b>'+(countryJa[to]||'地図から選択')+'</b><small>進出済みの国を選択</small></div></div>'+
- '<p class="muted">地図上の丸い拠点をクリック。1回目で出発地、2回目で目的地を指定できます。</p>'+
+ '<div class="grid2" style="margin-top:10px"><div class="metric"><small class="muted">出発地</small><b>'+(countryNames[from]||'未選択')+'</b><small>進出済みの拠点</small></div><div class="metric"><small class="muted">目的地</small><b>'+(countryNames[to]||'地図から選択')+'</b><small>進出済みの拠点</small></div></div><p class="muted">地図上の国をクリック。1回目で出発地、2回目で目的地を指定できます。</p>'+
  '<div class="grid3"><button class="country '+(s.routeModeDraft==='ship'?'selected':'')+'" data-mode="ship"><div class="flag">🚢</div><b>船便</b><div class="tag">費用 $1.5M · 4日</div></button><button class="country '+(s.routeModeDraft==='air'?'selected':'')+'" data-mode="air"><div class="flag">✈️</div><b>航空便</b><div class="tag">費用 $2.8M · 1日</div></button><button class="country '+(s.routeModeDraft==='land'?'selected':'')+'" data-mode="land"><div class="flag">🚚</div><b>陸路</b><div class="tag">費用 $0.9M · 2日</div></button></div>'+
  '<div class="btnline"><button class="btn green" id="createRoute" '+(!to||from===to?'disabled':'')+'>物流ルートを開設</button><button class="secondary" id="resetRouteDraft">選択をリセット</button></div>')+
- panel('運行中の物流ルート',routesHtml)+
- panel('輸送方式について','<div class="listitem">🚢 <b>船便</b>：大量の貨物を低コストで運ぶ。1日あたりの基本収益 '+money(transportModes.ship.income)+'</div><div class="listitem">✈️ <b>航空便</b>：高価値・急ぎの貨物向け。1日あたりの基本収益 '+money(transportModes.air.income)+'</div><div class="listitem">🚚 <b>陸路</b>：近隣地域間の輸送。1日あたりの基本収益 '+money(transportModes.land.income)+'</div>');
- drawDetailedWorld('tradeMapCanvas','tradeMapOverlay',true);
+ panel('運行中の物流ルート',routeList)+
+ panel('輸送方式','<div class="listitem">🚢 <b>船便</b>：大量輸送向け。基本収益 '+money(transport.ship.income)+'/日</div><div class="listitem">✈️ <b>航空便</b>：高速輸送向け。基本収益 '+money(transport.air.income)+'/日</div><div class="listitem">🚚 <b>陸路</b>：隣接国向け。基本収益 '+money(transport.land.income)+'/日</div>');
+ drawDetailedMap('tradeCanvas','tradeOverlay',true);
 }
-
 function ranking(){
- let all=[{name:'WORLD EMPIRE INC.',value:val(),you:true},...s.rivals.map(r=>({name:r.name,value:r.value}))].sort((a,b)=>b.value-a.value),max=all[0].value;
+ const all=[{name:'WORLD EMPIRE INC.',value:val(),you:true},...s.rivals.map(r=>({name:r.name,value:r.value}))].sort((a,b)=>b.value-a.value),max=all[0].value;
  $('content').innerHTML=panel('世界企業ランキング',all.map((r,i)=>'<div class="listitem row"><div style="min-width:0;flex:1"><b>#'+(i+1)+' '+esc(r.name)+(r.you?' ★':'')+'</b><div class="progress"><span style="width:'+Math.max(3,r.value/max*100)+'%"></span></div></div><b>'+money(r.value)+'</b></div>').join(''))+
  panel('企業帝国の実績','<div class="grid2"><div class="metric"><small class="muted">進出国数</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">保有企業数</small><b>'+s.businesses.length+'</b></div><div class="metric"><small class="muted">物流ルート</small><b>'+s.routes.length+'</b></div><div class="metric"><small class="muted">研究完了</small><b>'+s.research.length+'/'+tech.length+'</b></div></div>');
 }
-function show(v=current){
- current=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
- ({overview,world,business:businesses,market,research:researchView,trade,ranking}[v]||overview)();
- applyJapanese();
-}
-$('content').addEventListener('click',e=>{
- const pin=e.target.closest('[data-route-country]');
- if(pin){const name=pin.dataset.routeCountry;if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=name;s.routeToDraft='';}else if(name!==s.routeFromDraft){s.routeToDraft=name;}else{notify('出発地と異なる目的地を選んでください。');return;}trade();return;}
- const mode=e.target.closest('[data-mode]');
- if(mode){s.routeModeDraft=mode.dataset.mode;trade();return;}
- if(e.target.id==='resetRouteDraft'){s.routeFromDraft='';s.routeToDraft='';trade();return;}
- if(e.target.id==='createRoute'){
-  const from=s.routeFromDraft,to=s.routeToDraft,mode=s.routeModeDraft||'ship',cfg=transportModes[mode];
-  if(!from||!to||from===to){notify('出発地と目的地を選択してください。');return;}
-  if(mode==='land'&&!landPairs.includes(from+'|'+to)&&!landPairs.includes(to+'|'+from)){notify('陸路は隣接する国同士でのみ開設できます。');return;}
-  if(s.routes.some(r=>r.from===from&&r.to===to&&r.mode===mode)){notify('同じ輸送方式のルートがすでにあります。');return;}
-  if(s.cash<cfg.cost){notify('資金が不足しています。必要額：'+money(cfg.cost));return;}
-  s.cash-=cfg.cost;s.routes.push({from,to,mode,income:cfg.income*(s.research.includes('Global Logistics')?1.4:1),days:cfg.days});
-  s.news=countryJa[from]+'から'+countryJa[to]+'への'+cfg.label+'を開設しました。';s.routeFromDraft=from;s.routeToDraft='';
-  stats();show('trade');notify('物流ルートを開設しました！乗り物が地図上を運行します。');
- }
-});
-function build(i){let sec=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=sec[2]*c[3];if(s.cash<cost){notify('Insufficient funds. Required: '+money(cost));return}let bonus=1+(s.research.includes('AI Management')?.15:0)+(s.research.includes('Advanced Automation')&&i===0?.25function world(){
- const c=countries.find(x=>x[0]===s.selected)||countries[0],m=countryMood(c[0]);
- $('content').innerHTML=panel('詳細な世界地図 · 国をクリックして選択',
- '<div class="detailed-map-wrap"><canvas id="empireMapCanvas" aria-label="国境線付き世界地図"></canvas><svg id="empireMapOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済みの国の拠点"></svg><div class="map-status" id="empireMapCanvasStatus">詳細な世界地図を読み込んでいます…</div></div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>その他の国</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックすると選択できます。現在、経営・進出に対応している国は下の12か国です。</p>'+
- '<div class="grid3" style="margin-top:10px"><div class="metric"><small class="muted">進出国</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div><div class="metric"><small class="muted">景気見通し</small><b>'+(s.economy>65?'好景気':s.economy<35?'景気後退':'安定')+'</b></div></div><div class="country-grid" style="margin-top:12px">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'"><div class="flag">'+n[1]+'</div><b>'+countryJa[n[0]]+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">市場指数 '+countryMood(n[0])+'/100</div><div class="progress"><span style="width:'+countryMood(n[0])+'%"></span></div></button>').join('')+'</div>')+
- panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+countryJa[c[0]]+'</div><div class="muted">'+c[2]+' · 市場ポテンシャル '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">見通し</small><b class="'+(m>=50?'positive':'negative')+'">'+(m>=50?'成長中':'低迷')+'</b></div></div><p class="muted">各国の景気は、その国で活動する企業の収益に影響します。</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
- drawDetailedWorld('empireMapCanvas','empireMapOverlay',false);
-}me(r=>r.from===from&&r.to===to)){notify('This route already exists.');return}if(s.cash<1.5e6){notify('You need $1.5M to establish a route.');return}s.cash-=1.5e6;s.routes.push({from,to,income:120000*(s.research.includes('Global Logistics')?1.4:1)});s.news='New trade route opened: '+from+' to '+to+'.';stats();show('trade')}});
-$('advance').onclick=advance;$('save').onclick=save;$('load').onclick=load;$('reset').onclick=()=>{if(confirm('Start a new company? Current progress will be lost unless saved.')){stopAuto();s=fresh();stats();show('overview');notify('A new empire begins.')}};$('auto').onclick=()=>{if(timer){stopAuto()}else{timer=setInterval(advance,1800);s.auto=true;$('auto').textContent='AUTO: ON'}};
-
-/* WORLD EMPIRE 2.0 */
-s.countryEconomy ||= Object.fromEntries(countries.map((n,i)=>[n[0],43+((i*17+23)%31)]));
-s.shares ||= 0;s.sharePrice ||= 100000;
-s.businesses.forEach(b=>{b.level ||= 1;b.employees ||= 12});
-function countryMood(name){return s.countryEconomy[name]??50}
-function world(){
- const c=countries.find(x=>x[0]===s.selected)||countries[0],m=countryMood(c[0]);
- $('content').innerHTML=panel('詳細な世界地図 · 国をクリックして選択',
- '<div class="detailed-map-wrap"><canvas id="empireMapCanvas" aria-label="国境線付き世界地図"></canvas><svg id="empireMapOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済み企業拠点"></svg></div><div class="map-status" id="empireMapCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中の国</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>その他の国</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックすると選択できます。経営・進出に対応している国は現在12か国です。</p>'+
- '<div class="grid3" style="margin-top:10px"><div class="metric"><small class="muted">進出国</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div><div class="metric"><small class="muted">景気見通し</small><b>'+(s.economy>65?'好景気':s.economy<35?'景気後退':'安定')+'</b></div></div><div class="country-grid" style="margin-top:12px">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'"><div class="flag">'+n[1]+'</div><b>'+(countryJa[n[0]]||n[0])+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">市場指数 '+countryMood(n[0])+'/100</div><div class="progress"><span style="width:'+countryMood(n[0])+'%"></span></div></button>').join('')+'</div>')+
- panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+(countryJa[c[0]]||c[0])+'</div><div class="muted">'+c[2]+' · 市場ポテンシャル '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">見通し</small><b class="'+(m>=50?'positive':'negative')+'">'+(m>=50?'成長中':'低迷')+'</b></div></div><p class="muted">各国の景気は、その国で活動する企業の収益に影響します。</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
- drawDetailedWorld('empireMapCanvas','empireMapOverlay',false);
-}
-function businesses(){
- $('content').innerHTML=panel('BUSINESS PORTFOLIO · OPERATIONS',s.businesses.length?s.businesses.map((b,i)=>'<div class="listitem"><div class="row"><div><b>'+b.icon+' '+esc(b.sector)+'</b><div class="muted">'+esc(b.country)+' · Level '+(b.level||1)+' · '+(b.employees||12)+' employees</div></div><div style="text-align:right"><b class="positive">'+money(b.income)+'/day</b><div class="tag">Business value '+money(b.cost*(1+(b.level||1)*.12))+'</div></div></div><div class="btnline"><button class="btn" data-upgrade-business="'+i+'">UPGRADE · '+money(Math.max(500000,b.cost*.35*(b.level||1)))+'</button><button class="secondary" data-close-business="'+i+'">SELL BUSINESS</button></div></div>').join(''):'<div class="muted">No businesses yet. Invest in a sector below.</div>')+
- panel('ESTABLISH A NEW BUSINESS','<div class="muted">Build in '+esc(s.selected)+'. Local economic conditions affect business income.</div><div class="grid2" style="margin-top:10px">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:23px">'+a[1]+'</div><b>'+a[0]+'</b><div class="tag">Investment '+money(a[2]*(countries.find(x=>x[0]===s.selected)||countries[0])[3])+'</div><button class="btn" style="margin-top:9px" data-build="'+i+'">ESTABLISH BUSINESS</button></div>').join('')+'</div>');
-}
-function market(){
- const price=s.sharePrice||100000,daily=(s.stocks.at(-1)-s.stocks.at(-2))/s.stocks.at(-2)*100;
- $('content').innerHTML=panel('WORLD EMPIRE · STOCK EXCHANGE','<div class="row"><div><div class="muted">WEI · SIMULATED SHARE PRICE</div><div style="font-size:31px;font-weight:850">'+money(price)+'</div></div><div class="'+(daily>=0?'positive':'negative')+'">'+(daily>=0?'▲':'▼')+' '+Math.abs(daily).toFixed(2)+'%</div></div><canvas class="chart" id="chart"></canvas><div class="grid3"><div class="metric"><small class="muted">YOUR SHARES</small><b>'+s.shares.toLocaleString()+'</b></div><div class="metric"><small class="muted">HOLDING VALUE</small><b>'+money(s.shares*price)+'</b></div><div class="metric"><small class="muted">COMPANY VALUE</small><b>'+money(val())+'</b></div></div><div class="btnline"><button class="btn green" data-shares="buy">BUY 10 SHARES · '+money(price*10)+'</button><button class="secondary" data-shares="sell" '+(s.shares<10?'disabled':'')+'>SELL 10 SHARES</button></div>')+
- panel('RIVAL CORPORATIONS · LIVE COMPETITION','<table class="table"><thead><tr><th>COMPANY</th><th>VALUATION</th><th>ACTION</th></tr></thead><tbody>'+s.rivals.map((r,i)=>'<tr><td><b>'+esc(r.name)+'</b><div class="tag">'+r.sector+'</div></td><td>'+money(r.value)+'</td><td><button class="btn gold" data-acquire="'+i+'">ACQUIRE · '+money(r.value*1.2)+'</button></td></tr>').join('')+'</tbody></table><p class="muted">Rival firms grow or shrink independently in response to the global economy.</p>');
- chart();
+function show(view){
+ current=view;
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ const views={overview,world,business:businesses,market,research:researchView,trade,ranking};
+ (views[view]||overview)();
 }
 function advance(){
- const operating=s.businesses.reduce((a,b)=>a+b.income*(countryMood(b.country)/50),0)+s.routes.reduce((a,b)=>a+b.income,0);
- const p=operating-expenses();s.cash+=p;s.day++;if(s.day>365){s.day=1;s.year++}
- s.economy=Math.max(12,Math.min(94,s.economy+(Math.random()-.49)*3.5));
- countries.forEach(n=>{let old=countryMood(n[0]);s.countryEconomy[n[0]]=Math.max(12,Math.min(96,old+(Math.random()-.49)*5+(s.economy-50)*.018))});
- s.rivals.forEach(r=>{let growth=(Math.random()-.43)*.018+(s.economy-50)/9000;r.value=Math.max(4e6,r.value*(1+growth))});
- let change=(Math.random()-.47)*2.4+(s.economy-50)*.025+(p/Math.max(val(),1))*180;
- s.stocks.push(Math.max(30,s.stocks.at(-1)+change));if(s.stocks.length>40)s.stocks.shift();
- s.sharePrice=Math.max(1000,100000*s.stocks.at(-1)/100);s.history.push(val());
- s.news='Day '+s.day+': World economy '+s.economy.toFixed(1)+'. Operating profit '+money(p)+'. Rival companies adjusted their investments.';stats();show();
+ const p=businessIncome()+routeIncome()-expenses();s.profit=p;s.cash+=p;
+ s.day++;if(s.day>365){s.day=1;s.year++;}
+ s.economy=Math.max(12,Math.min(95,s.economy+(Math.random()-.49)*3.5));
+ countries.forEach(n=>{const old=countryMood(n[0]);s.countryEconomy[n[0]]=Math.max(12,Math.min(96,old+(Math.random()-.49)*5+(s.economy-50)*.018));});
+ s.rivals.forEach(r=>{const growth=(Math.random()-.43)*.018+(s.economy-50)/9000;r.value=Math.max(4e6,r.value*(1+growth));});
+ const change=(Math.random()-.47)*2.4+(s.economy-50)*.025+(p/Math.max(val(),1))*180;
+ s.stocks.push(Math.max(30,s.stocks[s.stocks.length-1]+change));if(s.stocks.length>40)s.stocks.shift();
+ s.sharePrice=Math.max(1000,100000*s.stocks[s.stocks.length-1]/100);s.history.push(val());
+ s.news='第'+s.day+'日：世界経済指数 '+s.economy.toFixed(1)+'。営業利益 '+money(p)+'。ライバル企業も投資を続けています。';
+ stats();show(current);
 }
+function saveGame(){try{localStorage.setItem('worldEmpireSave',JSON.stringify(s));notify('ゲームを保存しました。');}catch(e){notify('保存できませんでした。');}}
+function loadGame(){
+ const raw=localStorage.getItem('worldEmpireSave');if(!raw){notify('セーブデータがありません。');return;}
+ try{
+  const loaded=JSON.parse(raw);s={...fresh(),...loaded,auto:false};
+  s.countryEconomy ||= fresh().countryEconomy;s.shares ||= 0;s.sharePrice ||= 100000;
+  s.businesses.forEach(b=>{b.level ||= 1;b.employees ||= 12;b.name ||= b.sector;});
+  s.routes=s.routes.map(r=>({...r,mode:r.mode||'ship',income:r.income||transport.ship.income}));
+  stopAuto();stats();show(current);notify('セーブデータを読み込みました。');
+ }catch(e){notify('セーブデータを読み込めませんでした。');}
+}
+function stopAuto(){if(timer)clearInterval(timer);timer=null;$('auto').textContent='自動進行：OFF';}
+$('nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)show(b.dataset.view);});
 $('content').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
- if(b.dataset.upgradeBusiness!==undefined){const i=+b.dataset.upgradeBusiness,x=s.businesses[i];if(!x)return;const cost=Math.max(500000,x.cost*.35*(x.level||1));if(s.cash<cost){notify('Insufficient funds for upgrade.');return}s.cash-=cost;x.level=(x.level||1)+1;x.employees=(x.employees||12)+8;x.cost+=cost;x.income*=1.22;s.news=x.sector+' in '+x.country+' upgraded to Level '+x.level+'.';stats();show('business')}
- else if(b.dataset.closeBusiness!==undefined){const i=+b.dataset.closeBusiness,x=s.businesses[i];if(!x)return;const refund=x.cost*.5;s.cash+=refund;s.businesses.splice(i,1);s.news=x.sector+' business sold for '+money(refund)+'.';stats();show('business')}
- else if(b.dataset.shares){if(b.dataset.shares==='buy'){const cost=(s.sharePrice||100000)*10;if(s.cash<cost){notify('Not enough cash to buy shares.');return}s.cash-=cost;s.shares+=10;notify('10 shares purchased.')}else{if(s.shares<10)return;s.cash+=(s.sharePrice||100000)*10;s.shares-=10;notify('10 shares sold.')}stats();show('market')}
+ if(b.dataset.country){s.selected=b.dataset.country;show('world');}
+ else if(b.dataset.enter){
+  const c=countries.find(x=>x[0]===b.dataset.enter);
+  if(c&&s.cash>=c[4]){s.cash-=c[4];if(!s.markets.includes(c[0]))s.markets.push(c[0]);s.news=countryNames[c[0]]+'への進出に成功しました。';stats();show('world');}
+  else notify('市場進出に必要な資金が足りません。');
+ }
+ else if(b.dataset.build!==undefined)build(+b.dataset.build);
+ else if(b.dataset.tech!==undefined){
+  const t=tech[+b.dataset.tech];if(s.cash<t.cost){notify('研究開発に必要な資金が足りません。');return;}
+  s.cash-=t.cost;s.research.push(t.id);s.news='研究完了：'+t.name;stats();show('research');
+ }
+ else if(b.dataset.acquire!==undefined){
+  const i=+b.dataset.acquire,r=s.rivals[i];if(!r)return;const cost=r.value*1.2;
+  if(s.cash<cost){notify('買収に必要な資金が足りません。');return;}
+  s.cash-=cost;s.businesses.push({name:r.name+' 子会社',sector:r.sector,icon:'🏢',country:'Global',cost,income:Math.max(70000,r.value*.009),level:1,employees:30});
+  s.news=r.name+'の買収が完了しました。';s.rivals.splice(i,1);stats();show('market');
+ }
+ else if(b.dataset.upgradeBusiness!==undefined){
+  const x=s.businesses[+b.dataset.upgradeBusiness];if(!x)return;const cost=Math.max(500000,x.cost*.35*(x.level||1));
+  if(s.cash<cost){notify('強化に必要な資金が足りません。');return;}
+  s.cash-=cost;x.level=(x.level||1)+1;x.employees=(x.employees||12)+8;x.cost+=cost;x.income*=1.22;stats();show('business');
+ }
+ else if(b.dataset.closeBusiness!==undefined){
+  const i=+b.dataset.closeBusiness,x=s.businesses[i];if(!x)return;
+  s.cash+=x.cost*.5;s.businesses.splice(i,1);stats();show('business');notify('事業を売却しました。');
+ }
+ else if(b.dataset.shares){
+  const price=s.sharePrice||100000;
+  if(b.dataset.shares==='buy'){const cost=price*10;if(s.cash<cost){notify('株式を購入する資金が足りません。');return;}s.cash-=cost;s.shares+=10;notify('10株購入しました。');}
+  else{if(s.shares<10)return;s.cash+=price*10;s.shares-=10;notify('10株売却しました。');}
+  stats();show('market');
+ }
+ else if(b.dataset.mode){s.routeModeDraft=b.dataset.mode;trade();}
+ else if(b.id==='resetRouteDraft'){s.routeFromDraft='';s.routeToDraft='';trade();}
+ else if(b.id==='createRoute'){
+  const from=s.routeFromDraft,to=s.routeToDraft,mode=s.routeModeDraft||'ship',cfg=transport[mode];
+  if(!from||!to||from===to){notify('出発地と目的地を選んでください。');return;}
+  if(mode==='land'&&!landPairs.includes(from+'|'+to)&&!landPairs.includes(to+'|'+from)){notify('陸路は現在、隣接する国同士でのみ開設できます。');return;}
+  if(s.routes.some(r=>r.from===from&&r.to===to&&r.mode===mode)){notify('同じ物流ルートがすでにあります。');return;}
+  if(s.cash<cfg.cost){notify('開設に必要な資金が足りません。');return;}
+  s.cash-=cfg.cost;s.routes.push({from,to,mode,income:cfg.income*(s.research.includes('globalLogistics')?1.4:1),days:cfg.days});
+  s.news=countryNames[from]+'から'+countryNames[to]+'への'+cfg.name+'を開設しました。';s.routeToDraft='';stats();show('trade');notify('物流ルートを開設しました！');
+ }
 });
-
-/* Japanese UI localization */
-const ja={
-'GLOBAL BUSINESS & STRATEGY SIMULATOR':'世界経済・企業経営シミュレーション',
-'BUILD YOUR GLOBAL EMPIRE · CONTROL THE MARKET':'世界規模の企業帝国を築き、市場を支配せよ',
-'FISCAL YEAR':'年度','DAY ':'日目','WORLD ECONOMY':'世界経済','STABLE':'安定','BOOMING':'好景気','RECESSION':'不況',
-'AVAILABLE CASH':'現金','Liquid assets':'流動資産','COMPANY VALUE':'企業価値','Enterprise valuation':'企業評価額','DAILY NET PROFIT':'1日の純利益','Start building your business':'事業を始めよう','Revenue ':'売上 ',' / day':' / 日','MARKETS ENTERED':'進出国数',' businesses':'社',
-'OVERVIEW':'ダッシュボード','WORLD MAP':'世界地図','BUSINESSES':'企業経営','STOCK MARKET':'株式市場','R&D':'研究開発','TRADE':'貿易・物流','RANKINGS':'ランキング',
-'ADVANCE 1 DAY':'1日進める','AUTO: OFF':'自動進行：OFF','AUTO: ON':'自動進行：ON','SAVE GAME':'セーブ','LOAD GAME':'ロード','NEW GAME':'新しいゲーム',
-'Economic simulation · Save data stays in this browser':'経済シミュレーション · セーブデータはこのブラウザに保存されます',
-'CORPORATE PERFORMANCE':'企業業績','GLOBAL MARKET SHARE':'世界市場シェア','TECHNOLOGY LEVEL':'技術レベル','Share price index · simulated daily history':'株価指数 · 日ごとのシミュレーション履歴',
-'BUSINESS PORTFOLIO':'企業ポートフォリオ','No businesses yet. Start with a factory or technology company in Japan.':'まだ企業がありません。日本で工場やテクノロジー企業を設立しましょう。',
-'QUICK INVESTMENTS':'クイック投資','INVEST':'投資する','MARKET INTELLIGENCE':'市場情報','World economic index':'世界経済指数','Active trade routes':'稼働中の貿易ルート','Rival corporations':'ライバル企業',
-'GLOBAL EXPANSION · SELECT A MARKET':'世界進出 · 進出先を選択','Illustrative world map. Choose a market to inspect its entry cost.':'世界地図。国を選択すると進出費用などの情報を確認できます。',
-'ENTERED':'進出済み','Entry ':'進出費用 ','MARKET DETAILS':'市場詳細','Market index ':'市場指数 ','Entry fee covers registration and initial market setup.':'進出費用には登記と市場参入の初期費用が含まれます。',
-'MARKET ALREADY ENTERED':'進出済み','ENTER MARKET':'この国に進出する','BUSINESS PORTFOLIO · OPERATIONS':'企業ポートフォリオ · 経営管理','ESTABLISH A NEW BUSINESS':'新しい事業を設立','Select a sector. New businesses earn recurring revenue each game day.':'業種を選択してください。設立した企業は毎日収益を生み出します。',
-'Base cost':'基本投資額','Revenue':'売上','BUILD IN ':'に設立','GLOBAL STOCK EXCHANGE':'世界株式市場','Share price index · Updated each game day.':'株価指数 · ゲーム内の1日ごとに更新',
-'RIVAL CORPORATIONS':'ライバル企業','VALUATION':'企業価値','ACTION':'操作','ACQUIRE · ':'買収 · ','Acquisitions cost 120% of estimated valuation. Acquired companies become subsidiaries and add daily revenue.':'買収費用は推定企業価値の120%です。買収した企業は子会社となり、毎日の収益が加算されます。',
-'RESEARCH & DEVELOPMENT':'研究開発','Invest in permanent technology bonuses.':'技術に投資して恒久的な能力強化を獲得しましょう。','COMPLETED':'研究完了','FUND RESEARCH':'研究に投資',
-'GLOBAL LOGISTICS NETWORK':'世界物流ネットワーク','Create a route between markets you have entered. Routes generate recurring revenue.':'進出済みの国同士を結ぶ貿易ルートを作成できます。ルートは継続的な収益を生みます。',
-'ORIGIN':'出発地','DESTINATION':'到着地','ESTABLISH ROUTE · $1.5M':'ルートを開設 · $1.5M','Base route income: $120,000/day. Global Logistics research improves route revenue.':'基本収益：1日あたり12万ドル。物流研究で収益が増加します。',
-'ACTIVE TRADE ROUTES':'稼働中の貿易ルート','No routes established yet. Enter a second market to begin.':'貿易ルートはありません。2か国目に進出すると開設できます。',
-'GLOBAL CORPORATE RANKING':'世界企業ランキング','EMPIRE MILESTONES':'企業帝国の実績','COUNTRIES ENTERED':'進出国数','TECH COMPLETED':'研究完了数',
-'Insufficient funds.':'資金が不足しています。','Not enough funds for market entry.':'市場進出に必要な資金がありません。','Not enough cash to buy shares.':'株式を購入する資金が不足しています。',
-'Game saved in this browser.':'ゲームを保存しました。','No save data found.':'セーブデータが見つかりません。','Saved game loaded!':'セーブデータを読み込みました。','Save data could not be loaded.':'セーブデータを読み込めませんでした。',
-'Start a new company? Current progress will be lost unless saved.':'新しい会社を設立しますか？保存していない進行状況は失われます。','A new empire begins.':'新しい企業帝国が始まります。','Choose two different markets.':'異なる2つの国を選択してください。','This route already exists.':'この貿易ルートはすでに存在します。','You need $1.5M to establish a route.':'ルート開設には150万ドル必要です。',
-'Japan':'日本','United States':'アメリカ','China':'中国','Germany':'ドイツ','United Kingdom':'イギリス','India':'インド','France':'フランス','Brazil':'ブラジル','Australia':'オーストラリア','South Korea':'韓国','Canada':'カナダ','Singapore':'シンガポール',
-'Asia':'アジア','Europe':'ヨーロッパ','Oceania':'オセアニア','N. America':'北アメリカ','S. America':'南アメリカ',
-'Manufacturing':'製造業','Technology':'テクノロジー','Logistics':'物流','Real Estate':'不動産','Energy':'エネルギー','Finance':'金融',
-'Advanced Automation':'高度自動化','AI Management':'AI経営管理','Global Logistics':'国際物流','Financial Engineering':'金融工学','Next-gen Materials':'次世代素材','Quantum Computing':'量子コンピューター',
-'Manufacturing income +25%':'製造業の収益 +25%','All business income +15%':'全事業の収益 +15%','Trade route income +40%':'貿易ルートの収益 +40%','Company valuation +20%':'企業価値 +20%','Manufacturing income +30%':'製造業の収益 +30%','Technology income +35%':'技術事業の収益 +35%',
-'No businesses yet. Invest in a sector below.':'まだ企業がありません。下から業種を選んで投資しましょう。',
-'BUSINESS PORTFOLIO · OPERATIONS':'企業ポートフォリオ · 経営管理','Level ':'レベル',' employees':'人','Business value ':'企業価値 ','UPGRADE · ':'アップグレード · ','SELL BUSINESS':'事業を売却','ESTABLISH A NEW BUSINESS':'新規事業を設立','Build in ':'設立先：','Local economic conditions affect business income.':'現地の景気は事業収益に影響します。','ESTABLISH BUSINESS':'事業を設立',
-'WORLD EMPIRE · STOCK EXCHANGE':'WORLD EMPIRE · 株式市場','SIMULATED SHARE PRICE':'シミュレーション株価','YOUR SHARES':'保有株数','HOLDING VALUE':'保有株評価額','BUY 10 SHARES · ':'10株購入 · ','SELL 10 SHARES':'10株売却','RIVAL CORPORATIONS · LIVE COMPETITION':'ライバル企業 · 市場競争','Rival firms grow or shrink independently in response to the global economy.':'ライバル企業は世界経済に応じて独自に成長・縮小します。',
-'GLOBAL EXPANSION · LIVE COUNTRY MARKETS':'世界進出 · 各国市場','MARKETS':'進出市場','GLOBAL INDEX':'世界経済指数','OUTLOOK':'景気見通し','BOOM':'好景気','SLOWDOWN':'景気後退','ACTIVE':'進出済み','NOT ENTERED':'未進出','Economic index':'経済指数','COUNTRY BUSINESS INTELLIGENCE':'国別ビジネス情報','ECONOMY':'景気','DEMAND':'需要','HIGH':'高い','LOW':'低い','NORMAL':'通常','GROWING':'成長中','WEAK':'低迷','Local economic conditions affect the revenue of businesses operating in this country and change every game day.':'各国の景気は、その国で事業を行う企業の収益に影響し、ゲーム内の毎日変動します。',
-'UPGRADE':'強化','SELL':'売却','No businesses yet. Invest in a sector below.':'企業がありません。下から業種を選んで投資してください。',
-'Rival companies adjusted their investments.':'ライバル企業が投資計画を更新しました。'
-};
-function localizeNode(node){
- if(node.nodeType===Node.TEXT_NODE){let t=node.nodeValue;for(const [a,b] of Object.entries(ja))t=t.split(a).join(b);if(t!==node.nodeValue)node.nodeValue=t;}
- else if(node.nodeType===Node.ELEMENT_NODE){for(const a of ['aria-label','title','placeholder'])if(node.hasAttribute(a)){let t=node.getAttribute(a);for(const [x,y] of Object.entries(ja))t=t.split(x).join(y);node.setAttribute(a,t);}node.childNodes.forEach(localizeNode);}
-}
-function applyJapanese(){localizeNode(document.body);$('day').textContent='日目 '+s.day;}
-function translateString(value){let result=String(value);for(const [source,target] of Object.entries(ja))result=result.split(source).join(target);return result;}
-applyJapanese();
-stats();show();
+$('advance').onclick=advance;
+$('auto').onclick=()=>{if(timer){stopAuto();}else{timer=setInterval(advance,1800);$('auto').textContent='自動進行：ON';}};
+$('save').onclick=saveGame;$('load').onclick=loadGame;
+$('reset').onclick=()=>{if(confirm('新しい会社を設立しますか？保存していない進行状況は失われます。')){stopAuto();s=fresh();stats();show('overview');notify('新しい企業帝国が始まります。');}};
+stats();show('overview');
 })();
 </script></body></html>
