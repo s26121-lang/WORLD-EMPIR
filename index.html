@@ -7,7 +7,7 @@
 :root{color-scheme:dark;--bg:#081321;--panel:#122238;--panel2:#1a3049;--line:#29445f;--text:#edf5ff;--muted:#9ab0c8;--green:#43d6a0;--blue:#51a9ff;--gold:#f0c66d;--red:#ff7777}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#1c4964 0,transparent 48%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.app{max-width:1250px;margin:auto;padding:18px}button,select{font:inherit}button{cursor:pointer;color:inherit}.hero{padding:22px;border:1px solid #31516e;border-radius:18px;background:linear-gradient(115deg,#102a43,#164c61 60%,#16364c);box-shadow:0 14px 50px #0005}.top,.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.eyebrow{letter-spacing:2px;font-size:10px;color:#b5cce0}.brand{font-size:clamp(27px,5vw,43px);font-weight:950;letter-spacing:2px}.sub,.muted{color:var(--muted)}.year{text-align:right}.year strong{font-size:23px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0}.stat,.panel{background:linear-gradient(145deg,#15263d,#101d2e);border:1px solid var(--line);border-radius:14px;padding:15px;min-width:0}.stat small{color:var(--muted)}.stat strong{display:block;font-size:clamp(18px,3vw,26px);margin:5px 0}.positive{color:var(--green)}.negative{color:var(--red)}.nav{display:flex;gap:7px;overflow:auto;padding:3px 0 12px}.nav button,.secondary{border:1px solid var(--line);background:#142840;color:var(--text);border-radius:9px;padding:10px 13px;white-space:nowrap}.nav button.active,.primary{background:linear-gradient(120deg,#168b9b,#2374c6);border:0;color:white;font-weight:800}.panel{margin-bottom:12px}.panel h2{font-size:16px;margin:0 0 10px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.layout{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.metric,.card{padding:11px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}.metric b{display:block;font-size:18px;margin-top:3px}.btn{border:0;border-radius:9px;padding:10px 13px;color:white;background:#167e9c;font-weight:750}.btn.gold{background:#967022}.btn.green{background:#147a5a}.btn:disabled{opacity:.4;cursor:not-allowed}.btnline{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chart{width:100%;height:180px;display:block}.country-grid,.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}.country{background:#172840;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px;text-align:left}.country.selected{border:2px solid var(--gold);background:#26384d}.flag{font-size:22px}.tag{font-size:10px;color:var(--muted)}.progress{height:7px;border-radius:10px;background:#263950;overflow:hidden;margin-top:6px}.progress span{height:100%;display:block;background:linear-gradient(90deg,#21bd9a,#4da3ff)}.listitem{padding:11px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border:0}.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line)}.table th{color:var(--muted)}.notice{border-left:3px solid var(--gold);background:#302a1c;padding:10px;border-radius:7px;color:#f5dfb2}.map{background:#0d1b2c;border:1px solid var(--line);border-radius:12px;padding:8px}.map svg{width:100%;height:auto;display:block}.map path{fill:#285c67;stroke:#5d8790;stroke-width:1.2}.map circle{fill:#e4bd68;stroke:#fff;stroke-width:2}.footer{text-align:center;color:var(--muted);font-size:10px;padding:18px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#20354c;border:1px solid #52718d;border-radius:10px;padding:11px 16px;box-shadow:0 8px 30px #0008;z-index:5;max-width:90%;text-align:center}.hidden{display:none!important}select{display:block;width:100%;padding:10px;background:#172840;color:white;border:1px solid var(--line);border-radius:8px;margin-top:5px}
 @media(max-width:760px){.app{padding:10px}.stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.grid3{grid-template-columns:repeat(2,1fr)}.hero{padding:16px}}
-</style>
+.detailed-map-wrap{position:relative;width:100%;overflow:hidden;border:1px solid #31536d;border-radius:12px;background:#071827;line-height:0}.detailed-map-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair}.detailed-map-wrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.detailed-map-wrap .map-market-pin{pointer-events:all;cursor:pointer}.detailed-map-wrap .map-market-pin:hover circle{stroke:#fff;stroke-width:4}.map-legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 11px;background:#0c1d2e;border:1px solid var(--line);border-radius:9px;font-size:11px;color:var(--muted)}.map-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.map-note{font-size:12px;color:var(--muted);margin:8px 2px 12px}.map-status{padding:18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}.country.selected{border-color:var(--gold)}</style>
 </head>
 <body><main class="app">
 <header class="hero"><div class="top"><div><div class="eyebrow">GLOBAL BUSINESS & STRATEGY SIMULATOR</div><div class="brand">WORLD EMPIRE</div><div class="sub">BUILD YOUR GLOBAL EMPIRE · CONTROL THE MARKET</div></div><div class="year"><div class="eyebrow">FISCAL YEAR</div><strong id="year">2026</strong><div class="sub" id="day">DAY 1</div></div></div><div class="row" style="margin-top:18px"><span class="eyebrow">WORLD ECONOMY</span><b id="economyText">STABLE</b></div><div class="progress"><span id="economyBar" style="width:55%"></span></div></header>
@@ -15,6 +15,8 @@
 <nav class="nav" id="nav"><button class="active" data-view="overview">OVERVIEW</button><button data-view="world">WORLD MAP</button><button data-view="business">BUSINESSES</button><button data-view="market">STOCK MARKET</button><button data-view="research">R&D</button><button data-view="trade">TRADE</button><button data-view="ranking">RANKINGS</button></nav>
 <div id="content"></div><div class="btnline"><button class="btn primary" id="advance">▶ ADVANCE 1 DAY</button><button class="secondary" id="auto">AUTO: OFF</button><button class="secondary" id="save">💾 SAVE GAME</button><button class="secondary" id="load">↩ LOAD GAME</button><button class="secondary" id="reset">NEW GAME</button></div>
 <div class="footer">WORLD EMPIRE v1.0 · Economic simulation · Save data stays in this browser</div></main><div id="toast" class="toast hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/dist/d3-geo.min.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id),money=n=>'$'+(n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':Math.round(n).toLocaleString());
@@ -41,11 +43,81 @@ const routeCoords={'Japan':[540,112],'United States':[145,96],'China':[485,103],
 const countryJa={'Japan':'日本','United States':'アメリカ','China':'中国','Germany':'ドイツ','United Kingdom':'イギリス','India':'インド','France':'フランス','Brazil':'ブラジル','Australia':'オーストラリア','South Korea':'韓国','Canada':'カナダ','Singapore':'シンガポール'};
 const transportModes={ship:{label:'船便',icon:'🚢',cost:1500000,income:120000,days:4,duration:15,desc:'大量輸送向け・低コスト'},air:{label:'航空便',icon:'✈️',cost:2800000,income:220000,days:1,duration:8,desc:'最速・高コスト'},land:{label:'陸路',icon:'🚚',cost:900000,income:80000,days:2,duration:11,desc:'近隣国向け・中コスト'}};
 const landPairs=['United States|Canada','Germany|France','Germany|United Kingdom','France|United Kingdom','China|India'];
-function routeMap(){
- const paths=s.routes.map((r,i)=>{const a=routeCoords[r.from]||routeCoords.Japan,b=routeCoords[r.to]||routeCoords.China,mode=transportModes[r.mode]||transportModes.ship;return '<path d="M'+a[0]+' '+a[1]+' L'+b[0]+' '+b[1]+'" fill="none" stroke="#f1c66c" stroke-width="2.5" stroke-dasharray="7 5" opacity=".85"/><text font-size="21" text-anchor="middle"><animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" path="M'+a[0]+' '+a[1]+' L'+b[0]+' '+b[1]+'"/> '+mode.icon+'</text>';}).join('');
- const pins=s.markets.map(name=>{const p=routeCoords[name]||[350,145],country=countries.find(x=>x[0]===name);return '<g class="route-pin" data-route-country="'+name+'" transform="translate('+p[0]+' '+p[1]+')" style="cursor:pointer"><circle r="11" fill="'+(s.routeFromDraft===name?'#f0c66d':s.routeToDraft===name?'#4ca9ff':'#238e9a')+'" stroke="#fff" stroke-width="2"/><text text-anchor="middle" y="4" font-size="10" fill="#071523">●</text><text text-anchor="middle" y="-16" font-size="11" fill="#fff">'+(country?country[1]:'📍')+'</text></g>';}).join('');
- return '<div class="map"><svg viewBox="0 0 700 290" role="img" aria-label="物流ルート地図"><rect width="700" height="290" rx="10" fill="#0d2032"/><g fill="#285c62" stroke="#83aaa1" stroke-width="1.4"><path d="M35 68L72 37 126 24 182 38 213 69 191 104 158 117 137 153 108 178 78 156 65 119 34 101Z"/><path d="M175 157L213 145 244 166 238 206 214 265 192 229 180 192Z"/><path d="M285 45L320 28 357 37 386 59 376 83 340 92 315 115 289 95 270 69Z"/><path d="M319 108L357 95 390 111 405 151 386 203 355 252 332 211 314 164Z"/><path d="M392 43L453 27 523 40 581 72 564 111 527 127 490 113 455 122 420 94 392 76Z"/><path d="M525 177L565 165 615 190 601 220 560 229 530 208Z"/></g>'+paths+pins+'<text x="14" y="278" fill="#a9c7d0" font-size="10">拠点をクリックして出発地・目的地を選択</text></svg></div>';
+
+/* Detailed world geography: Natural Earth 1:50m country boundaries */
+const MARKET_ISO={'392':'Japan','840':'United States','156':'China','276':'Germany','826':'United Kingdom','356':'India','250':'France','076':'Brazil','036':'Australia','410':'South Korea','124':'Canada','702':'Singapore'};
+const MARKET_LONLAT={'Japan':[138,36],'United States':[-98,39],'China':[103,35],'Germany':[10.5,51],'United Kingdom':[-3,55],'India':[78,22],'France':[2,46],'Brazil':[-52,-10],'Australia':[134,-25],'South Korea':[127.5,36],'Canada':[-106,56],'Singapore':[103.8,1.3]};
+let detailedWorldFeatures=null,detailedWorldPromise=null,detailedWorldHits=[],detailedWorldProjection=null;
+function loadDetailedWorld(){
+ if(detailedWorldFeatures)return Promise.resolve(detailedWorldFeatures);
+ if(detailedWorldPromise)return detailedWorldPromise;
+ if(!window.topojson||!window.d3||!window.d3.geoNaturalEarth1)return Promise.reject(new Error('地図描画ライブラリが読み込めません'));
+ detailedWorldPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
+ .then(r=>{if(!r.ok)throw new Error('地図データを取得できません');return r.json();})
+ .then(topology=>{detailedWorldFeatures=topojson.feature(topology,topology.objects.countries).features;return detailedWorldFeatures;});
+ return detailedWorldPromise;
 }
+function detailedMapOverlay(svgId,showRoutes){
+ const svg=$(svgId);if(!svg||!detailedWorldProjection)return;
+ const xy=name=>{const ll=MARKET_LONLAT[name];return ll?detailedWorldProjection(ll):[700,325];};
+ let out='';
+ if(showRoutes){
+  s.routes.forEach(r=>{const a=xy(r.from),b=xy(r.to),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2-42,mode=transportModes[r.mode]||transportModes.ship,d='M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+b[0].toFixed(1)+' '+b[1].toFixed(1);
+   out+='<path d="'+d+'" fill="none" stroke="#f4c86d" stroke-width="3" stroke-dasharray="9 7" opacity=".9"/><text font-size="25" text-anchor="middle" dominant-baseline="central">'+ '<animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" rotate="auto" path="'+d+'"/>'+mode.icon+'</text>';
+  });
+ }
+ s.markets.forEach(name=>{const p=xy(name),country=countries.find(x=>x[0]===name),isFrom=s.routeFromDraft===name,isTo=s.routeToDraft===name;
+  out+='<g class="map-market-pin" data-route-country="'+name+'" transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+'"><circle r="12" fill="'+(isFrom?'#f0c66d':isTo?'#52aaff':'#198e9c')+'" stroke="#fff" stroke-width="2.5"/><text text-anchor="middle" y="5" font-size="15">'+(country?country[1]:'•')+'</text><text text-anchor="middle" y="-19" font-size="14" font-weight="700" fill="#fff" stroke="#071827" stroke-width="3" paint-order="stroke">'+(country?countryJa[name]||name:name)+'</text></g>';
+ });
+ svg.innerHTML=out;
+}
+function drawDetailedWorld(canvasId,svgId,showRoutes){
+ const canvas=$(canvasId);if(!canvas)return;
+ const status=$(canvasId+'Status');
+ if(status)status.textContent='詳しい国境線を読み込んでいます…';
+ loadDetailedWorld().then(features=>{
+  const ctx=canvas.getContext('2d');if(!ctx)return;
+  const W=1400,H=650;canvas.width=W;canvas.height=H;
+  const projection=d3.geoNaturalEarth1().fitSize([W,H],{type:'Sphere'});
+  detailedWorldProjection=projection;
+  const path=d3.geoPath(projection),sphere={type:'Sphere'};
+  const ocean=ctx.createLinearGradient(0,0,0,H);ocean.addColorStop(0,'#0a2940');ocean.addColorStop(1,'#061827');ctx.fillStyle=ocean;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.beginPath();path.context(ctx)(sphere);ctx.fillStyle='#0b263b';ctx.fill();
+  ctx.beginPath();path.context(ctx)(d3.geoGraticule10());ctx.strokeStyle='rgba(110,166,190,.19)';ctx.lineWidth=1;ctx.stroke();
+  detailedWorldHits=[];
+  const selectedId=Object.keys(MARKET_ISO).find(id=>MARKET_ISO[id]===s.selected);
+  features.forEach(feature=>{
+   if(!feature.geometry)return;
+   const id=String(feature.id||'').padStart(3,'0'),market=MARKET_ISO[id],d=path(feature);
+   if(!d)return;
+   const shape=new Path2D(d);
+   if(id===selectedId)ctx.fillStyle='#d7ac54';
+   else if(market&&s.markets.includes(market))ctx.fillStyle='#238b85';
+   else if(market)ctx.fillStyle='#397b7d';
+   else {const palette=['#426e66','#4b766d','#3c6866','#51796c','#3c6570'];ctx.fillStyle=palette[(parseInt(id,10)||0)%palette.length];}
+   ctx.fill(shape,'evenodd');ctx.strokeStyle='rgba(190,220,215,.72)';ctx.lineWidth=1.15;ctx.stroke(shape);
+   if(market)detailedWorldHits.push({id,market,path:shape});
+  });
+  ctx.restore();
+  detailedMapOverlay(svgId,showRoutes);
+  if(status)status.textContent='地図データ：Natural Earth 1:50m · 国境線を表示中';
+  canvas.onclick=e=>{
+   const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*W/rect.width,y=(e.clientY-rect.top)*H/rect.height;
+   const hit=detailedWorldHits.slice().reverse().find(h=>ctx.isPointInPath(h.path,x,y));
+   if(!hit){return;}
+   if(canvasId==='tradeMapCanvas'){
+    if(!s.markets.includes(hit.market)){notify('この国へ先に進出してください。');return;}
+    if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=hit.market;s.routeToDraft='';}
+    else if(hit.market!==s.routeFromDraft)s.routeToDraft=hit.market;
+    trade();
+   }else{s.selected=hit.market;show('world');}
+  };
+ }).catch(err=>{
+  if(status)status.textContent='詳細地図を読み込めませんでした。インターネット接続を確認してページを再読み込みしてください。';
+  console.warn('WORLD EMPIRE map:',err);
+ });
+}
+function routeMap(){return '<div class="detailed-map-wrap"><canvas id="tradeMapCanvas" aria-label="国境線付き物流マップ"></canvas><svg id="tradeMapOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="輸送ルートと移動中の乗り物"></svg><div class="map-status" id="tradeMapCanvasStatus">詳細な世界地図を読み込んでいます…</div></div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中の国</span><span><i class="map-dot" style="background:#238b85"></i>進出済みの国</span><span>🚢 船便　✈️ 航空便　🚚 陸路</span></div>';}
 function trade(){
  const from=s.routeFromDraft||'Japan',to=s.routeToDraft||'';
  const routesHtml=s.routes.length?s.routes.map((r,i)=>{const m=transportModes[r.mode]||transportModes.ship;return '<div class="listitem"><div class="row"><b>'+m.icon+' '+countryJa[r.from]+' → '+countryJa[r.to]+'</b><b class="positive">'+money(r.income)+'/日</b></div><div class="muted">'+m.label+' · 所要日数：約'+m.days+'日 · 運行中</div><div class="progress"><span style="width:100%"></span></div></div>';}).join(''):'<div class="muted">まだ物流ルートがありません。地図上の拠点を2つ選んで開設しましょう。</div>';
@@ -56,7 +128,9 @@ function trade(){
  '<div class="btnline"><button class="btn green" id="createRoute" '+(!to||from===to?'disabled':'')+'>物流ルートを開設</button><button class="secondary" id="resetRouteDraft">選択をリセット</button></div>')+
  panel('運行中の物流ルート',routesHtml)+
  panel('輸送方式について','<div class="listitem">🚢 <b>船便</b>：大量の貨物を低コストで運ぶ。1日あたりの基本収益 '+money(transportModes.ship.income)+'</div><div class="listitem">✈️ <b>航空便</b>：高価値・急ぎの貨物向け。1日あたりの基本収益 '+money(transportModes.air.income)+'</div><div class="listitem">🚚 <b>陸路</b>：近隣地域間の輸送。1日あたりの基本収益 '+money(transportModes.land.income)+'</div>');
-}function ranking(){let all=[{name:'WORLD EMPIRE INC.',value:val(),you:true},...s.rivals.map(r=>({name:r.name,value:r.value}))].sort((a,b)=>b.value-a.value),max=all[0].value;$('content').innerHTML=panel('GLOBAL CORPORATE RANKING',all.map((r,i)=>'<div class="listitem row"><div style="min-width:0;flex:1"><b>#'+(i+1)+' '+esc(r.name)+(r.you?' ★':'')+'</b><div class="progress"><span style="width:'+Math.max(3,r.value/max*100)+'%"></span></div></d$('content').addEventListener('click',e=>{
+ drawDetailedWorld('tradeMapCanvas','tradeMapOverlay',true);
+}
+function ranking(){let all=[{name:'WORLD EMPIRE INC.',value:val(),you:true},...s.rivals.map(r=>({name:r.name,value:r.value}))].sort((a,b)=>b.value-a.value),max=all[0].value;$('content').innerHTML=panel('GLOBAL CORPORATE RANKING',all.map((r,i)=>'<div class="listitem row"><div style="min-width:0;flex:1"><b>#'+(i+1)+' '+esc(r.name)+(r.you?' ★':'')+'</b><div class="progress"><span style="width:'+Math.max(3,r.value/max*100)+'%"></span></div></d$('content').addEventListener('click',e=>{
  const pin=e.target.closest('[data-route-country]');
  if(pin){const name=pin.dataset.routeCountry;if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=name;s.routeToDraft='';}else if(name!==s.routeFromDraft){s.routeToDraft=name;}else{notify('出発地と異なる目的地を選んでください。');return;}trade();return;}
  const mode=e.target.closest('[data-mode]');
@@ -74,14 +148,14 @@ function trade(){
  }
 });
 rent=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));({overview,world,business:businesses,market,research:researchView,trade,ranking}[v]||overview)();applyJapanese();}
-function build(i){let sec=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=sec[2]*c[3];if(s.cash<cost){notify('Insufficient funds. Required: '+money(cost));return}let bonus=1+(s.research.includes('AI Management')?.15:0)+(s.research.includes('Advanced Automation')&&i===0?.25:0)+(s.research.includes('Next-gen Materials')&&i===0?.3:0)+(s.research.includes('Quantum Computing')&&i===1?.35:0);s.cash-=cost;s.businesses.push({sector:sec[0],icon:sec[1],country:s.selected,cost,income:sec[3]*c[3]*bonus});s.news=sec[0]+' business opened in '+s.selected+'.';stats();show();}
-function advance(){let p=income()-expenses();s.cash+=p;s.day++;if(s.day>365){s.day=1;s.year++}s.economy=Math.max(10,Math.min(95,s.economy+(Math.random()-.5)*4));let marketFactor=(s.economy-50)/5000;s.rivals.forEach(r=>r.value*=1+(Math.random()-.47)*.018+marketFactor);let stockChange=(Math.random()-.46)*2.8+(s.economy-50)*.025+s.businesses.length*.08;s.stocks.push(Math.max(30,s.stocks.at(-1)+stockChange));if(s.stocks.length>40)s.stocks.shift();s.history.push(val());s.news='Day '+s.day+': Revenue '+money(income())+', expenses '+money(expenses())+'. Net profit '+money(p)+'.';stats();show();}
-function save(){localStorage.setItem('worldEmpireSave',JSON.stringify(s));notify('Game saved in this browser.')}
-function load(){let raw=localStorage.getItem('worldEmpireSave');if(!raw){notify('No save data found.');return}try{s={...fresh(),...JSON.parse(raw),auto:false};s.countryEconomy ||= Object.fromEntries(countries.map((n,i)=>[n[0],43+((i*17+23)%31)]));s.shares ||= 0;s.sharePrice ||= 100000;s.businesses.forEach(b=>{b.level ||= 1;b.employees ||= 12});stopAuto();stats();show();notify('Saved game loaded!')}catch(e){notify('Save data could not be loaded.')}}
-function stopAuto(){if(timer)clearInterval(timer);timer=null;s.auto=false;$('auto').textContent='AUTO: OFF'}
-$('nav').addEventListener('click',e=>{let b=e.target.closest('[data-view]');if(b)show(b.dataset.view)});
-$('content').addEventListener('click',e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.country){s.selected=b.dataset.country;show('world')}else if(b.dataset.enter){let c=countries.find(x=>x[0]===b.dataset.enter);if(c&&s.cash>=c[4]){s.cash-=c[4];s.markets.push(c[0]);s.news='Market entry successful: '+c[0]+'.';stats();show('world')}else notify('Not enough funds for market entry.')}else if(b.dataset.build!==undefined)build(+b.dataset.build);else if(b.dataset.tech!==undefined){let t=tech[+b.dataset.tech];if(s.cash<t[1])notify('Insufficient funds for research.');else{s.cash-=t[1];s.research.push(t[0]);s.news='Research completed: '+t[0]+'.';stats();show('research')}}else if(b.dataset.acquire!==undefined){let i=+b.dataset.acquire,r=s.rivals[i],cost=r.value*1.2;if(!r)return;if(s.cash<cost)notify('Insufficient funds. Acquisition requires '+money(cost));else{s.cash-=cost;s.businesses.push({sector:r.sector+' subsidiary',icon:'🏢',country:'Global',cost,income:Math.max(70000,r.value*.009)});s.news='Acquisition complete: '+r.name+' joins your group.';s.rivals.splice(i,1);stats();show('market')}}});
-$('content').addEventListener('click',e=>{if(e.target.id==='createRoute'){let from=$('origin').value,to=$('dest').value;if(!from||!to||from===to){notify('Choose two different markets.');return}if(s.routes.some(r=>r.from===from&&r.to===to)){notify('This route already exists.');return}if(s.cash<1.5e6){notify('You need $1.5M to establish a route.');return}s.cash-=1.5e6;s.routes.push({from,to,income:120000*(s.research.includes('Global Logistics')?1.4:1)});s.news='New trade route opened: '+from+' to '+to+'.';stats();show('trade')}});
+function build(i){let sec=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=sec[2]*c[3];if(s.cash<cost){notify('Insufficient funds. Required: '+money(cost));return}let bonus=1+(s.research.includes('AI Management')?.15:0)+(s.research.includes('Advanced Automation')&&i===0?.25function world(){
+ const c=countries.find(x=>x[0]===s.selected)||countries[0],m=countryMood(c[0]);
+ $('content').innerHTML=panel('詳細な世界地図 · 国をクリックして選択',
+ '<div class="detailed-map-wrap"><canvas id="empireMapCanvas" aria-label="国境線付き世界地図"></canvas><svg id="empireMapOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済みの国の拠点"></svg><div class="map-status" id="empireMapCanvasStatus">詳細な世界地図を読み込んでいます…</div></div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>その他の国</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックすると選択できます。現在、経営・進出に対応している国は下の12か国です。</p>'+
+ '<div class="grid3" style="margin-top:10px"><div class="metric"><small class="muted">進出国</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div><div class="metric"><small class="muted">景気見通し</small><b>'+(s.economy>65?'好景気':s.economy<35?'景気後退':'安定')+'</b></div></div><div class="country-grid" style="margin-top:12px">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'"><div class="flag">'+n[1]+'</div><b>'+countryJa[n[0]]+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">市場指数 '+countryMood(n[0])+'/100</div><div class="progress"><span style="width:'+countryMood(n[0])+'%"></span></div></button>').join('')+'</div>')+
+ panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+countryJa[c[0]]+'</div><div class="muted">'+c[2]+' · 市場ポテンシャル '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">見通し</small><b class="'+(m>=50?'positive':'negative')+'">'+(m>=50?'成長中':'低迷')+'</b></div></div><p class="muted">各国の景気は、その国で活動する企業の収益に影響します。</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
+ drawDetailedWorld('empireMapCanvas','empireMapOverlay',false);
+}me(r=>r.from===from&&r.to===to)){notify('This route already exists.');return}if(s.cash<1.5e6){notify('You need $1.5M to establish a route.');return}s.cash-=1.5e6;s.routes.push({from,to,income:120000*(s.research.includes('Global Logistics')?1.4:1)});s.news='New trade route opened: '+from+' to '+to+'.';stats();show('trade')}});
 $('advance').onclick=advance;$('save').onclick=save;$('load').onclick=load;$('reset').onclick=()=>{if(confirm('Start a new company? Current progress will be lost unless saved.')){stopAuto();s=fresh();stats();show('overview');notify('A new empire begins.')}};$('auto').onclick=()=>{if(timer){stopAuto()}else{timer=setInterval(advance,1800);s.auto=true;$('auto').textContent='AUTO: ON'}};
 
 /* WORLD EMPIRE 2.0 */
