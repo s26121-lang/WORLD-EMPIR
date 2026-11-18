@@ -142,8 +142,8 @@ function drawDetailedMap(canvasId,overlayId,logisticsMode){
   const projection=d3.geoNaturalEarth1().fitSize([W,H],{type:'Sphere'});worldProjection=projection;
   const path=d3.geoPath(projection),ocean=ctx.createLinearGradient(0,0,0,H);
   ocean.addColorStop(0,'#0a2940');ocean.addColorStop(1,'#061827');ctx.fillStyle=ocean;ctx.fillRect(0,0,W,H);
-  ctx.beginPath();path.context(ctx)({type:'Sphere'});ctx.fillStyle='#0b263b';ctx.fill();
-  ctx.beginPath();path.context(ctx)(d3.geoGraticule10());ctx.strokeStyle='rgba(110,166,190,.2)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#0b263b';ctx.fill(new Path2D(path({type:'Sphere'})));
+  ctx.strokeStyle='rgba(110,166,190,.2)';ctx.lineWidth=1;ctx.stroke(new Path2D(path(d3.geoGraticule10())));
   worldHits=[];
   const selectedId=Object.keys(isoMarket).find(id=>isoMarket[id]===s.selected);
   features.forEach(feature=>{
