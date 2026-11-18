@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EARTH SIMULATOR</title>
+<style>
+:root{--bg:#07111d;--panel:rgba(8,19,32,.91);--line:rgba(129,183,221,.2);--cyan:#67d9f5;--gold:#f4c76b;--muted:#8fa6b9;--green:#65d6a1}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#eaf4fb;font-family:Inter,"Noto Sans JP",system-ui,sans-serif}
+#scene{position:fixed;inset:0}canvas{display:block}
+.vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(1,6,13,.3) 100%)}
+header{position:fixed;z-index:5;top:0;left:0;right:0;height:70px;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(3,10,18,.94),rgba(3,10,18,.45));border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border:1px solid #65d9f5;border-radius:50%;display:grid;place-items:center;color:var(--cyan);box-shadow:0 0 22px #38bde533;font-size:20px}.brand b{letter-spacing:2.4px;font-size:15px}.brand small{display:block;color:#86a3b9;font-size:9px;letter-spacing:2px;margin-top:3px}
+.topstats{display:flex;gap:22px;align-items:center}.stat small{display:block;color:var(--muted);font-size:9px;letter-spacing:1px}.stat strong{font-size:14px;font-weight:650}.stat strong.money{color:var(--gold)}
+button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px solid var(--line);border-radius:7px;padding:9px 12px;cursor:pointer;transition:.2s}button:hover{border-color:var(--cyan);background:rgba(27,65,88,.95)}button.active{background:#16465c;border-color:var(--cyan);color:#c9f5ff}
+#left{position:fixed;z-index:4;left:18px;top:88px;bottom:18px;width:245px;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;backdrop-filter:blur(15px);box-shadow:0 12px 40px #0005;pointer-events:auto}
+.panelhead{padding:13px 14px 10px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:1.5px;color:#9bb7ca;display:flex;justify-content:space-between}
+.panelbody{padding:13px}
+.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.modegrid button{font-size:11px;text-align:left;padding:10px 9px}.modegrid button span{display:block;font-size:17px;margin-bottom:5px}
+.layerlist{display:grid;gap:7px}.layer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#c2d4e0}.switch{width:32px;height:18px;border-radius:12px;background:#304354;position:relative;cursor:pointer}.switch:after{content:"";position:absolute;left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:#a5bac8;transition:.2s}.switch.on{background:#17627a}.switch.on:after{left:17px;background:#8beaff}
+#right{position:fixed;z-index:4;right:18px;top:88px;bottom:18px;width:310px;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+#infoPanel{pointer-events:auto;overflow:auto;max-height:calc(100% - 155px)}
+.sectionTitle{font-size:17px;font-weight:650;margin-bottom:4px}.sub{font-size:10px;color:var(--muted);letter-spacing:.5px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.kpi{background:rgba(26,51,71,.56);border:1px solid rgba(130,180,210,.12);border-radius:8px;padding:10px}.kpi small{display:block;color:#91aabc;font-size:9px;margin-bottom:6px}.kpi b{font-size:16px}.kpi em{font-style:normal;color:var(--green);font-size:9px;margin-left:3px}
+.actionrow{display:flex;gap:7px;margin-top:12px}.actionrow button{flex:1;font-size:10px}.primary{background:linear-gradient(135deg,#14627a,#16445e);border-color:#48b9d8}
+#bottom{position:fixed;z-index:5;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(5,15,25,.9);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(12px)}
+#bottom button{font-size:10px;padding:8px 11px}#clock{font-variant-numeric:tabular-nums;font-size:12px;color:#d9eaf4;padding:0 8px}
+#toast{position:fixed;z-index:10;left:50%;top:83px;transform:translate(-50%,-10px);opacity:0;transition:.25s;background:#102c40;border:1px solid #3c8aa4;padding:10px 16px;border-radius:8px;font-size:12px;pointer-events:none}#toast.show{opacity:1;transform:translate(-50%,0)}
+#hint{position:fixed;z-index:3;left:50%;top:86px;transform:translateX(-50%);font-size:10px;color:#b2c8d7;background:#06152299;padding:7px 12px;border-radius:20px;border:1px solid #7ab6d122;pointer-events:none}
+#modal{display:none;position:fixed;z-index:20;inset:0;background:#020812b8;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}#modal.show{display:flex}.modalbox{width:min(600px,100%);max-height:85vh;overflow:auto;background:#0b1c2c;border:1px solid #37647d;border-radius:14px;box-shadow:0 25px 80px #000a}.modalhead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modalbody{padding:20px}.airportgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.airportgrid button{text-align:left;padding:13px}.airportgrid b{display:block;font-size:13px}.airportgrid small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+#routeSelect{display:none;position:fixed;z-index:8;left:50%;top:50%;transform:translate(-50%,-50%);background:#0a2030;border:1px solid #54bdd7;border-radius:10px;padding:18px;width:min(340px,90vw);box-shadow:0 15px 50px #000b}#routeSelect.show{display:block}
+@media(max-width:850px){header{height:60px;padding:9px 12px}.topstats .stat:nth-child(2),.topstats .stat:nth-child(3){display:none}#left{left:8px;top:70px;width:175px;bottom:70px}#right{right:8px;top:70px;width:210px;bottom:70px}.panelbody{padding:9px}.panelhead{padding:10px}.modegrid button{font-size:9px;padding:7px}.kpi{padding:7px}.kpi b{font-size:13px}#hint{top:66px;font-size:9px}#bottom{bottom:7px;max-width:96vw;gap:3px;padding:5px}#bottom button{padding:7px;font-size:9px}#clock{font-size:10px;padding:0 3px}.brand b{font-size:12px}.brand small{font-size:8px}}
+@media(max-width:560px){#left{width:145px}#right{width:175px}.topstats{gap:8px}.stat strong{font-size:11px}.brand{gap:6px}.logo{width:30px;height:30px}.modegrid{grid-template-columns:1fr}.airportgrid{grid-template-columns:1fr 1fr}.sectionTitle{font-size:14px}}
+</style>
+</head>
+<body>
+<div id="scene"></div><div class="vignette"></div>
+<header>
+ <div class="brand"><div class="logo">◎</div><div><b>EARTH SIMULATOR</b><small>GLOBAL MANAGEMENT SYSTEM · 01</small></div></div>
+ <div class="topstats">
+  <div class="stat"><small>WORLD TREASURY</small><strong class="money" id="money">$ 12,500,000</strong></div>
+  <div class="stat"><small>PASSENGERS / DAY</small><strong id="passengers">184,200</strong></div>
+  <div class="stat"><small>ACTIVE AIRPORTS</small><strong id="airportCount">12</strong></div>
+ </div>
+</header>
+<div id="hint">地球をドラッグして回転 · ホイールでズーム · 都市や空港をクリック</div>
+<aside id="left">
+ <div class="panel">
+  <div class="panelhead">CONTROL CENTER <span>01</span></div>
+  <div class="panelbody"><div class="modegrid">
+   <button class="active" data-mode="select"><span>🌐</span>地球マップ</button>
+   <button data-mode="airports"><span>✈️</span>空港管理</button>
+   <button data-mode="economy"><span>📈</span>世界経済</button>
+   <button data-mode="routes"><span>🛫</span>航空路線</button>
+  </div></div>
+ </div>
+ <div class="panel">
+  <div class="panelhead">MAP LAYERS</div>
+  <div class="panelbody layerlist">
+   <div class="layer">空港マーカー <div class="switch on" data-layer="airports"></div></div>
+   <div class="layer">航空路線 <div class="switch on" data-layer="routes"></div></div>
+   <div class="layer">都市ライト <div class="switch on" data-layer="cities"></div></div>
+   <div class="layer">大気・雲 <div class="switch on" data-layer="clouds"></div></div>
+  </div>
+ </div>
+ <div class="panel">
+  <div class="panelhead">WORLD CONDITIONS</div><div class="panelbody">
+   <div class="sub">GLOBAL ECONOMY INDEX</div><div style="font-size:25px;margin:5px 0" id="globalIndex">104.8 <span style="font-size:10px;color:var(--green)">▲ 0.8%</span></div>
+   <div class="sub">WORLD POPULATION</div><div style="font-size:17px;margin-top:5px" id="population">8.16 billion</div>
+  </div>
+ </div>
+</aside>
+<aside id="right">
+ <div class="panel" id="infoPanel">
+  <div class="panelhead">INTELLIGENCE / SELECTED</div>
+  <div class="panelbody" id="infoContent">
+   <div class="sectionTitle">地球シミュレーション</div><div class="sub">EARTH · GLOBAL OVERVIEW</div>
+   <p style="font-size:11px;line-height:1.8;color:#c0d1dd">世界の都市・空港・経済を管理し、地球規模の交通ネットワークを構築しよう。</p>
+   <div class="kpis">
+    <div class="kpi"><small>WORLD GDP</small><b>$ 105.4T</b></div><div class="kpi"><small>COUNTRIES</small><b>195</b></div>
+    <div class="kpi"><small>FLIGHTS / DAY</small><b>102K</b></div><div class="kpi"><small>AVG. DEMAND</small><b>78.4%</b></div>
+   </div>
+   <div class="actionrow"><button class="primary" id="openAirports">空港一覧を見る</button></div>
+  </div>
+ </div>
+ <div class="panel"><div class="panelhead">SIMULATION STATUS <span class="sub" id="simStatus">RUNNING</span></div><div class="panelbody" style="font-size:10px;color:#b1c7d6;line-height:1.9">世界経済 <span style="float:right;color:var(--green)">正常</span><br>航空ネットワーク <span style="float:right;color:var(--green)">稼働中</span><br>気象システム <span style="float:right;color:var(--gold)">変動中</span></div></div>
+</aside>
+<div id="bottom">
+ <span id="clock">2026年 1月 01日 08:00</span>
+ <button id="pause">Ⅱ 一時停止</button><button data-speed="1" class="active speed">×1</button><button data-speed="3" class="speed">×3</button><button data-speed="8" class="speed">×8</button>
+ <button id="resetView">◎ 視点リセット</button>
+</div>
+<div id="toast"></div>
+<div id="routeSelect"><b>✈ 航空路線の設定</b><p style="font-size:11px;color:#a9c1d0;line-height:1.6">出発空港と到着空港を選択してください。空港マーカーを順番にクリックします。</p><button id="cancelRoute">キャンセル</button></div>
+<div id="modal"><div class="modalbox"><div class="modalhead"><b id="modalTitle">空港ネットワーク</b><button id="closeModal">✕</button></div><div class="modalbody" id="modalBody"></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x030914);
+const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,1000);camera.position.set(0,0,3.55);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;$('scene').appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0x7c9bb7,.75));const sun=new THREE.DirectionalLight(0xffe6c4,2.15);sun.position.set(-4,2,5);scene.add(sun);
+const globeGroup=new THREE.Group();scene.add(globeGroup);
+function makeEarthTexture(){
+ const c=document.createElement('canvas');c.width=2048;c.height=1024;const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,0,1024);g.addColorStop(0,'#102d42');g.addColorStop(.48,'#16435b');g.addColorStop(1,'#091d31');x.fillStyle=g;x.fillRect(0,0,2048,1024);
+ // Stylized equirectangular continent silhouettes, intentionally softened with layered strokes.
+ const continents=[
+ [[-168,70],[-145,72],[-128,58],[-124,48],[-117,32],[-105,22],[-98,17],[-90,15],[-83,9],[-78,8],[-80,25],[-66,45],[-58,53],[-75,62],[-95,72],[-120,75],[-145,73]],
+ [[-82,12],[-70,9],[-58,-5],[-48,-15],[-45,-28],[-52,-42],[-66,-55],[-74,-42],[-78,-20]],
+ [[-10,72],[18,72],[38,60],[58,55],[75,58],[95,54],[115,50],[135,45],[153,58],[170,55],[178,43],[160,30],[140,20],[125,8],[110,5],[100,-5],[82,5],[72,20],[55,25],[45,35],[30,35],[20,42],[8,43],[-5,50],[-15,60]],
+ [[-18,35],[5,37],[25,31],[38,12],[43,-12],[30,-32],[17,-35],[5,-25],[-2,-5],[-15,5],[-18,20]],
+ [[112,-11],[130,-10],[151,-20],[154,-35],[140,-42],[120,-34]],
+ [[-52,82],[-25,80],[-20,65],[-42,58],[-55,65]],
+ [[45,-13],[50,-16],[49,-25],[44,-23]],
+ [[130,32],[142,34],[146,43],[139,46],[132,40]]
+ ];
+ function px(lon){return (lon+180)/360*2048}function py(lat){return (90-lat)/180*1024}
+ continents.forEach(poly=>{
+  x.beginPath();poly.forEach((p,i)=>{const X=px(p[0]),Y=py(p[1]);i?x.lineTo(X,Y):x.moveTo(X,Y)});x.closePath();
+  x.fillStyle='#477c70';x.shadowColor='#6caa91';x.shadowBlur=13;x.fill();x.shadowBlur=0;x.strokeStyle='#82ad91';x.lineWidth=2;x.stroke();
+  x.globalAlpha=.25;x.strokeStyle='#b6cbb0';x.lineWidth=1;
+  for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];x.beginPath();x.moveTo(px(a[0]),py(a[1]));x.lineTo(px(b[0]),py(b[1]));x.stroke()}x.globalAlpha=1;
+ });
+ // subtle ocean currents and latitude/longitude grid
+ x.strokeStyle='rgba(123,190,218,.13)';x.lineWidth=1;
+ for(let lat=-60;lat<=60;lat+=30){x.beginPath();x.moveTo(0,py(lat));x.lineTo(2048,py(lat));x.stroke()}
+ for(let lon=-150;lon<=180;lon+=30){x.beginPath();x.moveTo(px(lon),0);x.lineTo(px(lon),1024);x.stroke()}
+ // cloud-like atmospheric wisps
+ for(let i=0;i<160;i++){const xx=Math.random()*2048,yy=Math.random()*1024;x.fillStyle=`rgba(190,220,220,${Math.random()*.045})`;x.beginPath();x.ellipse(xx,yy,15+Math.random()*65,2+Math.random()*9,Math.random(),0,Math.PI*2);x.fill()}
+ const tex=new THREE.CanvasTexture(c);tex.anisotropy=8;return tex;
+}
+const earth=new THREE.Mesh(new THREE.SphereGeometry(1,96,64),new THREE.MeshPhongMaterial({map:makeEarthTexture(),shininess:18,specular:new THREE.Color(0x31536a)}));globeGroup.add(earth);
+const atmosphere=new THREE.Mesh(new THREE.SphereGeometry(1.035,64,48),new THREE.ShaderMaterial({vertexShader:`varying vec3 vNormal;varying vec3 vPos;void main(){vNormal=normalize(normalMatrix*normal);vec4 mvPosition=modelViewMatrix*vec4(position,1.);vPos=-mvPosition.xyz;gl_Position=projectionMatrix*mvPosition;}`,fragmentShader:`varying vec3 vNormal;varying vec3 vPos;void main(){float intensity=pow(0.68-dot(normalize(vNormal),normalize(vPos)),3.0);gl_FragColor=vec4(0.22,0.62,0.92,0.42)*intensity;}`,blending:THREE.AdditiveBlending,side:THREE.BackSide,transparent:true,depthWrite:false}));globeGroup.add(atmosphere);
+const cloud=new THREE.Mesh(new THREE.SphereGeometry(1.012,64,48),new THREE.MeshBasicMaterial({color:0xa9c5cf,transparent:true,opacity:.08,wireframe:false}));globeGroup.add(cloud);
+const starGeo=new THREE.BufferGeometry(),starPos=[];for(let i=0;i<1800;i++){const r=70,theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);starPos.push(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta))}starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xa9cce3,size:.11,transparent:true,opacity:.8})));
+const cities=[
+ {name:'東京',country:'日本',lat:35.68,lon:139.69,code:'HND',type:'airport',pass:87000,gdp:4.2},
+ {name:'大阪',country:'日本',lat:34.69,lon:135.50,code:'KIX',pass:39000,gdp:1.8},
+ {name:'福岡',country:'日本',lat:33.59,lon:130.40,code:'FUK',pass:18000,gdp:.7},
+ {name:'ソウル',country:'韓国',lat:37.46,lon:126.44,code:'ICN',pass:64000,gdp:1.7},
+ {name:'上海',country:'中国',lat:31.14,lon:121.80,code:'PVG',pass:76000,gdp:2.6},
+ {name:'北京',country:'中国',lat:40.08,lon:116.58,code:'PEK',pass:59000,gdp:2.0},
+ {name:'シンガポール',country:'シンガポール',lat:1.36,lon:103.99,code:'SIN',pass:68000,gdp:.5},
+ {name:'バンコク',country:'タイ',lat:13.69,lon:100.75,code:'BKK',pass:51000,gdp:.6},
+ {name:'デリー',country:'インド',lat:28.56,lon:77.10,code:'DEL',pass:49000,gdp:.9},
+ {name:'ドバイ',country:'UAE',lat:25.25,lon:55.36,code:'DXB',pass:92000,gdp:.5},
+ {name:'ロンドン',country:'イギリス',lat:51.47,lon:-.45,code:'LHR',pass:84000,gdp:3.1},
+ {name:'パリ',country:'フランス',lat:49.01,lon:2.55,code:'CDG',pass:73000,gdp:2.8},
+ {name:'フランクフルト',country:'ドイツ',lat:50.03,lon:8.57,code:'FRA',pass:61000,gdp:4.5},
+ {name:'イスタンブール',country:'トルコ',lat:41.26,lon:28.74,code:'IST',pass:77000,gdp:1.1},
+ {name:'ニューヨーク',country:'アメリカ',lat:40.64,lon:-73.78,code:'JFK',pass:79000,gdp:2.4},
+ {name:'ロサンゼルス',country:'アメリカ',lat:33.94,lon:-118.40,code:'LAX',pass:81000,gdp:1.2},
+ {name:'シカゴ',country:'アメリカ',lat:41.97,lon:-87.90,code:'ORD',pass:72000,gdp:.9},
+ {name:'トロント',country:'カナダ',lat:43.68,lon:-79.63,code:'YYZ',pass:49000,gdp:.5},
+ {name:'メキシコシティ',country:'メキシコ',lat:19.44,lon:-99.07,code:'MEX',pass:44000,gdp:.4},
+ {name:'サンパウロ',country:'ブラジル',lat:-23.43,lon:-46.47,code:'GRU',pass:58000,gdp:.8},
+ {name:'シドニー',country:'オーストラリア',lat:-33.94,lon:151.18,code:'SYD',pass:42000,gdp:.5},
+ {name:'ヨハネスブルク',country:'南アフリカ',lat:-26.13,lon:28.24,code:'JNB',pass:27000,gdp:.4},
+ {name:'カイロ',country:'エジプト',lat:30.12,lon:31.40,code:'CAI',pass:35000,gdp:.4},
+ {name:'レイキャビク',country:'アイスランド',lat:63.99,lon:-22.61,code:'KEF',pass:9000,gdp:.03}
+];
+const airportsGroup=new THREE.Group(),citiesGroup=new THREE.Group(),routesGroup=new THREE.Group();globeGroup.add(routesGroup,citiesGroup,airportsGroup);
+function vec(lat,lon,r=1.008){const a=(90-lat)*Math.PI/180,b=(lon+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(a)*Math.cos(b),r*Math.cos(a),r*Math.sin(a)*Math.sin(b))}
+const airportObjects=[];
+cities.forEach((c,i)=>{
+ const p=vec(c.lat,c.lon,1.008);
+ const city=new THREE.Mesh(new THREE.SphereGeometry(.008,8,8),new THREE.MeshBasicMaterial({color:0xffd98a}));city.position.copy(vec(c.lat,c.lon,1.004));citiesGroup.add(city);
+ const group=new THREE.Group();group.position.copy(p);group.lookAt(p.clone().multiplyScalar(2));
+ const stem=new THREE.Mesh(new THREE.CylinderGeometry(.0018,.0018,.025,5),new THREE.MeshBasicMaterial({color:0x66dff7}));stem.position.y=.012;group.add(stem);
+ const dot=new THREE.Mesh(new THREE.SphereGeometry(.012,10,10),new THREE.MeshBasicMaterial({color:0x8deaff}));dot.position.y=.027;group.add(dot);
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.014,.018,24),new THREE.MeshBasicMaterial({color:0x58cbe8,side:THREE.DoubleSide,transparent:true,opacity:.8}));ring.position.y=.027;ring.rotation.x=-Math.PI/2;group.add(ring);
+ group.userData={index:i};airportsGroup.add(group);airportObjects.push(group);
+});
+let routePairs=[[0,3],[0,4],[0,6],[0,10],[0,14],[10,11],[10,12],[11,13],[13,9],[9,6],[6,7],[6,8],[14,15],[14,17],[15,19],[19,20],[10,21],[4,5],[1,2]];
+function drawRoutes(){while(routesGroup.children.length)routesGroup.remove(routesGroup.children[0]);routePairs.forEach(([a,b])=>{const p1=vec(cities[a].lat,cities[a].lon,1.014),p2=vec(cities[b].lat,cities[b].lon,1.014),mid=p1.clone().add(p2).normalize().multiplyScalar(1.18);const curve=new THREE.QuadraticBezierCurve3(p1,mid,p2);const line=new THREE.Mesh(new THREE.TubeGeometry(curve,40,.0015,4,false),new THREE.MeshBasicMaterial({color:0x51c9ef,transparent:true,opacity:.52}));routesGroup.add(line)})}drawRoutes();
+let selected=0,mode='select',routeStart=null,money=12500000,day=1,month=1,year=2026,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=184200;
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function fmt(n){return Math.round(n).toLocaleString('en-US')}
+function selectAirport(i){selected=i;const a=cities[i];$('infoContent').innerHTML=`<div class="sectionTitle">${a.name} 国際空港</div><div class="sub">${a.country} · ${a.code} · INTERNATIONAL AIRPORT</div><div class="kpis"><div class="kpi"><small>PASSENGERS / DAY</small><b>${fmt(a.pass)}</b></div><div class="kpi"><small>GDP CONTRIBUTION</small><b>$${a.gdp.toFixed(1)}T</b></div><div class="kpi"><small>RUNWAYS</small><b>${a.runways||2}</b></div><div class="kpi"><small>TERMINALS</small><b>${a.terminals||2}</b></div><div class="kpi"><small>DAILY REVENUE</small><b>$${fmt(a.revenue||a.pass*18)}</b></div><div class="kpi"><small>CAPACITY</small><b>${fmt((a.capacity||a.pass*1.55))}</b></div></div><p class="sub" style="margin-top:13px;line-height:1.8">空港運営状況：<span style="color:var(--green)">正常稼働</span><br>旅客需要：${Math.min(99,Math.round(a.pass/(a.capacity||a.pass*1.55)*100))}%</p><div class="actionrow"><button class="primary" id="upgradeRunway">滑走路を拡張 $2.5M</button><button id="upgradeTerminal">ターミナル増築 $1.8M</button></div><div class="actionrow"><button id="makeRoute">航空路線を設定</button><button id="showAirportList">空港一覧</button></div>`;
+ $('upgradeRunway').onclick=()=>upgrade(i,'runway');$('upgradeTerminal').onclick=()=>upgrade(i,'terminal');$('makeRoute').onclick=startRoute;$('showAirportList').onclick=openAirports;
+}
+function upgrade(i,type){const cost=type==='runway'?2500000:1800000;if(money<cost){toast('資金が不足しています');return}money-=cost;const a=cities[i];if(type==='runway'){a.runways=(a.runways||2)+1;a.capacity=(a.capacity||a.pass*1.55)+a.pass*.35;toast(a.name+'：滑走路を拡張しました')}else{a.terminals=(a.terminals||2)+1;a.pass=Math.round(a.pass*1.08);a.capacity=(a.capacity||a.pass*1.55)+a.pass*.25;toast(a.name+'：ターミナルを増築しました')}selectAirport(i);updateStats()}
+function openAirports(){ $('modalTitle').textContent='GLOBAL AIRPORT NETWORK';$('modalBody').innerHTML='<p class="sub">世界の主要空港 · 空港を選択して管理画面を開く</p><div class="airportgrid">'+cities.map((a,i)=>`<button data-airport="${i}"><b>✈ ${a.name} <span style="color:#70d8f1">${a.code}</span></b><small>${a.country} · ${fmt(a.pass)} passengers/day</small></button>`).join('')+'</div>';$('modal').classList.add('show');document.querySelectorAll('[data-airport]').forEach(b=>b.onclick=()=>{$('modal').classList.remove('show');selectAirport(+b.dataset.airport);focusAirport(+b.dataset.airport)})}
+function focusAirport(i){const p=vec(cities[i].lat,cities[i].lon,1);const target=new THREE.Vector3(0,0,1).applyQuaternion(globeGroup.quaternion);const q=new THREE.Quaternion().setFromUnitVectors(p.clone().normalize(),target);globeGroup.quaternion.premultiply(q)}
+function startRoute(){mode='routes';routeStart=null;$('routeSelect').classList.add('show');toast('出発空港を選択してください')}
+$('cancelRoute').onclick=()=>{$('routeSelect').classList.remove('show');routeStart=null};
+function onAirportClick(i){if(mode==='routes'){if(routeStart===null){routeStart=i;toast(cities[i].name+' を出発空港に設定。到着空港を選択')}else if(routeStart===i){toast('別の空港を選んでください')}else{const exists=routePairs.some(p=>(p[0]===routeStart&&p[1]===i)||(p[1]===routeStart&&p[0]===i));if(!exists){routePairs.push([routeStart,i]);drawRoutes();money+=0;toast(cities[routeStart].code+' → '+cities[i].code+' の路線を開設！')}else toast('この路線はすでに存在します');routeStart=null;$('routeSelect').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'))}}else{selectAirport(i);toast(cities[i].name+' を選択しました')}}
+const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();let dragging=false,lastX=0,lastY=0,startX=0,startY=0,autoRotate=true;
+renderer.domElement.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;startX=e.clientX;startY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;globeGroup.rotation.y+=dx*.004;globeGroup.rotation.x+=dy*.004;globeGroup.rotation.x=Math.max(-1.35,Math.min(1.35,globeGroup.rotation.x));lastX=e.clientX;lastY=e.clientY;autoRotate=false});
+renderer.domElement.addEventListener('pointerup',e=>{if(!dragging)return;dragging=false;if(Math.abs(e.clientX-startX)+Math.abs(e.clientY-startY)<6){mouse.x=e.clientX/innerWidth*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(airportsGroup.children,true);if(hits.length){let obj=hits[0].object;while(obj.parent&&obj.parent!==airportsGroup)obj=obj.parent;if(obj.userData.index!==undefined)onAirportClick(obj.userData.index)} }});
+renderer.domElement.addEventListener('wheel',e=>{camera.position.z=Math.max(1.55,Math.min(6,camera.position.z+e.deltaY*.0015))},{passive:true});
+$('resetView').onclick=()=>{camera.position.set(0,0,3.55);globeGroup.rotation.set(0,0,0);globeGroup.quaternion.identity();autoRotate=true;toast('視点をリセットしました')};
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶ 再開':'Ⅱ 一時停止';$('simStatus').textContent=paused?'PAUSED':'RUNNING'};
+document.querySelectorAll('.speed').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b))});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));if(mode==='airports')openAirports();if(mode==='economy')showEconomy();if(mode==='routes')startRoute();if(mode==='select')toast('地球マップモード')});
+document.querySelectorAll('[data-layer]').forEach(s=>s.onclick=()=>{s.classList.toggle('on');const k=s.dataset.layer;({airports:airportsGroup,routes:routesGroup,cities:citiesGroup,clouds:cloud})[k].visible=s.classList.contains('on')});
+$('openAirports').onclick=openAirports;$('closeModal').onclick=()=>$('modal').classList.remove('show');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('show')};
+function showEconomy(){$('infoContent').innerHTML=`<div class="sectionTitle">世界経済ダッシュボード</div><div class="sub">GLOBAL ECONOMIC INTELLIGENCE</div><div class="kpis"><div class="kpi"><small>WORLD GDP</small><b>$105.4T</b></div><div class="kpi"><small>ECONOMY INDEX</small><b>${globalEcon.toFixed(1)}</b></div><div class="kpi"><small>POPULATION</small><b>8.16B</b></div><div class="kpi"><small>TRADE VOLUME</small><b>$32.1T</b></div></div><p style="font-size:11px;color:#a9c0ce;line-height:1.8">各国の経済活動はシミュレーション時間に応じて変化します。航空需要は都市の経済規模と連動します。</p><div class="sub">MAJOR ECONOMIES</div>${[['アメリカ','$28.8T'],['中国','$18.7T'],['ドイツ','$4.7T'],['日本','$4.2T'],['インド','$3.9T']].map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ffffff12;font-size:11px"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}`;}
+function updateStats(){$('money').textContent='$ '+fmt(money);$('passengers').textContent=fmt(passengerTotal);$('airportCount').textContent=cities.length}
+let last=performance.now(),acc=0;
+function tick(dt){if(paused)return;simMinutes+=dt*speed*8;acc+=dt*speed;if(acc>1){acc=0;const growth=(Math.random()-.38)*.002;globalEcon=Math.max(80,Math.min(130,globalEcon+growth));passengerTotal=Math.round(cities.reduce((s,c)=>s+c.pass,0));const income=cities.reduce((s,c)=>s+c.pass*0.018,0);money+=income*speed*.15;cities.forEach(c=>{c.pass=Math.max(1000,Math.round(c.pass*(1+(globalEcon-100)*.000015+(Math.random()-.48)*.0007)))});$('globalIndex').innerHTML=globalEcon.toFixed(1)+' <span style="font-size:10px;color:var(--green)">▲ LIVE</span>';updateStats()}
+ const total=Math.floor(simMinutes);const mins=total%60,hrs=Math.floor(total/60)%24,days=Math.floor(total/1440);let d=1+days%28,m=1+Math.floor(days/28)%12,y=2026+Math.floor(days/336);$('clock').textContent=`${y}年 ${String(m).padStart(2,'0')}月 ${String(d).padStart(2,'0')}日 ${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+}
+function animate(now){requestAnimationFrame(animate);const dt=Math.min(.05,(now-last)/1000);last=now;if(autoRotate&&!dragging)globeGroup.rotation.y+=dt*.025;cloud.rotation.y+=dt*.003;tick(dt);renderer.render(scene,camera)}requestAnimationFrame(animate);
+function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}addEventListener('resize',resize);
+updateStats();
+})();
+</script>
+</body>
+</html>
