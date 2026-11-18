@@ -35,6 +35,11 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
+.own-airport-pin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e6a63c;border:3px solid #fff;color:#183247;font-size:17px;font-weight:900;box-shadow:0 0 0 7px #ffcf6a55,0 3px 14px #001b2b99}
+#buildHint{display:none;position:fixed;z-index:9;left:50%;top:122px;transform:translateX(-50%);background:#07364d;color:#e9faff;border:1px solid #6ed7f0;padding:10px 15px;border-radius:8px;font-size:12px;box-shadow:0 6px 24px #001b2b55;pointer-events:none}
+#buildHint.show{display:block}
+#mapBuildForm{display:grid;gap:12px}
+#mapBuildForm input{width:100%;padding:11px;border-radius:7px;border:1px solid #42667a;background:#071724;color:#eaf4fb;font:inherit}
 #scene{z-index:0;background:#d9e4e7}
 #scene .leaflet-container{width:100%;height:100%;background:#dce5e7;font-family:Inter,"Noto Sans JP",sans-serif}
 .leaflet-tile{filter:saturate(1.08) contrast(1.02)}
@@ -64,8 +69,9 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
  <div class="panel">
   <div class="panelhead">CONTROL CENTER <span>01</span></div>
   <div class="panelbody"><div class="modegrid">
-   <button class="active" data-mode="select"><span>🌐</span>地球マップ</button>
-   <button data-mode="airports"><span>✈️</span>空港管理</button>
+   <button class="active" data-mode="select"><span>🌐</span>世界地図</button>
+   <button data-mode="build"><span>🏗️</span>自分の空港を建設</button>
+   <button data-mode="airports"><span>✈️</span>世界の空港</button>
    <button data-mode="economy"><span>📈</span>世界経済</button>
    <button data-mode="routes"><span>🛫</span>航空路線</button>
   </div></div>
@@ -90,13 +96,13 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
  <div class="panel" id="infoPanel">
   <div class="panelhead">INTELLIGENCE / SELECTED</div>
   <div class="panelbody" id="infoContent">
-   <div class="sectionTitle">地球シミュレーション</div><div class="sub">EARTH · GLOBAL OVERVIEW</div>
-   <p style="font-size:11px;line-height:1.8;color:#c0d1dd">世界の都市・空港・経済を管理し、地球規模の交通ネットワークを構築しよう。</p>
+   <div class="sectionTitle">航空会社を始めよう</div><div class="sub">BUILD YOUR FIRST AIRPORT</div>
+   <p style="font-size:11px;line-height:1.8;color:#c0d1dd">まず世界地図から好きな場所を選び、自分だけの空港を1つ建設しよう。完成したら実在する世界の空港へ路線をつなげよう。</p>
    <div class="kpis">
     <div class="kpi"><small>WORLD GDP</small><b>$ 105.4T</b></div><div class="kpi"><small>COUNTRIES</small><b>195</b></div>
     <div class="kpi"><small>FLIGHTS / DAY</small><b>102K</b></div><div class="kpi"><small>AVG. DEMAND</small><b>78.4%</b></div>
    </div>
-   <div class="actionrow"><button class="primary" id="openAirports">空港一覧を見る</button></div>
+   <div class="actionrow"><button class="primary" id="beginBuild">地図から空港を建設する</button></div><div class="sub" style="margin-top:9px">初期資金：$12.5M · 建設費：$5M</div>
   </div>
  </div>
  <div class="panel"><div class="panelhead">SIMULATION STATUS <span class="sub" id="simStatus">RUNNING</span></div><div class="panelbody" style="font-size:10px;color:#b1c7d6;line-height:1.9">世界経済 <span style="float:right;color:var(--green)">正常</span><br>航空ネットワーク <span style="float:right;color:var(--green)">稼働中</span><br>気象システム <span style="float:right;color:var(--gold)">変動中</span></div></div>
@@ -106,7 +112,7 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
  <button id="pause">Ⅱ 一時停止</button><button data-speed="1" class="active speed">×1</button><button data-speed="3" class="speed">×3</button><button data-speed="8" class="speed">×8</button>
  <button id="resetView">◎ 視点リセット</button>
 </div>
-<div id="toast"></div>
+<div id="toast"></div><div id="buildHint">空港を建設したい場所を地図上でクリック</div>
 <div id="routeSelect"><b>✈ 航空路線の設定</b><p style="font-size:11px;color:#a9c1d0;line-height:1.6">出発空港と到着空港を選択してください。空港マーカーを順番にクリックします。</p><button id="cancelRoute">キャンセル</button></div>
 <div id="modal"><div class="modalbox"><div class="modalhead"><b id="modalTitle">空港ネットワーク</b><button id="closeModal">✕</button></div><div class="modalbody" id="modalBody"></div></div></div>
 
@@ -143,11 +149,12 @@ const cities=[
 const map=L.map('scene',{worldCopyJump:true,minZoom:2,maxZoom:12,zoomControl:true,preferCanvas:true}).setView([22,10],2);
 const base=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
 const airportLayer=L.layerGroup().addTo(map),cityLayer=L.layerGroup().addTo(map),routeLayer=L.layerGroup().addTo(map);
-let selected=0,mode='select',routeStart=null,money=12500000,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=184200,autoFit=true;
+let selected=0,mode='select',routeStart=null,money=12500000,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=0,autoFit=true;
+let ownedAirport=null,ownedAirportMarker=null,buildLocation=null,ownedRoutes=[];
 const airportMarkers=[];
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function fmt(n){return Math.round(n).toLocaleString('en-US')}
-function updateStats(){$('money').textContent='$ '+fmt(money);$('passengers').textContent=fmt(passengerTotal);$('airportCount').textContent=cities.length}
+function updateStats(){$('money').textContent='$ '+fmt(money);$('passengers').textContent=fmt(passengerTotal);$('airportCount').textContent=ownedAirport?1:0}
 function iconFor(i){return L.divIcon({className:'',html:'<div class="airport-pin '+(selected===i?'selected':'')+'">✈</div>',iconSize:[25,25],iconAnchor:[12,12]})}
 function refreshAirportIcons(){airportMarkers.forEach((m,i)=>m.setIcon(iconFor(i)))}
 cities.forEach((c,i)=>{
@@ -158,13 +165,13 @@ cities.forEach((c,i)=>{
  marker.bindTooltip(c.name+' · '+c.code,{direction:'top',offset:[0,-10],className:'airport-name'});
  airportMarkers.push(marker);
 });
-let routePairs=[[0,3],[0,4],[0,6],[0,10],[0,14],[10,11],[10,12],[11,13],[13,9],[9,6],[6,7],[6,8],[14,15],[14,17],[15,19],[19,20],[10,21],[4,5],[1,2]];
+let routePairs=[];
 function routeCoords(a,b){
- const A=cities[a],B=cities[b];let lon2=B.lon,lon1=A.lon;
+ const A=a==='home'?ownedAirport:cities[a],B=b==='home'?ownedAirport:cities[b];if(!A||!B)return[];let lon2=B.lon,lon1=A.lon;
  if(Math.abs(lon2-lon1)>180){if(lon2>lon1)lon1+=360;else lon2+=360}
  const pts=[];for(let t=0;t<=32;t++){const f=t/32;const lat=A.lat+(B.lat-A.lat)*f+Math.sin(Math.PI*f)*Math.min(13,Math.abs(lon2-lon1)*.035);let lon=lon1+(lon2-lon1)*f;while(lon>180)lon-=360;while(lon< -180)lon+=360;pts.push([lat,lon])}return pts;
 }
-function drawRoutes(){routeLayer.clearLayers();routePairs.forEach(([a,b])=>L.polyline(routeCoords(a,b),{color:'#087ca5',weight:2.4,opacity:.72,dashArray:'7 6',lineCap:'round'}).addTo(routeLayer))}
+function drawRoutes(){routeLayer.clearLayers();ownedRoutes.forEach(i=>{const pts=routeCoords('home',i);if(pts.length)L.polyline(pts,{color:'#e19a2d',weight:3.5,opacity:.92,dashArray:'9 5',lineCap:'round'}).addTo(routeLayer)})}
 drawRoutes();
 function selectAirport(i){
  selected=i;refreshAirportIcons();const a=cities[i];
@@ -173,10 +180,37 @@ function selectAirport(i){
 }
 function upgrade(i,type){const cost=type==='runway'?2500000:1800000;if(money<cost){toast('資金が不足しています');return}money-=cost;const a=cities[i];if(type==='runway'){a.runways=(a.runways||2)+1;a.capacity=(a.capacity||a.pass*1.55)+a.pass*.35;toast(a.name+'：滑走路を拡張しました')}else{a.terminals=(a.terminals||2)+1;a.pass=Math.round(a.pass*1.08);a.capacity=(a.capacity||a.pass*1.55)+a.pass*.25;toast(a.name+'：ターミナルを増築しました')}selectAirport(i);updateStats()}
 function focusAirport(i){map.flyTo([cities[i].lat,cities[i].lon],Math.max(map.getZoom(),5),{duration:1.1})}
+function showOwnedAirport(){if(!ownedAirport)return;$('infoContent').innerHTML='<div class="sectionTitle">'+ownedAirport.name+'</div><div class="sub">YOUR HOME AIRPORT · PLAYER OWNED</div><div class="kpis"><div class="kpi"><small>CONNECTED AIRPORTS</small><b>'+ownedRoutes.length+'</b></div><div class="kpi"><small>PASSENGERS / DAY</small><b>'+fmt(ownedAirport.pass||0)+'</b></div><div class="kpi"><small>RUNWAYS</small><b>'+ownedAirport.runways+'</b></div><div class="kpi"><small>TERMINALS</small><b>'+ownedAirport.terminals+'</b></div></div><p class="sub" style="margin-top:12px;line-height:1.8">この空港を拠点に、世界の実在する空港へ路線を広げよう。</p><div class="actionrow"><button class="primary" id="connectWorld">世界の空港と接続</button></div><div class="actionrow"><button id="showConnected">接続済み空港を見る</button></div>';$('connectWorld').onclick=startRoute;$('showConnected').onclick=showConnectedAirports}
+function showConnectedAirports(){if(!ownedAirport)return;$('infoContent').innerHTML='<div class="sectionTitle">接続済みの空港</div><div class="sub">YOUR FLIGHT NETWORK</div>'+(ownedRoutes.length?ownedRoutes.map(i=>'<div style="padding:9px 0;border-bottom:1px solid #ffffff18;font-size:11px">✈ '+cities[i].name+' <span style="color:#70d8f1">'+cities[i].code+'</span><small style="display:block;color:#91aabc;margin-top:3px">'+cities[i].country+'</small></div>').join(''):'<p class="sub">まだ路線がありません。</p>')+'<div class="actionrow"><button class="primary" id="addMoreRoutes">路線を追加する</button></div>';$('addMoreRoutes').onclick=startRoute}
+function beginBuild(){if(ownedAirport){showOwnedAirport();toast('自分の空港はすでにあります');return}if(money<5000000){toast('建設資金が不足しています');return}mode='build';$('buildHint').classList.add('show');$('hint').textContent='建設したい場所をクリックして選択';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='build'));toast('地図上で空港を建設する場所を選んでください')}
+function confirmBuild(latlng){buildLocation=latlng;$('modalTitle').textContent='自分の空港を建設';$('modalBody').innerHTML='<div id="mapBuildForm"><p style="font-size:12px;line-height:1.7;color:#c5d7e2">選択した場所に自分の空港を建設します。建設後は世界の実在する空港へ航空路線を接続できます。</p><div class="sub">建設地点：'+latlng.lat.toFixed(3)+'°, '+latlng.lng.toFixed(3)+'°</div><label style="font-size:11px;color:#9bb7ca">空港名<input id="newAirportName" maxlength="28" value="MY INTERNATIONAL AIRPORT" /></label><div class="kpis"><div class="kpi"><small>CONSTRUCTION COST</small><b>$5,000,000</b></div><div class="kpi"><small>REMAINING FUNDS</small><b>
 function openAirports(){$('modalTitle').textContent='GLOBAL AIRPORT NETWORK';$('modalBody').innerHTML='<p class="sub">世界の主要空港 · 空港を選択して管理画面を開く</p><div class="airportgrid">'+cities.map((a,i)=>'<button data-airport="'+i+'"><b>✈ '+a.name+' <span style="color:#70d8f1">'+a.code+'</span></b><small>'+a.country+' · '+fmt(a.pass)+' passengers/day</small></button>').join('')+'</div>';$('modal').classList.add('show');document.querySelectorAll('[data-airport]').forEach(b=>b.onclick=()=>{$('modal').classList.remove('show');selectAirport(+b.dataset.airport);focusAirport(+b.dataset.airport)})}
-function startRoute(){mode='routes';routeStart=null;$('routeSelect').classList.add('show');toast('出発空港を選択してください')}
+function startRoute(){if(!ownedAirport){toast('先に自分の空港を建設してください');return}mode='routes';routeStart='home';$('routeSelect').classList.add('show');$('routeSelect').querySelector('b').textContent='✈ 自分の空港から路線を開設';$('routeSelect').querySelector('p').textContent='地図上の実在する空港マーカーをクリックすると、そこへ直行便を開設します。';toast('接続したい世界の空港を選んでください')}
 $('cancelRoute').onclick=()=>{$('routeSelect').classList.remove('show');routeStart=null;mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'))};
-function onAirportClick(i){if(mode==='routes'){if(routeStart===null){routeStart=i;toast(cities[i].name+' を出発空港に設定。到着空港を選択')}else if(routeStart===i){toast('別の空港を選んでください')}else{const exists=routePairs.some(p=>(p[0]===routeStart&&p[1]===i)||(p[1]===routeStart&&p[0]===i));if(!exists){routePairs.push([routeStart,i]);drawRoutes();toast(cities[routeStart].code+' → '+cities[i].code+' の路線を開設！')}else toast('この路線はすでに存在します');routeStart=null;$('routeSelect').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'))}}else{selectAirport(i);toast(cities[i].name+' を選択しました')}}
+function onAirportClick(i){if(mode==='routes'){if(ownedRoutes.includes(i)){toast('この空港とはすでに接続しています');return}ownedRoutes.push(i);drawRoutes();const destination=cities[i];if(ownedAirport){ownedAirport.pass=(ownedAirport.pass||0)+Math.round(destination.pass*.12);ownedAirport.capacity=(ownedAirport.capacity||0)+Math.round(destination.pass*.15)}$('routeSelect').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'));showOwnedAirport();updateStats();toast(ownedAirport.name+' → '+destination.name+' の路線を開設！')}else{selectAirport(i);toast(cities[i].name+' を選択しました')}}
+$('resetView').onclick=()=>{map.flyTo([22,10],2,{duration:.8});toast('世界地図に戻りました')};
+$('beginBuild').onclick=beginBuild;
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶ 再開':'Ⅱ 一時停止';$('simStatus').textContent=paused?'PAUSED':'RUNNING'};
+document.querySelectorAll('.speed').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b))});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(b.dataset.mode==='build'){beginBuild();return}if(b.dataset.mode==='routes'){startRoute();return}mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));if(mode==='airports')openAirports();if(mode==='economy')showEconomy();if(mode==='select')toast('世界地図モード')});
+document.querySelectorAll('[data-layer]').forEach(s=>s.onclick=()=>{s.classList.toggle('on');const k=s.dataset.layer;({airports:airportLayer,routes:routeLayer,cities:cityLayer})[k]?.[s.classList.contains('on')?'addTo':'remove']?.(map);if(k==='clouds')toast('2D地図では雲レイヤーは利用できません')});
+$('openAirports').onclick=openAirports;$('closeModal').onclick=()=>$('modal').classList.remove('show');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('show')};
+function showEconomy(){$('infoContent').innerHTML=`<div class="sectionTitle">世界経済ダッシュボード</div><div class="sub">GLOBAL ECONOMIC INTELLIGENCE</div><div class="kpis"><div class="kpi"><small>WORLD GDP</small><b>$105.4T</b></div><div class="kpi"><small>ECONOMY INDEX</small><b>${globalEcon.toFixed(1)}</b></div><div class="kpi"><small>POPULATION</small><b>8.16B</b></div><div class="kpi"><small>TRADE VOLUME</small><b>$32.1T</b></div></div><p style="font-size:11px;color:#a9c0ce;line-height:1.8">各国の経済活動はシミュレーション時間に応じて変化します。航空需要は都市の経済規模と連動します。</p><div class="sub">MAJOR ECONOMIES</div>${[['アメリカ','$28.8T'],['中国','$18.7T'],['ドイツ','$4.7T'],['日本','$4.2T'],['インド','$3.9T']].map(x=>'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ffffff12;font-size:11px"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('')}`;}
+let last=performance.now(),acc=0;
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(paused)return;simMinutes+=dt*speed*8;acc+=dt*speed;if(acc>1){acc=0;const growth=(Math.random()-.38)*.002;globalEcon=Math.max(80,Math.min(130,globalEcon+growth));if(ownedAirport){const demand=ownedRoutes.reduce((s,i)=>s+cities[i].pass,0);const target=Math.round(demand*.12);ownedAirport.pass=Math.round((ownedAirport.pass||0)*.92+target*.08);passengerTotal=ownedAirport.pass;money+=ownedAirport.pass*.018*speed*.15}else passengerTotal=0;cities.forEach(c=>{c.pass=Math.max(1000,Math.round(c.pass*(1+(globalEcon-100)*.000015+(Math.random()-.48)*.0007)))});$('globalIndex').innerHTML=globalEcon.toFixed(1)+' <span style="font-size:10px;color:var(--green)">▲ LIVE</span>';updateStats()}
+const total=Math.floor(simMinutes),mins=total%60,hrs=Math.floor(total/60)%24,days=Math.floor(total/1440),d=1+days%28,m=1+Math.floor(days/28)%12,y=2026+Math.floor(days/336);$('clock').textContent=`${y}年 ${String(m).padStart(2,'0')}月 ${String(d).padStart(2,'0')}日 ${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;}
+function animate(now){tick(now);requestAnimationFrame(animate)}requestAnimationFrame(animate);
+$('hint').textContent='地図をドラッグして移動 · ホイールで拡大縮小 · 都市や空港をクリック';
+setTimeout(()=>map.invalidateSize(),100);addEventListener('resize',()=>map.invalidateSize());
+updateStats();
+})();
+</script>
+</body></html>+fmt(money-5000000)+'</b></div></div><div class="actionrow"><button class="primary" id="confirmAirportBuild">この場所に建設する</button><button id="cancelAirportBuild">キャンセル</button></div></div>';$('modal').classList.add('show');$('confirmAirportBuild').onclick=()=>{const name=$('newAirportName').value.trim()||'MY INTERNATIONAL AIRPORT';if(money<5000000){toast('資金が不足しています');return}money-=5000000;ownedAirport={name,lat:buildLocation.lat,lon:buildLocation.lng,code:'HOME',pass:0,runways:1,terminals:1};ownedAirportMarker=L.marker([ownedAirport.lat,ownedAirport.lon],{icon:L.divIcon({className:'',html:'<div class="own-airport-pin">★</div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1000}).addTo(airportLayer).bindTooltip(name+' · YOUR AIRPORT',{permanent:true,direction:'top',offset:[0,-18],className:'airport-name'});ownedAirportMarker.on('click',showOwnedAirport);$('modal').classList.remove('show');$('buildHint').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='select'));$('hint').textContent='地図をドラッグして移動 · ホイールで拡大縮小 · 空港をクリック';map.flyTo(buildLocation,6,{duration:1.2});showOwnedAirport();updateStats();toast('空港を建設しました！次は世界の空港と接続しよう')};$('cancelAirportBuild').onclick=()=>$('modal').classList.remove('show')}
+map.on('click',e=>{if(mode==='build')confirmBuild(e.latlng)})
+function openAirports(){$('modalTitle').textContent='GLOBAL AIRPORT NETWORK';$('modalBody').innerHTML='<p class="sub">世界の主要空港 · 空港を選択して管理画面を開く</p><div class="airportgrid">'+cities.map((a,i)=>'<button data-airport="'+i+'"><b>✈ '+a.name+' <span style="color:#70d8f1">'+a.code+'</span></b><small>'+a.country+' · '+fmt(a.pass)+' passengers/day</small></button>').join('')+'</div>';$('modal').classList.add('show');document.querySelectorAll('[data-airport]').forEach(b=>b.onclick=()=>{$('modal').classList.remove('show');selectAirport(+b.dataset.airport);focusAirport(+b.dataset.airport)})}
+function startRoute(){if(!ownedAirport){toast('先に自分の空港を建設してください');return}mode='routes';routeStart='home';$('routeSelect').classList.add('show');$('routeSelect').querySelector('b').textContent='✈ 自分の空港から路線を開設';$('routeSelect').querySelector('p').textContent='地図上の実在する空港マーカーをクリックすると、そこへ直行便を開設します。';toast('接続したい世界の空港を選んでください')}
+$('cancelRoute').onclick=()=>{$('routeSelect').classList.remove('show');routeStart=null;mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'))};
+function onAirportClick(i){if(mode==='routes'){if(ownedRoutes.includes(i)){toast('この空港とはすでに接続しています');return}ownedRoutes.push(i);drawRoutes();const destination=cities[i];if(ownedAirport){ownedAirport.pass=(ownedAirport.pass||0)+Math.round(destination.pass*.12);ownedAirport.capacity=(ownedAirport.capacity||0)+Math.round(destination.pass*.15)}$('routeSelect').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'));showOwnedAirport();updateStats();toast(ownedAirport.name+' → '+destination.name+' の路線を開設！')}else{selectAirport(i);toast(cities[i].name+' を選択しました')}}
 $('resetView').onclick=()=>{map.flyTo([22,10],2,{duration:.8});toast('世界地図に戻りました')};
 $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶ 再開':'Ⅱ 一時停止';$('simStatus').textContent=paused?'PAUSED':'RUNNING'};
 document.querySelectorAll('.speed').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b))});
