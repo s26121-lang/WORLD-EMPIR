@@ -33,25 +33,20 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
 @media(max-width:850px){header{height:60px;padding:9px 12px}.topstats .stat:nth-child(2),.topstats .stat:nth-child(3){display:none}#left{left:8px;top:70px;width:175px;bottom:70px}#right{right:8px;top:70px;width:210px;bottom:70px}.panelbody{padding:9px}.panelhead{padding:10px}.modegrid button{font-size:9px;padding:7px}.kpi{padding:7px}.kpi b{font-size:13px}#hint{top:66px;font-size:9px}#bottom{bottom:7px;max-width:96vw;gap:3px;padding:5px}#bottom button{padding:7px;font-size:9px}#clock{font-size:10px;padding:0 3px}.brand b{font-size:12px}.brand small{font-size:8px}}
 @media(max-width:560px){#left{width:145px}#right{width:175px}.topstats{gap:8px}.stat strong{font-size:11px}.brand{gap:6px}.logo{width:30px;height:30px}.modegrid{grid-template-columns:1fr}.airportgrid{grid-template-columns:1fr 1fr}.sectionTitle{font-size:14px}}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Widgets/widgets.css">
 <style>
-.own-airport-pin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e6a63c;border:3px solid #fff;color:#183247;font-size:17px;font-weight:900;box-shadow:0 0 0 7px #ffcf6a55,0 3px 14px #001b2b99}
+#scene{z-index:0;background:#020914}
+#scene .cesium-viewer,#scene .cesium-widget,#scene canvas{width:100%;height:100%;display:block}
+#scene .cesium-viewer-bottom{left:auto;right:8px;bottom:4px}
+#scene .cesium-widget-credits{font-size:9px;background:rgba(3,12,22,.62);padding:2px 5px;border-radius:4px}
+.cesium-viewer-toolbar,.cesium-viewer-animationContainer,.cesium-viewer-timelineContainer,.cesium-viewer-fullscreenContainer{display:none!important}
+.cesium-viewer .cesium-widget canvas{touch-action:pan-x pan-y}
 #buildHint{display:none;position:fixed;z-index:9;left:50%;top:122px;transform:translateX(-50%);background:#07364d;color:#e9faff;border:1px solid #6ed7f0;padding:10px 15px;border-radius:8px;font-size:12px;box-shadow:0 6px 24px #001b2b55;pointer-events:none}
 #buildHint.show{display:block}
 #mapBuildForm{display:grid;gap:12px}
 #mapBuildForm input{width:100%;padding:11px;border-radius:7px;border:1px solid #42667a;background:#071724;color:#eaf4fb;font:inherit}
-#scene{z-index:0;background:#d9e4e7}
-#scene .leaflet-container{width:100%;height:100%;background:#dce5e7;font-family:Inter,"Noto Sans JP",sans-serif}
-.leaflet-tile{filter:saturate(1.08) contrast(1.02)}
-.leaflet-control-zoom{border:1px solid rgba(24,55,73,.25)!important;box-shadow:0 4px 18px #001a2a22!important}
-.leaflet-control-zoom a{color:#173b50!important;background:#f7fbfc!important}
-.leaflet-control-attribution{font-size:9px!important;background:rgba(248,252,253,.82)!important}
-.airport-pin{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#073c57;border:2px solid #b8f1ff;color:#eaffff;font-size:12px;box-shadow:0 2px 10px #00283b88;transition:transform .15s}
-.airport-pin.selected{background:#e5a83d;border-color:white;color:#132b39;transform:scale(1.35);box-shadow:0 0 0 6px #ffcb6655,0 2px 12px #00283b88}
-.city-label{font-size:10px;font-weight:700;color:#12354a;text-shadow:0 1px 3px white,1px 0 3px white,-1px 0 3px white;white-space:nowrap}
-.route-line{stroke:#087ca5;stroke-width:2.2;opacity:.75}
-.leaflet-tooltip.airport-name{background:#09283a;color:#e8f8ff;border:1px solid #5ab8d2;border-radius:5px;box-shadow:0 4px 12px #001b2b55;font-size:10px;padding:4px 7px}
-@media(max-width:560px){.airport-pin{width:22px;height:22px}.city-label{font-size:9px}}
+.own-airport-pin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e6a63c;border:3px solid #fff;color:#183247;font-size:17px;font-weight:900;box-shadow:0 0 0 7px #ffcf6a55,0 3px 14px #001b2b99}
+@media(max-width:560px){#buildHint{top:105px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -116,7 +111,8 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
 <div id="routeSelect"><b>✈ 航空路線の設定</b><p style="font-size:11px;color:#a9c1d0;line-height:1.6">出発空港と到着空港を選択してください。空港マーカーを順番にクリックします。</p><button id="cancelRoute">キャンセル</button></div>
 <div id="modal"><div class="modalbox"><div class="modalhead"><b id="modalTitle">空港ネットワーク</b><button id="closeModal">✕</button></div><div class="modalbody" id="modalBody"></div></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>window.CESIUM_BASE_URL="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/";</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Cesium.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
@@ -146,9 +142,70 @@ const cities=[
  {name:'カイロ',country:'エジプト',lat:30.12,lon:31.40,code:'CAI',pass:35000,gdp:.4},
  {name:'レイキャビク',country:'アイスランド',lat:63.99,lon:-22.61,code:'KEF',pass:9000,gdp:.03}
 ];
-const map=L.map('scene',{worldCopyJump:true,minZoom:2,maxZoom:12,zoomControl:true,preferCanvas:true}).setView([22,10],2);
-const base=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+// CesiumJS 3D globe + OpenStreetMap imagery (no API key required)
+const viewer=new Cesium.Viewer('scene',{
+ baseLayer:false,terrainProvider:new Cesium.EllipsoidTerrainProvider(),
+ animation:false,timeline:false,baseLayerPicker:false,geocoder:false,
+ homeButton:false,sceneModePicker:false,navigationHelpButton:false,
+ infoBox:false,selectionIndicator:false,fullscreenButton:false,
+ scene3DOnly:true,requestRenderMode:false
+});
+viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({url:'https://tile.openstreetmap.org/'}));
+viewer.scene.globe.enableLighting=true;
+viewer.scene.globe.showGroundAtmosphere=true;
+viewer.scene.skyAtmosphere.show=true;
+viewer.scene.fog.enabled=true;
+viewer.scene.backgroundColor=Cesium.Color.fromCssColorString('#020914');
+viewer.scene.screenSpaceCameraController.minimumZoomDistance=100000;
+viewer.scene.screenSpaceCameraController.maximumZoomDistance=45000000;
+const map={
+ _clicks:[],
+ flyTo(latlng,zoom,opts={}){const h=25000000/Math.pow(2,(zoom||2)-2);viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(latlng.lng,latlng.lat,h),duration:opts.duration??1.1,orientation:{heading:0,pitch:Cesium.Math.toRadians(-90),roll:0}})},
+ getZoom(){return Math.max(2,Math.min(12,2+Math.log2(25000000/Math.max(100000,viewer.camera.positionCartographic.height))))},
+ invalidateSize(){viewer.resize()},
+ on(event,fn){if(event==='click')this._clicks.push(fn);return this}
+};
+map.flyTo({lat:22,lng:10},2,{duration:0});
+const makeLayer=()=>({
+ entities:[],
+ addTo(){return this},
+ add(entity){this.entities.push(entity);return entity},
+ clearLayers(){this.entities.forEach(e=>viewer.entities.remove(e));this.entities=[]},
+ remove(){this.clearLayers()},
+ removeFrom(){this.clearLayers()}
+});
+const colorFromIcon=icon=>icon?.html?.includes('own-airport-pin')?Cesium.Color.fromCssColorString('#f4b943'):Cesium.Color.fromCssColorString('#55d9f5');
+const L={
+ layerGroup:makeLayer,
+ divIcon:o=>o,
+ marker(pos,opts={}){
+  let icon=opts.icon||{},color=colorFromIcon(icon);
+  const entity=viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(pos[1],pos[0]),point:{pixelSize:icon.html?.includes('own-airport-pin')?15:10,color,outlineColor:Cesium.Color.WHITE,outlineWidth:2,disableDepthTestDistance:Number.POSITIVE_INFINITY},label:{text:opts.title||'',font:'12px sans-serif',fillColor:Cesium.Color.WHITE,outlineColor:Cesium.Color.BLACK,outlineWidth:3,style:Cesium.LabelStyle.FILL_AND_OUTLINE,pixelOffset:new Cesium.Cartesian2(0,-18),disableDepthTestDistance:Number.POSITIVE_INFINITY,show:!!opts.title}});
+  const obj={_entity:entity,_click:null,addTo(layer){layer.add(entity);return this},on(event,fn){if(event==='click')this._click=fn;entity.__marker=this;return this},bindTooltip(text){entity.label.text=text;entity.label.show=true;return this},setIcon(next){icon=next;color=colorFromIcon(next);entity.point.color=color;entity.point.pixelSize=next.html?.includes('own-airport-pin')?16:11;return this}};
+  entity.__marker=obj;return obj;
+ },
+ circleMarker(pos,opts={}){
+  const entity=viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(pos[1],pos[0]),point:{pixelSize:(opts.radius||4)*2,color:Cesium.Color.fromCssColorString(opts.fillColor||'#e5a83d'),outlineColor:Cesium.Color.WHITE,outlineWidth:opts.weight||1,disableDepthTestDistance:Number.POSITIVE_INFINITY}});
+  return {_entity:entity,addTo(layer){layer.add(entity);return this},bindTooltip(text){entity.label={text,font:'11px sans-serif',fillColor:Cesium.Color.WHITE,outlineColor:Cesium.Color.BLACK,outlineWidth:3,style:Cesium.LabelStyle.FILL_AND_OUTLINE,pixelOffset:new Cesium.Cartesian2(0,-13),disableDepthTestDistance:Number.POSITIVE_INFINITY};return this}};
+ },
+ polyline(points,opts={}){
+  const positions=points.flatMap(p=>[p[1],p[0]]);
+  const entity=viewer.entities.add({polyline:{positions:Cesium.Cartesian3.fromDegreesArray(positions),width:opts.weight||3,material:Cesium.Color.fromCssColorString(opts.color||'#e19a2d').withAlpha(opts.opacity??.9),clampToGround:true}});
+  return {_entity:entity,addTo(layer){layer.add(entity);return this}};
+ }
+};
 const airportLayer=L.layerGroup().addTo(map),cityLayer=L.layerGroup().addTo(map),routeLayer=L.layerGroup().addTo(map);
+const globeHandler=new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+globeHandler.setInputAction(movement=>{
+ const picked=viewer.scene.pick(movement.position);
+ if(Cesium.defined(picked)&&picked.id&&picked.id.__marker&&picked.id.__marker._click){picked.id.__marker._click();return}
+ const cartesian=viewer.camera.pickEllipsoid(movement.position,viewer.scene.globe.ellipsoid);
+ if(!cartesian)return;
+ const c=Cesium.Cartographic.fromCartesian(cartesian);
+ const lat=Cesium.Math.toDegrees(c.latitude),lng=Cesium.Math.toDegrees(c.longitude);
+ map._clicks.forEach(fn=>fn({lat,lng}));
+},Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
 let selected=0,mode='select',routeStart=null,money=12500000,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=0,autoFit=true;
 let ownedAirport=null,ownedAirportMarker=null,buildLocation=null,ownedRoutes=[];
 const airportMarkers=[];
@@ -179,7 +236,7 @@ function selectAirport(i){
  $('upgradeRunway').onclick=()=>upgrade(i,'runway');$('upgradeTerminal').onclick=()=>upgrade(i,'terminal');$('makeRoute').onclick=startRoute;$('showAirportList').onclick=openAirports;
 }
 function upgrade(i,type){const cost=type==='runway'?2500000:1800000;if(money<cost){toast('資金が不足しています');return}money-=cost;const a=cities[i];if(type==='runway'){a.runways=(a.runways||2)+1;a.capacity=(a.capacity||a.pass*1.55)+a.pass*.35;toast(a.name+'：滑走路を拡張しました')}else{a.terminals=(a.terminals||2)+1;a.pass=Math.round(a.pass*1.08);a.capacity=(a.capacity||a.pass*1.55)+a.pass*.25;toast(a.name+'：ターミナルを増築しました')}selectAirport(i);updateStats()}
-function focusAirport(i){map.flyTo([cities[i].lat,cities[i].lon],Math.max(map.getZoom(),5),{duration:1.1})}
+function focusAirport(i){map.flyTo({lat:cities[i].lat,lng:cities[i].lon},Math.max(map.getZoom(),5),{duration:1.1})}
 function showOwnedAirport(){if(!ownedAirport)return;$('infoContent').innerHTML='<div class="sectionTitle">'+ownedAirport.name+'</div><div class="sub">YOUR HOME AIRPORT · PLAYER OWNED</div><div class="kpis"><div class="kpi"><small>CONNECTED AIRPORTS</small><b>'+ownedRoutes.length+'</b></div><div class="kpi"><small>PASSENGERS / DAY</small><b>'+fmt(ownedAirport.pass||0)+'</b></div><div class="kpi"><small>RUNWAYS</small><b>'+ownedAirport.runways+'</b></div><div class="kpi"><small>TERMINALS</small><b>'+ownedAirport.terminals+'</b></div></div><p class="sub" style="margin-top:12px;line-height:1.8">この空港を拠点に、世界の実在する空港へ路線を広げよう。</p><div class="actionrow"><button class="primary" id="connectWorld">世界の空港と接続</button></div><div class="actionrow"><button id="showConnected">接続済み空港を見る</button></div>';$('connectWorld').onclick=startRoute;$('showConnected').onclick=showConnectedAirports}
 function showConnectedAirports(){if(!ownedAirport)return;$('infoContent').innerHTML='<div class="sectionTitle">接続済みの空港</div><div class="sub">YOUR FLIGHT NETWORK</div>'+(ownedRoutes.length?ownedRoutes.map(i=>'<div style="padding:9px 0;border-bottom:1px solid #ffffff18;font-size:11px">✈ '+cities[i].name+' <span style="color:#70d8f1">'+cities[i].code+'</span><small style="display:block;color:#91aabc;margin-top:3px">'+cities[i].country+'</small></div>').join(''):'<p class="sub">まだ路線がありません。</p>')+'<div class="actionrow"><button class="primary" id="addMoreRoutes">路線を追加する</button></div>';$('addMoreRoutes').onclick=startRoute}
 function beginBuild(){if(ownedAirport){showOwnedAirport();toast('自分の空港はすでにあります');return}if(money<5000000){toast('建設資金が不足しています');return}mode='build';$('buildHint').classList.add('show');$('hint').textContent='建設したい場所をクリックして選択';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='build'));toast('地図上で空港を建設する場所を選んでください')}
@@ -203,11 +260,12 @@ function confirmBuild(latlng){
  };
  $('cancelAirportBuild').onclick=()=>{$('modal').classList.remove('show');mode='select';$('buildHint').classList.remove('show')};
 }
+map.on('click',e=>{if(mode==='build')confirmBuild(e)});
 function openAirports(){$('modalTitle').textContent='GLOBAL AIRPORT NETWORK';$('modalBody').innerHTML='<p class="sub">世界の主要空港 · 空港を選択して管理画面を開く</p><div class="airportgrid">'+cities.map((a,i)=>'<button data-airport="'+i+'"><b>✈ '+a.name+' <span style="color:#70d8f1">'+a.code+'</span></b><small>'+a.country+' · '+fmt(a.pass)+' passengers/day</small></button>').join('')+'</div>';$('modal').classList.add('show');document.querySelectorAll('[data-airport]').forEach(b=>b.onclick=()=>{$('modal').classList.remove('show');selectAirport(+b.dataset.airport);focusAirport(+b.dataset.airport)})}
 function startRoute(){if(!ownedAirport){toast('先に自分の空港を建設してください');return}mode='routes';routeStart='home';$('routeSelect').classList.add('show');$('routeSelect').querySelector('b').textContent='✈ 自分の空港から路線を開設';$('routeSelect').querySelector('p').textContent='地図上の実在する空港マーカーをクリックすると、そこへ直行便を開設します。';toast('接続したい世界の空港を選んでください')}
 $('cancelRoute').onclick=()=>{$('routeSelect').classList.remove('show');routeStart=null;mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'))};
 function onAirportClick(i){if(mode==='routes'){if(ownedRoutes.includes(i)){toast('この空港とはすでに接続しています');return}ownedRoutes.push(i);drawRoutes();const destination=cities[i];if(ownedAirport){ownedAirport.pass=(ownedAirport.pass||0)+Math.round(destination.pass*.12);ownedAirport.capacity=(ownedAirport.capacity||0)+Math.round(destination.pass*.15)}$('routeSelect').classList.remove('show');mode='select';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='select'));showOwnedAirport();updateStats();toast(ownedAirport.name+' → '+destination.name+' の路線を開設！')}else{selectAirport(i);toast(cities[i].name+' を選択しました')}}
-$('resetView').onclick=()=>{map.flyTo([22,10],2,{duration:.8});toast('世界地図に戻りました')};
+$('resetView').onclick=()=>{map.flyTo({lat:22,lng:10},2,{duration:.8});toast('世界地図に戻りました')};
 $('beginBuild').onclick=beginBuild;
 $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶ 再開':'Ⅱ 一時停止';$('simStatus').textContent=paused?'PAUSED':'RUNNING'};
 document.querySelectorAll('.speed').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b))});
