@@ -129,6 +129,33 @@ const cityJapanese={
 function cityLabel(city){return cityJapanese[city.name]||city.name;}
 function registerWorldCities(records){
  worldCities=[];Object.keys(citiesByCountry).forEach(key=>delete citiesByCountry[key]);
+ if(!Array.isArray(records)||records.length===0){
+  console.warn('世界都市データの配信に失敗したため、主要都市の内蔵データを使用します。');
+  records=[
+   ['JP','Tokyo',35.6895,139.6917],['JP','Yokohama',35.4437,139.6380],['JP','Osaka',34.6937,135.5023],['JP','Fukuoka',33.5902,130.4017],['JP','Nagoya',35.1815,136.9066],['JP','Sapporo',43.0618,141.3545],['JP','Kobe',34.6901,135.1955],
+   ['US','New York City',40.7128,-74.0060],['US','Los Angeles',34.0522,-118.2437],['US','Chicago',41.8781,-87.6298],['US','San Francisco',37.7749,-122.4194],['US','Seattle',47.6062,-122.3321],['US','Miami',25.7617,-80.1918],['US','Houston',29.7604,-95.3698],
+   ['CN','Beijing',39.9042,116.4074],['CN','Shanghai',31.2304,121.4737],['CN','Shenzhen',22.5431,114.0579],['CN','Guangzhou',23.1291,113.2644],
+   ['GB','London',51.5072,-.1276],['GB','Manchester',53.4808,-2.2426],['GB','Birmingham',52.4862,-1.8904],
+   ['DE','Berlin',52.5200,13.4050],['DE','Hamburg',53.5511,9.9937],['DE','Munich',48.1351,11.5820],
+   ['FR','Paris',48.8566,2.3522],['FR','Marseille',43.2965,5.3698],['FR','Lyon',45.7640,4.8357],
+   ['IN','Mumbai',19.0760,72.8777],['IN','New Delhi',28.6139,77.2090],['IN','Bengaluru',12.9716,77.5946],['IN','Chennai',13.0827,80.2707],
+   ['BR','São Paulo',-23.5505,-46.6333],['BR','Rio de Janeiro',-22.9068,-43.1729],['BR','Brasília',-15.7939,-47.8828],
+   ['AU','Sydney',-33.8688,151.2093],['AU','Melbourne',-37.8136,144.9631],['AU','Brisbane',-27.4698,153.0251],['AU','Perth',-31.9505,115.8605],
+   ['KR','Seoul',37.5665,126.9780],['KR','Busan',35.1796,129.0756],
+   ['CA','Toronto',43.6532,-79.3832],['CA','Vancouver',49.2827,-123.1207],['CA','Montreal',45.5019,-73.5674],
+   ['SG','Singapore',1.3521,103.8198],
+   ['ID','Jakarta',-6.2088,106.8456],['ID','Surabaya',-7.2575,112.7521],
+   ['MX','Mexico City',19.4326,-99.1332],['MX','Guadalajara',20.6597,-103.3496],
+   ['ES','Madrid',40.4168,-3.7038],['ES','Barcelona',41.3874,2.1686],
+   ['IT','Rome',41.9028,12.4964],['IT','Milan',45.4642,9.1900],
+   ['NL','Amsterdam',52.3676,4.9041],['NL','Rotterdam',51.9244,4.4777],
+   ['TR','Istanbul',41.0082,28.9784],['TR','Ankara',39.9334,32.8597],
+   ['RU','Moscow',55.7558,37.6173],['RU','Saint Petersburg',59.9311,30.3609],
+   ['ZA','Johannesburg',-26.2041,28.0473],['ZA','Cape Town',-33.9249,18.4241],
+   ['EG','Cairo',30.0444,31.2357],['KE','Nairobi',-1.2921,36.8219],['NG','Lagos',6.5244,3.3792],
+   ['AE','Dubai',25.2048,55.2708],['AE','Abu Dhabi',24.4539,54.3773]
+  ].map(row=>({country:row[0],name:row[1],lat:String(row[2]),lng:String(row[3])}));
+ }
  const seen=new Set();
  for(const item of records){
   const country=countryByIso2[String(item.country||'').toUpperCase()];
@@ -266,9 +293,8 @@ function loadWorldData(){
   ],'国・地域データ'),
   fetchJsonFallback([
    'https://raw.githubusercontent.com/joelacus/world-cities/main/world_cities_15000.json',
-   'https://cdn.jsdelivr.net/gh/joelacus/world-cities@main/world_cities_15000.json',
-   'https://unpkg.com/world-cities@latest/world_cities_15000.json'
-  ],'都市データ')
+   'https://cdn.jsdelivr.net/gh/joelacus/world-cities@main/world_cities_15000.json'
+  ],'都市データ').catch(error=>{console.warn('都市データ配信に失敗しました。主要都市の内蔵データへ切り替えます。',error);return [];})
  ])).then(([topology,records,cityRecords])=>{
   worldFeatures=topojson.feature(topology,topology.objects.countries).features;
   registerWorldCountries(records,worldFeatures);
