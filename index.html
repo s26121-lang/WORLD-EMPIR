@@ -88,5 +88,52 @@ $('content').addEventListener('click',e=>{
  else if(b.dataset.closeBusiness!==undefined){const i=+b.dataset.closeBusiness,x=s.businesses[i];if(!x)return;const refund=x.cost*.5;s.cash+=refund;s.businesses.splice(i,1);s.news=x.sector+' business sold for '+money(refund)+'.';stats();show('business')}
  else if(b.dataset.shares){if(b.dataset.shares==='buy'){const cost=(s.sharePrice||100000)*10;if(s.cash<cost){notify('Not enough cash to buy shares.');return}s.cash-=cost;s.shares+=10;notify('10 shares purchased.')}else{if(s.shares<10)return;s.cash+=(s.sharePrice||100000)*10;s.shares-=10;notify('10 shares sold.')}stats();show('market')}
 });
+
+/* Japanese UI localization */
+const ja={
+'GLOBAL BUSINESS & STRATEGY SIMULATOR':'世界経済・企業経営シミュレーション',
+'BUILD YOUR GLOBAL EMPIRE · CONTROL THE MARKET':'世界規模の企業帝国を築き、市場を支配せよ',
+'FISCAL YEAR':'年度','DAY ':'日目','WORLD ECONOMY':'世界経済','STABLE':'安定','BOOMING':'好景気','RECESSION':'不況',
+'AVAILABLE CASH':'現金','Liquid assets':'流動資産','COMPANY VALUE':'企業価値','Enterprise valuation':'企業評価額','DAILY NET PROFIT':'1日の純利益','Start building your business':'事業を始めよう','Revenue ':'売上 ',' / day':' / 日','MARKETS ENTERED':'進出国数',' businesses':'社',
+'OVERVIEW':'ダッシュボード','WORLD MAP':'世界地図','BUSINESSES':'企業経営','STOCK MARKET':'株式市場','R&D':'研究開発','TRADE':'貿易・物流','RANKINGS':'ランキング',
+'ADVANCE 1 DAY':'1日進める','AUTO: OFF':'自動進行：OFF','AUTO: ON':'自動進行：ON','SAVE GAME':'セーブ','LOAD GAME':'ロード','NEW GAME':'新しいゲーム',
+'Economic simulation · Save data stays in this browser':'経済シミュレーション · セーブデータはこのブラウザに保存されます',
+'CORPORATE PERFORMANCE':'企業業績','GLOBAL MARKET SHARE':'世界市場シェア','TECHNOLOGY LEVEL':'技術レベル','Share price index · simulated daily history':'株価指数 · 日ごとのシミュレーション履歴',
+'BUSINESS PORTFOLIO':'企業ポートフォリオ','No businesses yet. Start with a factory or technology company in Japan.':'まだ企業がありません。日本で工場やテクノロジー企業を設立しましょう。',
+'QUICK INVESTMENTS':'クイック投資','INVEST':'投資する','MARKET INTELLIGENCE':'市場情報','World economic index':'世界経済指数','Active trade routes':'稼働中の貿易ルート','Rival corporations':'ライバル企業',
+'GLOBAL EXPANSION · SELECT A MARKET':'世界進出 · 進出先を選択','Illustrative world map. Choose a market to inspect its entry cost.':'世界地図。国を選択すると進出費用などの情報を確認できます。',
+'ENTERED':'進出済み','Entry ':'進出費用 ','MARKET DETAILS':'市場詳細','Market index ':'市場指数 ','Entry fee covers registration and initial market setup.':'進出費用には登記と市場参入の初期費用が含まれます。',
+'MARKET ALREADY ENTERED':'進出済み','ENTER MARKET':'この国に進出する','BUSINESS PORTFOLIO · OPERATIONS':'企業ポートフォリオ · 経営管理','ESTABLISH A NEW BUSINESS':'新しい事業を設立','Select a sector. New businesses earn recurring revenue each game day.':'業種を選択してください。設立した企業は毎日収益を生み出します。',
+'Base cost':'基本投資額','Revenue':'売上','BUILD IN ':'に設立','GLOBAL STOCK EXCHANGE':'世界株式市場','Share price index · Updated each game day.':'株価指数 · ゲーム内の1日ごとに更新',
+'RIVAL CORPORATIONS':'ライバル企業','VALUATION':'企業価値','ACTION':'操作','ACQUIRE · ':'買収 · ','Acquisitions cost 120% of estimated valuation. Acquired companies become subsidiaries and add daily revenue.':'買収費用は推定企業価値の120%です。買収した企業は子会社となり、毎日の収益が加算されます。',
+'RESEARCH & DEVELOPMENT':'研究開発','Invest in permanent technology bonuses.':'技術に投資して恒久的な能力強化を獲得しましょう。','COMPLETED':'研究完了','FUND RESEARCH':'研究に投資',
+'GLOBAL LOGISTICS NETWORK':'世界物流ネットワーク','Create a route between markets you have entered. Routes generate recurring revenue.':'進出済みの国同士を結ぶ貿易ルートを作成できます。ルートは継続的な収益を生みます。',
+'ORIGIN':'出発地','DESTINATION':'到着地','ESTABLISH ROUTE · $1.5M':'ルートを開設 · $1.5M','Base route income: $120,000/day. Global Logistics research improves route revenue.':'基本収益：1日あたり12万ドル。物流研究で収益が増加します。',
+'ACTIVE TRADE ROUTES':'稼働中の貿易ルート','No routes established yet. Enter a second market to begin.':'貿易ルートはありません。2か国目に進出すると開設できます。',
+'GLOBAL CORPORATE RANKING':'世界企業ランキング','EMPIRE MILESTONES':'企業帝国の実績','COUNTRIES ENTERED':'進出国数','TECH COMPLETED':'研究完了数',
+'Insufficient funds.':'資金が不足しています。','Not enough funds for market entry.':'市場進出に必要な資金がありません。','Not enough cash to buy shares.':'株式を購入する資金が不足しています。',
+'Game saved in this browser.':'ゲームを保存しました。','No save data found.':'セーブデータが見つかりません。','Saved game loaded!':'セーブデータを読み込みました。','Save data could not be loaded.':'セーブデータを読み込めませんでした。',
+'Start a new company? Current progress will be lost unless saved.':'新しい会社を設立しますか？保存していない進行状況は失われます。','A new empire begins.':'新しい企業帝国が始まります。','Choose two different markets.':'異なる2つの国を選択してください。','This route already exists.':'この貿易ルートはすでに存在します。','You need $1.5M to establish a route.':'ルート開設には150万ドル必要です。',
+'Japan':'日本','United States':'アメリカ','China':'中国','Germany':'ドイツ','United Kingdom':'イギリス','India':'インド','France':'フランス','Brazil':'ブラジル','Australia':'オーストラリア','South Korea':'韓国','Canada':'カナダ','Singapore':'シンガポール',
+'Asia':'アジア','Europe':'ヨーロッパ','Oceania':'オセアニア','N. America':'北アメリカ','S. America':'南アメリカ',
+'Manufacturing':'製造業','Technology':'テクノロジー','Logistics':'物流','Real Estate':'不動産','Energy':'エネルギー','Finance':'金融',
+'Advanced Automation':'高度自動化','AI Management':'AI経営管理','Global Logistics':'国際物流','Financial Engineering':'金融工学','Next-gen Materials':'次世代素材','Quantum Computing':'量子コンピューター',
+'Manufacturing income +25%':'製造業の収益 +25%','All business income +15%':'全事業の収益 +15%','Trade route income +40%':'貿易ルートの収益 +40%','Company valuation +20%':'企業価値 +20%','Manufacturing income +30%':'製造業の収益 +30%','Technology income +35%':'技術事業の収益 +35%',
+'No businesses yet. Invest in a sector below.':'まだ企業がありません。下から業種を選んで投資しましょう。',
+'BUSINESS PORTFOLIO · OPERATIONS':'企業ポートフォリオ · 経営管理','Level ':'レベル',' employees':'人','Business value ':'企業価値 ','UPGRADE · ':'アップグレード · ','SELL BUSINESS':'事業を売却','ESTABLISH A NEW BUSINESS':'新規事業を設立','Build in ':'設立先：','Local economic conditions affect business income.':'現地の景気は事業収益に影響します。','ESTABLISH BUSINESS':'事業を設立',
+'WORLD EMPIRE · STOCK EXCHANGE':'WORLD EMPIRE · 株式市場','SIMULATED SHARE PRICE':'シミュレーション株価','YOUR SHARES':'保有株数','HOLDING VALUE':'保有株評価額','BUY 10 SHARES · ':'10株購入 · ','SELL 10 SHARES':'10株売却','RIVAL CORPORATIONS · LIVE COMPETITION':'ライバル企業 · 市場競争','Rival firms grow or shrink independently in response to the global economy.':'ライバル企業は世界経済に応じて独自に成長・縮小します。',
+'GLOBAL EXPANSION · LIVE COUNTRY MARKETS':'世界進出 · 各国市場','MARKETS':'進出市場','GLOBAL INDEX':'世界経済指数','OUTLOOK':'景気見通し','BOOM':'好景気','SLOWDOWN':'景気後退','ACTIVE':'進出済み','NOT ENTERED':'未進出','Economic index':'経済指数','COUNTRY BUSINESS INTELLIGENCE':'国別ビジネス情報','ECONOMY':'景気','DEMAND':'需要','HIGH':'高い','LOW':'低い','NORMAL':'通常','GROWING':'成長中','WEAK':'低迷','Local economic conditions affect the revenue of businesses operating in this country and change every game day.':'各国の景気は、その国で事業を行う企業の収益に影響し、ゲーム内の毎日変動します。',
+'UPGRADE':'強化','SELL':'売却','No businesses yet. Invest in a sector below.':'企業がありません。下から業種を選んで投資してください。',
+'Rival companies adjusted their investments.':'ライバル企業が投資計画を更新しました。'
+};
+function localizeNode(node){
+ if(node.nodeType===Node.TEXT_NODE){let t=node.nodeValue;for(const [a,b] of Object.entries(ja))t=t.split(a).join(b);node.nodeValue=t;}
+ else if(node.nodeType===Node.ELEMENT_NODE){for(const a of ['aria-label','title','placeholder'])if(node.hasAttribute(a)){let t=node.getAttribute(a);for(const [x,y] of Object.entries(ja))t=t.split(x).join(y);node.setAttribute(a,t);}node.childNodes.forEach(localizeNode);}
+}
+function applyJapanese(){localizeNode(document.body);$('day').textContent='日目 '+s.day;}
+const observer=new MutationObserver(()=>{if(!window.__weJaBusy){window.__weJaBusy=true;applyJapanese();window.__weJaBusy=false;}});
+observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+applyJapanese();
+
 stats();show();
 </script></body></html>
