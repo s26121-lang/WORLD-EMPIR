@@ -127,7 +127,7 @@ const ja={
 'Rival companies adjusted their investments.':'ライバル企業が投資計画を更新しました。'
 };
 function localizeNode(node){
- if(node.nodeType===Node.TEXT_NODE){let t=node.nodeValue;for(const [a,b] of Object.entries(ja))t=t.split(a).join(b);node.nodeValue=t;}
+ if(node.nodeType===Node.TEXT_NODE){let t=node.nodeValue;for(const [a,b] of Object.entries(ja))t=t.split(a).join(b);if(t!==node.nodeValue)node.nodeValue=t;}
  else if(node.nodeType===Node.ELEMENT_NODE){for(const a of ['aria-label','title','placeholder'])if(node.hasAttribute(a)){let t=node.getAttribute(a);for(const [x,y] of Object.entries(ja))t=t.split(x).join(y);node.setAttribute(a,t);}node.childNodes.forEach(localizeNode);}
 }
 function applyJapanese(){localizeNode(document.body);$('day').textContent='日目 '+s.day;}
