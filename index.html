@@ -82,6 +82,10 @@ const landPairs=['United States|Canada','Germany|France','Germany|United Kingdom
 const isoMarket={'392':'Japan','840':'United States','156':'China','276':'Germany','826':'United Kingdom','356':'India','250':'France','076':'Brazil','036':'Australia','410':'South Korea','124':'Canada','702':'Singapore'};
 const marketLonLat={'Japan':[138,36],'United States':[-98,39],'China':[103,35],'Germany':[10.5,51],'United Kingdom':[-3,55],'India':[78,22],'France':[2,46],'Brazil':[-52,-10],'Australia':[134,-25],'South Korea':[127.5,36],'Canada':[-106,56],'Singapore':[103.8,1.3]};
 const countryMetaByName={};
+const countryByIso2={};
+let worldCities=[];
+const citiesByCountry={};
+let cityDataReady=false;
 const countryMetaByIso3={};
 const worldCountryCentroids={};
 const regionNames={'Africa':'アフリカ','Americas':'南北アメリカ','Asia':'アジア','Europe':'ヨーロッパ','Oceania':'オセアニア','Polar':'極地'};
@@ -106,6 +110,7 @@ function registerWorldCountries(records,features){
    known.add(english);
   }
   countryNames[english]=japanese;
+  if(entry.cca2)countryByIso2[entry.cca2]=english;
   isoMarket[numeric]=english;
   countryMetaByName[english]=entry;
   if(entry.cca3)countryMetaByIso3[entry.cca3]=entry;
@@ -113,6 +118,58 @@ function registerWorldCountries(records,features){
  }
  countryDataReady=true;
 }
+
+const cityJapanese={
+ Tokyo:'東京',Yokohama:'横浜',Osaka:'大阪',Nagoya:'名古屋',Sapporo:'札幌',Fukuoka:'福岡',Kobe:'神戸',Kyoto:'京都',Hiroshima:'広島',Sendai:'仙台',
+ 'New York City':'ニューヨーク','Los Angeles':'ロサンゼルス',Chicago:'シカゴ','San Francisco':'サンフランシスコ',Seattle:'シアトル','Washington, D.C.':'ワシントンD.C.',Houston:'ヒューストン',Miami:'マイアミ',Boston:'ボストン',Dallas:'ダラス',
+ London:'ロンドン',Manchester:'マンチェスター',Birmingham:'バーミンガム',Paris:'パリ',Marseille:'マルセイユ',Lyon:'リヨン',Berlin:'ベルリン',Hamburg:'ハンブルク',Munich:'ミュンヘン',Frankfurt:'フランクフルト',Madrid:'マドリード',Barcelona:'バルセロナ',Rome:'ローマ',Milan:'ミラノ',Amsterdam:'アムステルダム',Rotterdam:'ロッテルダム',Brussels:'ブリュッセル',Vienna:'ウィーン',Zurich:'チューリッヒ',Istanbul:'イスタンブール',Moscow:'モスクワ',
+ Beijing:'北京',Shanghai:'上海',Shenzhen:'深圳',Guangzhou:'広州',Chengdu:'成都','Hong Kong':'香港',Taipei:'台北',Seoul:'ソウル',Busan:'釜山',Bangkok:'バンコク',Singapore:'シンガポール','Kuala Lumpur':'クアラルンプール',Jakarta:'ジャカルタ',Manila:'マニラ','Ho Chi Minh City':'ホーチミン',Hanoi:'ハノイ',Mumbai:'ムンバイ',Delhi:'デリー','New Delhi':'ニューデリー',Bengaluru:'ベンガルール',Chennai:'チェンナイ',Kolkata:'コルカタ',Dubai:'ドバイ','Abu Dhabi':'アブダビ',Riyadh:'リヤド',Doha:'ドーハ',
+ Sydney:'シドニー',Melbourne:'メルボルン',Brisbane:'ブリスベン',Perth:'パース',Auckland:'オークランド',Toronto:'トロント',Vancouver:'バンクーバー',Montreal:'モントリオール','Mexico City':'メキシコシティ','São Paulo':'サンパウロ','Rio de Janeiro':'リオデジャネイロ','Buenos Aires':'ブエノスアイレス',Santiago:'サンティアゴ',Lima:'リマ',Bogotá:'ボゴタ','Cape Town':'ケープタウン',Johannesburg:'ヨハネスブルク',Cairo:'カイロ',Nairobi:'ナイロビ',Lagos:'ラゴス',Casablanca:'カサブランカ'
+};
+function cityLabel(city){return cityJapanese[city.name]||city.name;}
+function registerWorldCities(records){
+ worldCities=[];Object.keys(citiesByCountry).forEach(key=>delete citiesByCountry[key]);
+ const seen=new Set();
+ for(const item of records){
+  const country=countryByIso2[String(item.country||'').toUpperCase()];
+  const lat=Number(item.lat),lng=Number(item.lng);
+  if(!country||!item.name||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)continue;
+  const key=country+'|'+item.name+'|'+lat.toFixed(4)+'|'+lng.toFixed(4);
+  if(seen.has(key))continue;seen.add(key);
+  const city={key,country,name:String(item.name),lat,lng};
+  worldCities.push(city);(citiesByCountry[country] ||= []).push(city);
+ }
+ Object.values(citiesByCountry).forEach(list=>list.sort((a,b)=>a.name.localeCompare(b.name)));
+ cityDataReady=true;
+}
+function getCities(country){return citiesByCountry[country]||[];}
+function findCity(key){return worldCities.find(city=>city.key===key)||null;}
+function chooseDefaultCity(country){
+ const list=getCities(country);if(!list.length)return null;
+ if(country==='Japan'){const tokyo=list.find(city=>city.name==='Tokyo');if(tokyo)return tokyo;}
+ const meta=countryMetaByName[country];
+ if(meta&&meta.capital){const capital=list.find(city=>city.name===meta.capital);if(capital)return capital;}
+ return list[0];
+}
+function ensureSelectedCity(){
+ let city=findCity(s.selectedCityKey);
+ if(!city||city.country!==s.selected)city=chooseDefaultCity(s.selected);
+ if(city)s.selectedCityKey=city.key;
+ return city;
+}
+function cityDistanceKm(a,b){
+ const rad=n=>n*Math.PI/180,lat1=rad(a.lat),lat2=rad(b.lat),dLat=lat2-lat1,dLon=rad(b.lng-a.lng);
+ const q=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+ return 6371*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q));
+}
+function cityFacility(city,type){return s.facilities.find(f=>f.cityKey===city.key&&f.type===type);}
+function facilitiesOfType(type){return s.facilities.filter(f=>f.type===type);}
+const facilityTypes={
+ port:{name:'港',icon:'⚓',cost:1800000,mode:'ship',fee:4500,description:'船便の発着拠点'},
+ airport:{name:'空港',icon:'🛫',cost:2800000,mode:'air',fee:7500,description:'航空便の発着拠点'},
+ warehouse:{name:'倉庫',icon:'📦',cost:850000,mode:'land',fee:2500,description:'陸上輸送の集配拠点'}
+};
+
 function areCountriesAdjacent(from,to){
  const a=countryMetaByName[from],b=countryMetaByName[to];
  if(a&&b&&Array.isArray(a.borders)&&a.borders.includes(b.cca3))return true;
@@ -121,7 +178,7 @@ function areCountriesAdjacent(from,to){
 }
 
 const fresh=()=>({
- cash:1e7,day:1,year:2026,economy:55,selected:'Japan',markets:['Japan'],businesses:[],routes:[],research:[],
+ cash:1e7,day:1,year:2026,economy:55,selected:'Japan',selectedCityKey:'',markets:['Japan'],businesses:[],facilities:[],routes:[],research:[],
  stocks:[100,102,99,105,103,108,110,107],history:[25],profit:0,shares:0,sharePrice:100000,
  countryEconomy:Object.fromEntries(countries.map((n,i)=>[n[0],43+((i*17+23)%31)])),
  news:'WORLD EMPIRE INC.を東京に設立しました。最初の事業を始めましょう。',
@@ -186,7 +243,7 @@ async function fetchJsonFallback(urls,label){
  throw new Error(label+'を取得できませんでした。試した配信先：'+failures.join(' / '));
 }
 function loadWorldData(){
- if(worldFeatures&&countryDataReady)return Promise.resolve(worldFeatures);
+ if(worldFeatures&&countryDataReady&&cityDataReady)return Promise.resolve(worldFeatures);
  if(worldPromise)return worldPromise;
  worldPromise=Promise.resolve(window.__worldMapLibraries).then(()=>Promise.all([
   fetchJsonFallback([
@@ -198,29 +255,46 @@ function loadWorldData(){
    'https://cdn.jsdelivr.net/npm/world-countries@5.1.0/countries.json',
    'https://unpkg.com/world-countries@5.1.0/countries.json',
    'https://cdn.jsdelivr.net/gh/mledoze/countries@master/countries.json'
-  ],'国・地域データ')
- ])).then(([topology,records])=>{
+  ],'国・地域データ'),
+  fetchJsonFallback([
+   'https://raw.githubusercontent.com/joelacus/world-cities/main/world_cities_15000.json',
+   'https://cdn.jsdelivr.net/gh/joelacus/world-cities@main/world_cities_15000.json',
+   'https://unpkg.com/world-cities@latest/world_cities_15000.json'
+  ],'都市データ')
+ ])).then(([topology,records,cityRecords])=>{
   worldFeatures=topojson.feature(topology,topology.objects.countries).features;
   registerWorldCountries(records,worldFeatures);
+  registerWorldCities(cityRecords);
+  ensureSelectedCity();
   return worldFeatures;
  }).catch(error=>{worldPromise=null;throw error;});
  return worldPromise;
 }
 function mapOverlay(svgId,showRoutes){
  const svg=$(svgId);if(!svg||!worldProjection)return;
- const project=name=>worldCountryCentroids[name]?worldProjection(worldCountryCentroids[name]):(marketLonLat[name]?worldProjection(marketLonLat[name]):[700,325]);
- let out='';
- if(showRoutes){
-  s.routes.forEach(r=>{
-   const a=project(r.from),b=project(r.to),mode=transport[r.mode]||transport.ship,mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2-40;
-   const path='M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+b[0].toFixed(1)+' '+b[1].toFixed(1);
-   out+='<path d="'+path+'" fill="none" stroke="#f4c86d" stroke-width="3" stroke-dasharray="9 7" opacity=".9"/>';
-   out+='<text font-size="25" text-anchor="middle" dominant-baseline="central"><animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" rotate="auto" path="'+path+'"/>'+mode.icon+'</text>';
-  });
- }
+ const projectCountry=name=>worldCountryCentroids[name]?worldProjection(worldCountryCentroids[name]):(marketLonLat[name]?worldProjection(marketLonLat[name]):[700,325]);
+ const projectCity=(lat,lng)=>worldProjection([lng,lat]);let out='';
+ if(showRoutes)s.routes.forEach(r=>{
+  const a=Number.isFinite(r.fromLat)?projectCity(r.fromLat,r.fromLng):projectCountry(r.from);
+  const b=Number.isFinite(r.toLat)?projectCity(r.toLat,r.toLng):projectCountry(r.to);
+  const mode=transport[r.mode]||transport.ship,mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2-38;
+  const d='M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+b[0].toFixed(1)+' '+b[1].toFixed(1);
+  out+='<path d="'+d+'" fill="none" stroke="#f4c86d" stroke-width="3" stroke-dasharray="9 7" opacity=".9"/>';
+  out+='<text font-size="25" text-anchor="middle" dominant-baseline="central"><animateMotion dur="'+mode.duration+'s" repeatCount="indefinite" rotate="auto" path="'+d+'"/><tspan>'+mode.icon+'</tspan></text>';
+ });
+ s.facilities.forEach(f=>{
+  if(!Number.isFinite(f.lat)||!Number.isFinite(f.lng))return;
+  const p=projectCity(f.lat,f.lng),config=facilityTypes[f.type]||facilityTypes.warehouse;
+  out+='<g transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"><circle r="9" fill="#102238" stroke="#77d6c5" stroke-width="2"/><text text-anchor="middle" y="5" font-size="13">'+config.icon+'</text><title>'+esc(f.cityName)+' · '+config.name+'</title></g>';
+ });
+ s.businesses.forEach(x=>{
+  if(!Number.isFinite(x.lat)||!Number.isFinite(x.lng))return;
+  const p=projectCity(x.lat,x.lng);
+  out+='<g transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"><circle r="6" fill="#e8bd61" stroke="#fff" stroke-width="1.5"/><text x="8" y="-7" font-size="12">🏢</text><title>'+esc(x.cityName||x.country)+' · '+esc(x.name||x.sector)+'</title></g>';
+ });
  s.markets.forEach(name=>{
-  const p=project(name),country=countries.find(x=>x[0]===name);
-  out+='<g transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"><circle r="11" fill="'+(s.selected===name?'#e8bd61':'#238f91')+'" stroke="#fff" stroke-width="2.5"/><text text-anchor="middle" y="5" font-size="14">'+(country?country[1]:'•')+'</text><text text-anchor="middle" y="-17" font-size="13" font-weight="700" fill="#fff" stroke="#071827" stroke-width="3" paint-order="stroke">'+(country?countryNames[name]:name)+'</text></g>';
+  const p=projectCountry(name),country=countries.find(x=>x[0]===name);
+  out+='<g transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"><circle r="9" fill="'+(s.selected===name?'#e8bd61':'#238f91')+'" stroke="#fff" stroke-width="2"/><text text-anchor="middle" y="5" font-size="12">'+(country?country[1]:'•')+'</text></g>';
  });
  svg.innerHTML=out;
 }
