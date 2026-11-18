@@ -60,8 +60,8 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
  <div class="brand"><div class="logo">◎</div><div><b>EARTH SIMULATOR</b><small>GLOBAL MANAGEMENT SYSTEM · 01</small></div></div>
  <div class="topstats">
   <div class="stat"><small>WORLD TREASURY</small><strong class="money" id="money">$ 12,500,000</strong></div>
-  <div class="stat"><small>PASSENGERS / DAY</small><strong id="passengers">184,200</strong></div>
-  <div class="stat"><small>YOUR AIRPORTS</small><strong id="airportCount">12</strong></div>
+  <div class="stat"><small>PASSENGERS / DAY</small><strong id="passengers">0</strong></div>
+  <div class="stat"><small>YOUR AIRPORTS</small><strong id="airportCount">0</strong></div>
  </div>
 </header>
 <div id="hint">地球をドラッグして回転 · ホイールでズーム · 都市や空港をクリック</div>
@@ -147,7 +147,7 @@ const cities=[
  {name:'レイキャビク',country:'アイスランド',lat:63.99,lon:-22.61,code:'KEF',pass:9000,gdp:.03}
 ];
 const map=L.map('scene',{worldCopyJump:true,minZoom:2,maxZoom:12,zoomControl:true,preferCanvas:true}).setView([22,10],2);
-const base=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
+const base=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 const airportLayer=L.layerGroup().addTo(map),cityLayer=L.layerGroup().addTo(map),routeLayer=L.layerGroup().addTo(map);
 let selected=0,mode='select',routeStart=null,money=12500000,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=0,autoFit=true;
 let ownedAirport=null,ownedAirportMarker=null,buildLocation=null,ownedRoutes=[];
