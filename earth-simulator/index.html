@@ -185,18 +185,23 @@ function showConnectedAirports(){if(!ownedAirport)return;$('infoContent').innerH
 function beginBuild(){if(ownedAirport){showOwnedAirport();toast('自分の空港はすでにあります');return}if(money<5000000){toast('建設資金が不足しています');return}mode='build';$('buildHint').classList.add('show');$('hint').textContent='建設したい場所をクリックして選択';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='build'));toast('地図上で空港を建設する場所を選んでください')}
 function confirmBuild(latlng){
  buildLocation=latlng;
- const name=prompt('空港名を入力してください','MY INTERNATIONAL AIRPORT');
- if(name===null)return;
- if(money<5000000||!confirm('この場所に「'+(name.trim()||'MY INTERNATIONAL AIRPORT')+'」を建設しますか？\\n建設費：$5,000,000'))return;
- money-=5000000;
- ownedAirport={name:name.trim()||'MY INTERNATIONAL AIRPORT',lat:buildLocation.lat,lon:buildLocation.lng,code:'HOME',pass:0,runways:1,terminals:1};
- ownedAirportMarker=L.marker([ownedAirport.lat,ownedAirport.lon],{icon:L.divIcon({className:'',html:'<div class="own-airport-pin">★</div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1000}).addTo(airportLayer).bindTooltip(ownedAirport.name+' · YOUR AIRPORT',{permanent:true,direction:'top',offset:[0,-18],className:'airport-name'});
- ownedAirportMarker.on('click',showOwnedAirport);
- $('buildHint').classList.remove('show');mode='select';
- document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='select'));
- $('hint').textContent='地図をドラッグして移動 · ホイールで拡大縮小 · 空港をクリック';
- map.flyTo(buildLocation,6,{duration:1.2});showOwnedAirport();updateStats();
- toast('空港を建設しました！次は世界の空港と接続しよう');
+ $('modalTitle').textContent='空港を建設';
+ $('modalBody').innerHTML='<p class="sub">この場所に自分の空港を建設します。</p><label style="display:block;font-size:11px;margin:12px 0 6px;color:#b9d0dc">空港名</label><input id="newAirportName" value="MY INTERNATIONAL AIRPORT" style="width:100%;box-sizing:border-box;padding:12px;border-radius:7px;border:1px solid #42667a;background:#071724;color:#eaf4fb;font:inherit"><p class="sub" style="margin-top:12px">建設費：$5,000,000　/　所持金：'+fmt(money)+'</p><div class="actionrow"><button class="primary" id="confirmAirportBuild">この場所に建設する</button><button id="cancelAirportBuild">キャンセル</button></div>';
+ $('modal').classList.add('show');
+ $('confirmAirportBuild').onclick=()=>{
+  const name=$('newAirportName').value.trim()||'MY INTERNATIONAL AIRPORT';
+  if(money<5000000){toast('建設資金が不足しています');return}
+  money-=5000000;
+  ownedAirport={name,lat:buildLocation.lat,lon:buildLocation.lng,code:'HOME',pass:0,runways:1,terminals:1};
+  ownedAirportMarker=L.marker([ownedAirport.lat,ownedAirport.lon],{icon:L.divIcon({className:'',html:'<div class="own-airport-pin">★</div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1000}).addTo(airportLayer).bindTooltip(name+' · YOUR AIRPORT',{permanent:true,direction:'top',offset:[0,-18],className:'airport-name'});
+  ownedAirportMarker.on('click',showOwnedAirport);
+  $('modal').classList.remove('show');$('buildHint').classList.remove('show');mode='select';
+  document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='select'));
+  $('hint').textContent='地図をドラッグして移動 · ホイールで拡大縮小 · 空港をクリック';
+  map.flyTo(buildLocation,6,{duration:1.2});showOwnedAirport();updateStats();
+  toast('空港を建設しました！次は世界の空港と接続しよう');
+ };
+ $('cancelAirportBuild').onclick=()=>{$('modal').classList.remove('show');mode='select';$('buildHint').classList.remove('show')};
 }
 function openAirports(){$('modalTitle').textContent='GLOBAL AIRPORT NETWORK';$('modalBody').innerHTML='<p class="sub">世界の主要空港 · 空港を選択して管理画面を開く</p><div class="airportgrid">'+cities.map((a,i)=>'<button data-airport="'+i+'"><b>✈ '+a.name+' <span style="color:#70d8f1">'+a.code+'</span></b><small>'+a.country+' · '+fmt(a.pass)+' passengers/day</small></button>').join('')+'</div>';$('modal').classList.add('show');document.querySelectorAll('[data-airport]').forEach(b=>b.onclick=()=>{$('modal').classList.remove('show');selectAirport(+b.dataset.airport);focusAirport(+b.dataset.airport)})}
 function startRoute(){if(!ownedAirport){toast('先に自分の空港を建設してください');return}mode='routes';routeStart='home';$('routeSelect').classList.add('show');$('routeSelect').querySelector('b').textContent='✈ 自分の空港から路線を開設';$('routeSelect').querySelector('p').textContent='地図上の実在する空港マーカーをクリックすると、そこへ直行便を開設します。';toast('接続したい世界の空港を選んでください')}
