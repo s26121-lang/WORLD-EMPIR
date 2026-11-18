@@ -320,6 +320,7 @@ $('content').addEventListener('input',e=>{
   const matchesRegion=!region||button.dataset.region===region;
   button.hidden=!(matchesName&&matchesRegion);if(!button.hidden)visible++;
  });
+$('content').addEventListener('change',e=>{if(e.target.id==='countryRegionFilter')e.target.dispatchEvent(new Event('input',{bubbles:true}));});
  $('countryResultCount').textContent=visible+'か国・地域';
 });
 $('content').addEventListener('click',e=>{
