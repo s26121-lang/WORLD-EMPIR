@@ -365,10 +365,7 @@ function drawDetailedMap(canvasId,overlayId,logisticsMode){
    const hit=worldHits.slice().reverse().find(h=>ctx.isPointInPath(h.path,x,y));if(!hit)return;
    if(!hit.market){notify('この国はまだ経営対象外です。国・地域の市場データがまだ対応していない場所です。');return;}
    if(logisticsMode){
-    if(!s.markets.includes(hit.market)){notify('この国へ先に進出してください。');return;}
-    if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=hit.market;s.routeToDraft='';}
-    else if(hit.market!==s.routeFromDraft)s.routeToDraft=hit.market;
-    trade();
+    notify('物流ルートは、建設した港・空港・倉庫を出発地と目的地に選んで開設してください。');
    }else{s.selected=hit.market;show('world');}
   };
  }).catch(err=>{
@@ -427,7 +424,7 @@ function businesses(){
   $('content').innerHTML=panel('企業拠点 · 都市を選択',
    '<div class="muted">国を選び、その国の都市を選択してから企業や物流施設を建設します。</div><label style="display:block;margin-top:12px">進出国<select id="businessCountry" style="width:100%;padding:11px;border-radius:9px;background:#12263b;border:1px solid #31536d;color:#fff">'+marketOptions+'</select></label>'+
    '<div class="row" style="margin:12px 0 7px"><b>都市を選択</b><span class="muted">'+list.length+'都市</span></div><input id="citySearch" class="country-search" type="search" placeholder="都市名で検索（東京、ロンドン、ニューヨーク…）"><div class="row" style="margin:8px 0"><span class="muted">検索結果</span><span class="muted" id="cityResultCount">'+list.length+'都市を表示</span></div><div class="country-grid" id="cityList" style="margin-top:9px"></div>'+
-   '<div class="map-note">現在の選択：<b>'+(city?cityLabel(city):'未選択')+'</b> · 都市データ：'+cityDataSource+' · 位置データ：GeoNames（CC BY 4.0）</div>')+
+   '<div class="map-note">現在の選択：<b>'+(city?cityLabel(city):'未選択')+'</b> · 都市データ：'+cityDataSource+' · 位置データ：'+cityDataSource+'</div>')+
   panel('選択した都市に事業を設立','<div class="metric"><small class="muted">建設予定地</small><b>📍 '+(city?cityLabel(city):'都市を選択してください')+'</b><div class="tag">'+(city?(countryNames[city.country]||city.country)+' · '+city.name:'')+'</div></div><div class="grid2" style="margin-top:10px">'+sectors.map((a,i)=>'<div class="card"><div style="font-size:23px">'+a.icon+'</div><b>'+a.name+'</b><div class="tag">投資額 '+money(a.cost*(countries.find(x=>x[0]===s.selected)||countries[0])[3])+' · 売上 '+money(a.income)+'/日</div><button class="btn" style="margin-top:9px" data-build="'+i+'" '+(!city?'disabled':'')+'>この都市に設立</button></div>').join('')+'</div>')+
   panel('都市インフラ · 物流拠点を建設','<div class="muted">船・飛行機・トラックの発着には、対応する物流施設が必要です。</div><div class="grid3" style="margin-top:10px">'+Object.entries(facilityTypes).map(([type,config])=>{const existing=city&&cityFacility(city,type);return '<div class="card"><div style="font-size:24px">'+config.icon+'</div><b>'+config.name+'</b><div class="tag">'+config.description+'</div><div class="tag">建設 '+money(config.cost)+'</div><button class="btn" style="margin-top:8px;width:100%" data-facility="'+type+'" '+(!city||existing?'disabled':'')+'>'+(existing?'建設済み':'建設する')+'</button></div>';}).join('')+'</div>')+
   panel('保有企業',companyCards||'<div class="muted">まだ企業がありません。</div>')+
