@@ -7,7 +7,7 @@
 :root{color-scheme:dark;--bg:#081321;--panel:#122238;--panel2:#1a3049;--line:#29445f;--text:#edf5ff;--muted:#9ab0c8;--green:#43d6a0;--blue:#51a9ff;--gold:#f0c66d;--red:#ff7777}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#1c4964 0,transparent 48%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.app{max-width:1250px;margin:auto;padding:18px}button,select{font:inherit}button{cursor:pointer;color:inherit}.hero{padding:22px;border:1px solid #31516e;border-radius:18px;background:linear-gradient(115deg,#102a43,#164c61 60%,#16364c);box-shadow:0 14px 50px #0005}.top,.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.eyebrow{letter-spacing:2px;font-size:10px;color:#b5cce0}.brand{font-size:clamp(27px,5vw,43px);font-weight:950;letter-spacing:2px}.sub,.muted{color:var(--muted)}.year{text-align:right}.year strong{font-size:23px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0}.stat,.panel{background:linear-gradient(145deg,#15263d,#101d2e);border:1px solid var(--line);border-radius:14px;padding:15px;min-width:0}.stat small{color:var(--muted)}.stat strong{display:block;font-size:clamp(18px,3vw,26px);margin:5px 0}.positive{color:var(--green)}.negative{color:var(--red)}.nav{display:flex;gap:7px;overflow:auto;padding:3px 0 12px}.nav button,.secondary{border:1px solid var(--line);background:#142840;color:var(--text);border-radius:9px;padding:10px 13px;white-space:nowrap}.nav button.active,.primary{background:linear-gradient(120deg,#168b9b,#2374c6);border:0;color:white;font-weight:800}.panel{margin-bottom:12px}.panel h2{font-size:16px;margin:0 0 10px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.layout{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.metric,.card{padding:11px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}.metric b{display:block;font-size:18px;margin-top:3px}.btn{border:0;border-radius:9px;padding:10px 13px;color:white;background:#167e9c;font-weight:750}.btn.gold{background:#967022}.btn.green{background:#147a5a}.btn:disabled{opacity:.4;cursor:not-allowed}.btnline{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chart{width:100%;height:180px;display:block}.country-grid,.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}.country{background:#172840;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px;text-align:left}.country.selected{border:2px solid var(--gold);background:#26384d}.flag{font-size:22px}.tag{font-size:10px;color:var(--muted)}.progress{height:7px;border-radius:10px;background:#263950;overflow:hidden;margin-top:6px}.progress span{height:100%;display:block;background:linear-gradient(90deg,#21bd9a,#4da3ff)}.listitem{padding:11px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border:0}.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line)}.table th{color:var(--muted)}.notice{border-left:3px solid var(--gold);background:#302a1c;padding:10px;border-radius:7px;color:#f5dfb2}.map{background:#0d1b2c;border:1px solid var(--line);border-radius:12px;padding:8px}.map svg{width:100%;height:auto;display:block}.map path{fill:#285c67;stroke:#5d8790;stroke-width:1.2}.map circle{fill:#e4bd68;stroke:#fff;stroke-width:2}.footer{text-align:center;color:var(--muted);font-size:10px;padding:18px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#20354c;border:1px solid #52718d;border-radius:10px;padding:11px 16px;box-shadow:0 8px 30px #0008;z-index:5;max-width:90%;text-align:center}.hidden{display:none!important}select{display:block;width:100%;padding:10px;background:#172840;color:white;border:1px solid var(--line);border-radius:8px;margin-top:5px}
 @media(max-width:760px){.app{padding:10px}.stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.grid3{grid-template-columns:repeat(2,1fr)}.hero{padding:16px}}
-.detailed-map-wrap{position:relative;width:100%;overflow:hidden;border:1px solid #31536d;border-radius:12px;background:#071827;line-height:0}.detailed-map-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair}.detailed-map-wrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.detailed-map-wrap .map-market-pin{pointer-events:all;cursor:pointer}.detailed-map-wrap .map-market-pin:hover circle{stroke:#fff;stroke-width:4}.map-legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 11px;background:#0c1d2e;border:1px solid var(--line);border-radius:9px;font-size:11px;color:var(--muted)}.map-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.map-note{font-size:12px;color:var(--muted);margin:8px 2px 12px}.map-status{padding:18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}.country.selected{border-color:var(--gold)}</style>
+.country-search{width:100%;padding:11px;border-radius:9px;background:#12263b;border:1px solid #31536d;color:#fff}.country[hidden]{display:none!important}.detailed-map-wrap{position:relative;width:100%;overflow:hidden;border:1px solid #31536d;border-radius:12px;background:#071827;line-height:0}.detailed-map-wrap canvas{display:block;width:100%;height:auto;cursor:crosshair}.detailed-map-wrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.detailed-map-wrap .map-market-pin{pointer-events:all;cursor:pointer}.detailed-map-wrap .map-market-pin:hover circle{stroke:#fff;stroke-width:4}.map-legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 11px;background:#0c1d2e;border:1px solid var(--line);border-radius:9px;font-size:11px;color:var(--muted)}.map-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.map-note{font-size:12px;color:var(--muted);margin:8px 2px 12px}.map-status{padding:18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}.country.selected{border-color:var(--gold)}</style>
 </head>
 <body><main class="app">
 <header class="hero"><div class="top"><div><div class="eyebrow">世界経済・企業経営シミュレーション</div><div class="brand">WORLD EMPIRE</div><div class="sub">世界規模の企業帝国を築き、市場を支配しよう</div></div><div class="year"><div class="eyebrow">会計年度</div><strong id="year">2026</strong><div class="sub" id="day">1日目</div></div></div><div class="row" style="margin-top:18px"><span class="eyebrow">世界経済</span><b id="economyText">安定</b></div><div class="progress"><span id="economyBar" style="width:55%"></span></div></header>
@@ -52,6 +52,45 @@ const transport={
 const landPairs=['United States|Canada','Germany|France','Germany|United Kingdom','France|United Kingdom'];
 const isoMarket={'392':'Japan','840':'United States','156':'China','276':'Germany','826':'United Kingdom','356':'India','250':'France','076':'Brazil','036':'Australia','410':'South Korea','124':'Canada','702':'Singapore'};
 const marketLonLat={'Japan':[138,36],'United States':[-98,39],'China':[103,35],'Germany':[10.5,51],'United Kingdom':[-3,55],'India':[78,22],'France':[2,46],'Brazil':[-52,-10],'Australia':[134,-25],'South Korea':[127.5,36],'Canada':[-106,56],'Singapore':[103.8,1.3]};
+const countryMetaByName={};
+const countryMetaByIso3={};
+const worldCountryCentroids={};
+const regionNames={'Africa':'アフリカ','Americas':'南北アメリカ','Asia':'アジア','Europe':'ヨーロッパ','Oceania':'オセアニア','Polar':'極地'};
+let countryDataReady=false;
+function marketNumbers(code){
+ const n=Number(code)||1;
+ return {index:.82+(n%55)/100,cost:2.4e6+(n%74)*50000};
+}
+function registerWorldCountries(records,features){
+ const featureIds=new Set(features.map(feature=>String(feature.id||'').padStart(3,'0')));
+ const known=new Set(countries.map(country=>country[0]));
+ for(const entry of records){
+  const numeric=String(entry.ccn3||'').padStart(3,'0');
+  if(!/^\\d{3}$/.test(numeric)||!featureIds.has(numeric)||!entry.name||!entry.name.common)continue;
+  if(entry.name.common==='Antarctica')continue;
+  const english=entry.name.common;
+  const japanese=entry.translations&&entry.translations.jpn&&entry.translations.jpn.common?entry.translations.jpn.common:english;
+  const region=regionNames[entry.region]||'その他';
+  const numbers=marketNumbers(numeric);
+  if(!known.has(english)){
+   countries.push([english,entry.flag||'🌐',region,numbers.index,numbers.cost]);
+   known.add(english);
+  }
+  countryNames[english]=japanese;
+  isoMarket[numeric]=english;
+  countryMetaByName[english]=entry;
+  if(entry.cca3)countryMetaByIso3[entry.cca3]=entry;
+  if(s.countryEconomy)s.countryEconomy[english]??=(43+(Number(numeric)%43));
+ }
+ countryDataReady=true;
+}
+function areCountriesAdjacent(from,to){
+ const a=countryMetaByName[from],b=countryMetaByName[to];
+ if(a&&b&&Array.isArray(a.borders)&&a.borders.includes(b.cca3))return true;
+ if(a&&b&&Array.isArray(b.borders)&&b.borders.includes(a.cca3))return true;
+ return landPairs.includes(from+'|'+to)||landPairs.includes(to+'|'+from);
+}
+
 const fresh=()=>({
  cash:1e7,day:1,year:2026,economy:55,selected:'Japan',markets:['Japan'],businesses:[],routes:[],research:[],
  stocks:[100,102,99,105,103,108,110,107],history:[25],profit:0,shares:0,sharePrice:100000,
@@ -107,17 +146,22 @@ function overview(){
  chart();
 }
 function loadWorldData(){
- if(worldFeatures)return Promise.resolve(worldFeatures);
+ if(worldFeatures&&countryDataReady)return Promise.resolve(worldFeatures);
  if(worldPromise)return worldPromise;
  if(!window.topojson||!window.d3||!window.d3.geoNaturalEarth1)return Promise.reject(new Error('地図ライブラリが読み込まれていません'));
- worldPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
-  .then(r=>{if(!r.ok)throw new Error('地図データを取得できません');return r.json();})
-  .then(topology=>{worldFeatures=topojson.feature(topology,topology.objects.countries).features;return worldFeatures;});
+ worldPromise=Promise.all([
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r=>{if(!r.ok)throw new Error('国境地図を取得できません');return r.json();}),
+  fetch('https://cdn.jsdelivr.net/npm/world-countries@5.1.0/countries.json').then(r=>{if(!r.ok)throw new Error('国・地域データを取得できません');return r.json();})
+ ]).then(([topology,records])=>{
+  worldFeatures=topojson.feature(topology,topology.objects.countries).features;
+  registerWorldCountries(records,worldFeatures);
+  return worldFeatures;
+ });
  return worldPromise;
 }
 function mapOverlay(svgId,showRoutes){
  const svg=$(svgId);if(!svg||!worldProjection)return;
- const project=name=>marketLonLat[name]?worldProjection(marketLonLat[name]):[700,325];
+ const project=name=>worldCountryCentroids[name]?worldProjection(worldCountryCentroids[name]):(marketLonLat[name]?worldProjection(marketLonLat[name]):[700,325]);
  let out='';
  if(showRoutes){
   s.routes.forEach(r=>{
@@ -150,11 +194,12 @@ function drawDetailedMap(canvasId,overlayId,logisticsMode){
    if(!feature.geometry)return;
    const id=String(feature.id||'').padStart(3,'0'),market=isoMarket[id],d=path(feature);if(!d)return;
    const shape=new Path2D(d);
+   if(market)worldCountryCentroids[market]=d3.geoCentroid(feature);
    if(id===selectedId)ctx.fillStyle='#d7ac54';
    else if(market&&s.markets.includes(market))ctx.fillStyle='#238b85';
    else if(market)ctx.fillStyle='#397b7d';
    else{const palette=['#426e66','#4b766d','#3c6866','#51796c','#3c6570'];ctx.fillStyle=palette[(parseInt(id,10)||0)%palette.length];}
-   ctx.fill(shape,'evenodd');ctx.strokeStyle='rgba(190,220,215,.8)';ctx.lineWidth=1.15;ctx.stroke(shape);
+   ctx.fill(shape,'evenodd');ctx.strokeStyle='rgba(190,220,215,.88)';ctx.lineWidth=1.2;ctx.stroke(shape);
    worldHits.push({market:market||null,path:shape});
   });
   mapOverlay(overlayId,logisticsMode);
@@ -162,7 +207,7 @@ function drawDetailedMap(canvasId,overlayId,logisticsMode){
   canvas.onclick=e=>{
    const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*W/rect.width,y=(e.clientY-rect.top)*H/rect.height;
    const hit=worldHits.slice().reverse().find(h=>ctx.isPointInPath(h.path,x,y));if(!hit)return;
-   if(!hit.market){notify('この国はまだ経営対象外です。現在は12か国でプレイできます。');return;}
+   if(!hit.market){notify('この国はまだ経営対象外です。国・地域の市場データがまだ対応していない場所です。');return;}
    if(logisticsMode){
     if(!s.markets.includes(hit.market)){notify('この国へ先に進出してください。');return;}
     if(!s.routeFromDraft||s.routeToDraft){s.routeFromDraft=hit.market;s.routeToDraft='';}
@@ -176,13 +221,20 @@ function drawDetailedMap(canvasId,overlayId,logisticsMode){
  });
 }
 function world(){
- const c=countries.find(x=>x[0]===s.selected)||countries[0],m=s.countryEconomy[c[0]]||50;
- $('content').innerHTML=panel('詳細な世界地図 · 国をクリックして選択',
- '<div class="detailed-map-wrap"><canvas id="worldCanvas" aria-label="国境線付き世界地図"></canvas><svg id="worldOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済みの国の拠点"></svg></div><div class="map-status" id="worldCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>その他の国</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックすると選択できます。現在、経営・進出に対応している国は12か国です。</p>'+
- '<div class="grid3"><div class="metric"><small class="muted">進出国</small><b>'+s.markets.length+'/12</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div><div class="metric"><small class="muted">景気見通し</small><b>'+(s.economy>65?'好景気':s.economy<35?'景気後退':'安定')+'</b></div></div>'+
- '<div class="country-grid" style="margin-top:12px">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+n[0]+'"><div class="flag">'+n[1]+'</div><b>'+countryNames[n[0]]+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">景気指数 '+(s.countryEconomy[n[0]]||50)+'/100</div><div class="progress"><span style="width:'+(s.countryEconomy[n[0]]||50)+'%"></span></div></button>').join('')+'</div>')+
- panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+countryNames[c[0]]+'</div><div class="muted">'+c[2]+' · 市場ポテンシャル '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">見通し</small><b class="'+(m>=50?'positive':'negative')+'">'+(m>=50?'成長中':'低迷')+'</b></div></div><p class="muted">各国の景気は、その国で活動する企業の収益に影響します。</p><button class="btn" data-enter="'+c[0]+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
- drawDetailedMap('worldCanvas','worldOverlay',false);
+ $('content').innerHTML=panel('世界地図を準備中','世界中の国境線と市場データを読み込んでいます…');
+ loadWorldData().then(()=>{
+  if(current!=='world')return;
+  const c=countries.find(x=>x[0]===s.selected)||countries[0],m=s.countryEconomy[c[0]]||50;
+  const regions=[...new Set(countries.map(n=>n[2]))].sort((a,b)=>a.localeCompare(b,'ja'));
+  $('content').innerHTML=panel('世界地図 · 国を選択して経営を開始',
+   '<div class="detailed-map-wrap"><canvas id="worldCanvas" aria-label="全世界の国境線付き地図"></canvas><svg id="worldOverlay" viewBox="0 0 1400 650" preserveAspectRatio="none" aria-label="進出済みの国の拠点"></svg></div><div class="map-status" id="worldCanvasStatus">詳細な世界地図を読み込んでいます…</div><div class="map-legend"><span><i class="map-dot" style="background:#d7ac54"></i>選択中</span><span><i class="map-dot" style="background:#238b85"></i>進出済み</span><span><i class="map-dot" style="background:#426e66"></i>未進出</span><span>国境線：Natural Earth 1:50m</span></div><p class="map-note">地図上の国をクリックするか、下の一覧から国名を検索して選択できます。進出後は、その国に会社を設立できます。</p>'+
+   '<div class="grid3"><div class="metric"><small class="muted">進出済みの国・地域</small><b>'+s.markets.length+' / '+countries.length+'</b></div><div class="metric"><small class="muted">選択可能な国・地域</small><b>'+countries.length+'</b></div><div class="metric"><small class="muted">世界経済指数</small><b>'+s.economy.toFixed(1)+'/100</b></div></div>'+
+   '<div class="grid2" style="margin-top:12px"><input id="countrySearch" type="search" placeholder="国名を検索（日本、カナダ、ブラジル…）" style="width:100%;padding:11px;border-radius:9px;background:#12263b;border:1px solid #31536d;color:#fff"><select id="countryRegionFilter" style="width:100%;padding:11px;border-radius:9px;background:#12263b;border:1px solid #31536d;color:#fff"><option value="">すべての地域</option>'+regions.map(r=>'<option value="'+esc(r)+'">'+esc(r)+'</option>').join('')+'</select></div>'+
+   '<div class="row" style="margin:8px 0"><b>国・地域一覧</b><span class="muted" id="countryResultCount">'+countries.length+'か国・地域</span></div>'+
+   '<div class="country-grid" id="countryList">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'" data-region="'+esc(n[2])+'"><div class="flag">'+n[1]+'</div><b>'+(countryNames[n[0]]||n[0])+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">経済指数 '+(s.countryEconomy[n[0]]||50)+'/100</div><div class="progress"><span style="width:'+(s.countryEconomy[n[0]]||50)+'%"></span></div></button>').join('')+'</div>')+
+   panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+(countryNames[c[0]]||c[0])+'</div><div class="muted">'+c[2]+' · 市場指数 '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">進出状況</small><b>'+(s.markets.includes(c[0])?'進出済み':'未進出')+'</b></div></div><p class="muted">進出費用には市場開設費が含まれます。進出すると企業設立・物流ネットワークの拠点として利用できます。</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
+  drawDetailedMap('worldCanvas','worldOverlay',false);
+ }).catch(err=>{const content=$('content');if(content)content.innerHTML=panel('世界地図の読み込みに失敗しました','地図データを取得できませんでした。インターネット接続を確認して再読み込みしてください。');console.warn('WORLD EMPIRE country data:',err);});
 }
 function build(i){
  const a=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=a.cost*c[3];
@@ -258,6 +310,18 @@ function loadGame(){
 }
 function stopAuto(){if(timer)clearInterval(timer);timer=null;$('auto').textContent='自動進行：OFF';}
 $('nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)show(b.dataset.view);});
+$('content').addEventListener('input',e=>{
+ if(e.target.id!=='countrySearch'&&e.target.id!=='countryRegionFilter')return;
+ const query=($('countrySearch').value||'').trim().toLocaleLowerCase('ja'),region=$('countryRegionFilter').value;
+ let visible=0;
+ $('countryList').querySelectorAll('[data-country]').forEach(button=>{
+  const name=countryNames[button.dataset.country]||button.dataset.country;
+  const matchesName=!query||name.toLocaleLowerCase('ja').includes(query)||button.dataset.country.toLocaleLowerCase('en').includes(query);
+  const matchesRegion=!region||button.dataset.region===region;
+  button.hidden=!(matchesName&&matchesRegion);if(!button.hidden)visible++;
+ });
+ $('countryResultCount').textContent=visible+'か国・地域';
+});
 $('content').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.dataset.country){s.selected=b.dataset.country;show('world');}
@@ -297,7 +361,7 @@ $('content').addEventListener('click',e=>{
  else if(b.id==='createRoute'){
   const from=s.routeFromDraft,to=s.routeToDraft,mode=s.routeModeDraft||'ship',cfg=transport[mode];
   if(!from||!to||from===to){notify('出発地と目的地を選んでください。');return;}
-  if(mode==='land'&&!landPairs.includes(from+'|'+to)&&!landPairs.includes(to+'|'+from)){notify('陸路は現在、隣接する国同士でのみ開設できます。');return;}
+  if(mode==='land'&&!areCountriesAdjacent(from,to)){notify('陸路は陸続きの隣接する国同士でのみ開設できます。');return;}
   if(s.routes.some(r=>r.from===from&&r.to===to&&r.mode===mode)){notify('同じ物流ルートがすでにあります。');return;}
   if(s.cash<cfg.cost){notify('開設に必要な資金が足りません。');return;}
   s.cash-=cfg.cost;s.routes.push({from,to,mode,income:cfg.income*(s.research.includes('globalLogistics')?1.4:1),days:cfg.days});
