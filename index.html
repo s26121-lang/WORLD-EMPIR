@@ -134,4 +134,5 @@ function applyJapanese(){localizeNode(document.body);$('day').textContent='æ—¥ç›
 function translateString(value){let result=String(value);for(const [source,target] of Object.entries(ja))result=result.split(source).join(target);return result;}
 applyJapanese();
 stats();show();
+})();
 </script></body></html>
