@@ -15,8 +15,37 @@
 <nav class="nav" id="nav"><button class="active" data-view="overview">概要</button><button data-view="world">世界地図</button><button data-view="business">企業経営</button><button data-view="market">株式市場</button><button data-view="research">研究開発</button><button data-view="trade">物流ネットワーク</button><button data-view="ranking">ランキング</button></nav>
 <div id="content"></div><div class="btnline"><button class="btn primary" id="advance">▶ 1日進める</button><button class="secondary" id="auto">自動進行：OFF</button><button class="secondary" id="save">💾 セーブ</button><button class="secondary" id="load">↩ ロード</button><button class="secondary" id="reset">新しいゲーム</button></div>
 <div class="footer">WORLD EMPIRE v2.3 · 世界市場拡張版 · セーブデータはこのブラウザに保存されます</div></main><div id="toast" class="toast hidden"></div>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/dist/d3-geo.min.js"></script>
+<script>
+(function(){
+ function loadOne(urls,check){
+  return new Promise((resolve,reject)=>{
+   let index=0,lastError=null;
+   function next(){
+    if(check()){resolve();return;}
+    if(index>=urls.length){reject(lastError||new Error('地図ライブラリを読み込めませんでした'));return;}
+    const script=document.createElement('script');
+    script.src=urls[index++];script.async=true;script.crossOrigin='anonymous';
+    script.onload=()=>check()?resolve():(lastError=new Error('ライブラリ機能を確認できません'),script.remove(),next());
+    script.onerror=()=>{lastError=new Error('読み込み失敗：'+script.src);script.remove();next();};
+    document.head.appendChild(script);
+   }
+   next();
+  });
+ }
+ window.__worldMapLibraries=Promise.all([
+  loadOne([
+   'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js',
+   'https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js',
+   'https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js'
+  ],()=>!!window.topojson),
+  loadOne([
+   'https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js',
+   'https://unpkg.com/d3@7.9.0/dist/d3.min.js',
+   'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js'
+  ],()=>!!(window.d3&&window.d3.geoNaturalEarth1&&window.d3.geoPath))
+ ]).catch(error=>{window.__worldMapLibraryError=error;throw error;});
+})();
+</script>
 <script>
 (()=>{
 'use strict';
@@ -145,18 +174,36 @@ function overview(){
  panel('市場情報','<div class="notice">'+esc(s.news)+'</div><div class="listitem row"><span class="muted">世界経済指数</span><b>'+s.economy.toFixed(1)+'/100</b></div><div class="listitem row"><span class="muted">稼働中の物流ルート</span><b>'+s.routes.length+'</b></div><div class="listitem row"><span class="muted">ライバル企業</span><b>'+s.rivals.length+'社</b></div>')+'</div></div>';
  chart();
 }
+async function fetchJsonFallback(urls,label){
+ const failures=[];
+ for(const url of urls){
+  try{
+   const response=await fetch(url,{mode:'cors',cache:'no-store'});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   return await response.json();
+  }catch(error){failures.push(url+' ('+error.message+')');}
+ }
+ throw new Error(label+'を取得できませんでした。試した配信先：'+failures.join(' / '));
+}
 function loadWorldData(){
  if(worldFeatures&&countryDataReady)return Promise.resolve(worldFeatures);
  if(worldPromise)return worldPromise;
- if(!window.topojson||!window.d3||!window.d3.geoNaturalEarth1)return Promise.reject(new Error('地図ライブラリが読み込まれていません'));
- worldPromise=Promise.all([
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r=>{if(!r.ok)throw new Error('国境地図を取得できません');return r.json();}),
-  fetch('https://cdn.jsdelivr.net/npm/world-countries@5.1.0/countries.json').then(r=>{if(!r.ok)throw new Error('国・地域データを取得できません');return r.json();})
- ]).then(([topology,records])=>{
+ worldPromise=Promise.resolve(window.__worldMapLibraries).then(()=>Promise.all([
+  fetchJsonFallback([
+   'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json',
+   'https://unpkg.com/world-atlas@2.0.2/countries-50m.json',
+   'https://raw.githubusercontent.com/topojson/world-atlas/master/countries-50m.json'
+  ],'国境地図'),
+  fetchJsonFallback([
+   'https://cdn.jsdelivr.net/npm/world-countries@5.1.0/countries.json',
+   'https://unpkg.com/world-countries@5.1.0/countries.json',
+   'https://cdn.jsdelivr.net/gh/mledoze/countries@master/countries.json'
+  ],'国・地域データ')
+ ])).then(([topology,records])=>{
   worldFeatures=topojson.feature(topology,topology.objects.countries).features;
   registerWorldCountries(records,worldFeatures);
   return worldFeatures;
- });
+ }).catch(error=>{worldPromise=null;throw error;});
  return worldPromise;
 }
 function mapOverlay(svgId,showRoutes){
@@ -234,7 +281,7 @@ function world(){
    '<div class="country-grid" id="countryList">'+countries.map(n=>'<button class="country '+(s.selected===n[0]?'selected':'')+'" data-country="'+esc(n[0])+'" data-region="'+esc(n[2])+'"><div class="flag">'+n[1]+'</div><b>'+(countryNames[n[0]]||n[0])+'</b><div class="tag">'+n[2]+' · '+(s.markets.includes(n[0])?'進出済み':'未進出')+'</div><div class="tag">経済指数 '+(s.countryEconomy[n[0]]||50)+'/100</div><div class="progress"><span style="width:'+(s.countryEconomy[n[0]]||50)+'%"></span></div></button>').join('')+'</div>')+
    panel('選択した国の市場情報','<div class="row"><div><div style="font-size:23px">'+c[1]+' '+(countryNames[c[0]]||c[0])+'</div><div class="muted">'+c[2]+' · 市場指数 '+c[3].toFixed(2)+'</div></div><b>'+money(c[4])+'</b></div><div class="grid3" style="margin:12px 0"><div class="metric"><small class="muted">景気</small><b>'+m+'/100</b></div><div class="metric"><small class="muted">需要</small><b>'+(m>65?'高い':m<35?'低い':'通常')+'</b></div><div class="metric"><small class="muted">進出状況</small><b>'+(s.markets.includes(c[0])?'進出済み':'未進出')+'</b></div></div><p class="muted">進出費用には市場開設費が含まれます。進出すると企業設立・物流ネットワークの拠点として利用できます。</p><button class="btn" data-enter="'+esc(c[0])+'" '+(s.markets.includes(c[0])?'disabled':'')+'>'+(s.markets.includes(c[0])?'進出済み':'この国に進出する · '+money(c[4]))+'</button>');
   drawDetailedMap('worldCanvas','worldOverlay',false);
- }).catch(err=>{const content=$('content');if(content)content.innerHTML=panel('世界地図の読み込みに失敗しました','地図データを取得できませんでした。インターネット接続を確認して再読み込みしてください。');console.warn('WORLD EMPIRE country data:',err);});
+ }).catch(err=>{const content=$('content');if(content)content.innerHTML=panel('世界地図の読み込みに失敗しました','地図データを読み込めませんでした。複数の配信先を試しました。通信制限がある場合は、接続を確認してもう一度お試しください。');console.warn('WORLD EMPIRE country data:',err);});
 }
 function build(i){
  const a=sectors[i],c=countries.find(x=>x[0]===s.selected)||countries[0],cost=a.cost*c[3];
