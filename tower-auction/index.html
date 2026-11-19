@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOWER AUCTION</title>
+<style>
+:root{--bg:#0b1018;--panel:#131d2b;--panel2:#192638;--line:#2c4057;--gold:#e7b85c;--gold2:#9d7130;--text:#edf3fa;--muted:#91a2b8;--green:#74d6a0;--red:#f07878;--blue:#75baff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#263a51 0,#101a28 42%,#090e16 100%);color:var(--text);font-family:Inter,"Noto Sans JP",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;border:1px solid var(--line);background:linear-gradient(180deg,#26384d,#1a293b);border-radius:10px;padding:10px 14px;cursor:pointer;transition:.15s}button:hover:not(:disabled){border-color:var(--gold);transform:translateY(-1px);filter:brightness(1.12)}button:disabled{opacity:.42;cursor:not-allowed}
+header{height:68px;border-bottom:1px solid #29384a;background:#0b121ddc;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,36px);position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.brand{display:flex;align-items:center;gap:12px}.crest{width:38px;height:38px;border:1px solid #a77e3b;border-radius:11px;display:grid;place-items:center;color:var(--gold);font-size:21px;background:linear-gradient(145deg,#3c3425,#182536);box-shadow:0 0 20px #e5b65c20}.brand b{letter-spacing:2.5px;font-size:16px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:2px}
+.resources{display:flex;gap:10px;align-items:center}.resource{background:#172333;border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-width:84px;text-align:center}.resource small{display:block;color:var(--muted);font-size:9px;letter-spacing:1px}.resource strong{color:var(--gold);font-size:15px}
+main{max-width:1440px;margin:auto;padding:22px clamp(12px,2vw,28px) 40px}.topline{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px;gap:12px}.eyebrow{font-size:10px;letter-spacing:2.5px;color:var(--gold);font-weight:800}.topline h1{font-size:clamp(23px,3vw,34px);margin:5px 0 0;letter-spacing:1px}.topline p{margin:5px 0 0;color:var(--muted);font-size:12px}.stage-pill{border:1px solid #6e5732;background:#332a1b;color:#f0c879;border-radius:30px;padding:8px 14px;font-size:12px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}.maincol{min-width:0}.panel{background:linear-gradient(155deg,#172435ed,#111a27f2);border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 44px #0004;overflow:hidden}.panelhead{padding:14px 17px;border-bottom:1px solid #29394c;display:flex;justify-content:space-between;align-items:center;gap:10px}.panelhead h2{margin:0;font-size:14px;letter-spacing:.8px}.panelhead small{color:var(--muted);font-size:10px}.arena{padding:12px;background:linear-gradient(180deg,#101a27,#0d1621)}canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:10px;border:1px solid #34475b;background:#13261f;cursor:crosshair}
+.hud{display:flex;gap:8px;flex-wrap:wrap;padding:10px 13px;border-top:1px solid #28394b}.hud span{font-size:10px;color:var(--muted);background:#172536;border:1px solid #2a3c50;border-radius:7px;padding:6px 9px}.hud b{color:#f1d28e;margin-left:4px}
+.actionbar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid #29394c;align-items:center}.primary{background:linear-gradient(180deg,#d9ad5b,#9c6c2b);color:#1b1710;border-color:#e8c77e;font-weight:800}.danger{border-color:#754047;background:#38232b}.mutebtn{background:#172435}.actionbar .hint{color:var(--muted);font-size:10px;margin-left:auto}
+.side{display:grid;gap:14px}.sidebody{padding:14px}.phase{display:inline-flex;align-items:center;gap:7px;color:var(--gold);font-size:10px;font-weight:800;letter-spacing:1.6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}.lot{border:1px solid #33465c;border-radius:12px;padding:12px;background:linear-gradient(145deg,#1c2b3e,#142131);margin-top:10px}.lot.selected{border-color:#c79b4e;box-shadow:0 0 0 1px #c79b4e33}.lotrow{display:flex;justify-content:space-between;align-items:center;gap:8px}.towericon{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:23px;background:#283b50;border:1px solid #53677e}.lot h3{margin:0;font-size:13px}.lot p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.5}.price{color:var(--gold);font-weight:800;font-size:15px}.tag{font-size:9px;padding:4px 7px;border-radius:20px;border:1px solid #52647a;color:#b9c8d8}.bidrow{display:flex;gap:7px;margin-top:10px}.bidrow button{flex:1;font-size:11px;padding:9px 6px}.bidinfo{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:10px}.progress{height:4px;background:#26384b;border-radius:5px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;background:linear-gradient(90deg,#bb8a40,#f0d18b);width:0;transition:width .2s}
+.towerlist{display:grid;gap:7px}.toweritem{display:flex;align-items:center;gap:9px;padding:8px;border:1px solid #2a3d52;border-radius:9px;background:#152334}.toweritem .mini{width:30px;height:30px;border-radius:8px;background:#263a50;display:grid;place-items:center}.toweritem b{font-size:11px}.toweritem small{display:block;color:var(--muted);font-size:9px;margin-top:2px}.empty{color:var(--muted);font-size:11px;text-align:center;padding:15px 5px;border:1px dashed #34475a;border-radius:10px}
+.log{max-height:150px;overflow:auto;display:grid;gap:7px}.logline{font-size:10px;color:#aebed0;padding-left:10px;border-left:2px solid #536b86;line-height:1.45}.logline.good{border-color:var(--green)}.logline.warn{border-color:var(--gold)}
+.modalback{position:fixed;inset:0;background:#050910c9;display:none;place-items:center;padding:16px;z-index:20;backdrop-filter:blur(8px)}.modalback.show{display:grid}.modal{width:min(520px,100%);border:1px solid #65758a;border-radius:18px;background:linear-gradient(145deg,#1c2c40,#101a28);box-shadow:0 24px 90px #000b;padding:24px}.modal h2{margin:7px 0 8px;font-size:24px}.modal p{color:#aebed0;font-size:12px;line-height:1.7}.modal .big{font-size:34px;color:var(--gold);font-weight:900}.modalactions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+footer{color:#6e8198;font-size:10px;text-align:center;padding:24px 10px}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,minmax(0,1fr))}.side .wide{grid-column:1/-1}}
+@media(max-width:600px){header{padding:0 10px}.brand b{font-size:12px}.resources{gap:5px}.resource{min-width:65px;padding:6px}.resource strong{font-size:12px}.side{grid-template-columns:1fr}.topline{align-items:start;flex-direction:column}.actionbar .hint{width:100%;margin:0}.arena{padding:6px}.panelhead{padding:11px}.side .wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="crest">♜</div><div><b>TOWER AUCTION</b><small>THE ART OF DEFENCE & DEALS</small></div></div>
+ <div class="resources"><div class="resource"><small>GOLD</small><strong id="gold">1,000 G</strong></div><div class="resource"><small>CRYSTALS</small><strong id="crystals">0</strong></div></div>
+</header>
+<main>
+ <div class="topline"><div><div class="eyebrow">STRATEGY • AUCTION • DEFENCE</div><h1 id="screenTitle">THE AUCTION HALL</h1><p id="screenSub">競り落としたタワーで、迫りくるモンスターから王国を守れ。</p></div><div class="stage-pill">STAGE <b id="stageNum">01</b>　/　FOREST FRONTIER</div></div>
+ <div class="layout">
+  <section class="maincol panel">
+   <div class="panelhead"><div><h2 id="mapTitle">EMERALD FOREST</h2><small id="mapSub">敵の進行ルートを確認してタワーを配置しよう</small></div><span class="tag" id="phaseTag">AUCTION PHASE</span></div>
+   <div class="arena"><canvas id="game" width="960" height="540" aria-label="タワーディフェンスの戦場"></canvas></div>
+   <div class="hud"><span>WAVE <b id="wave">準備中</b></span><span>ENEMIES <b id="enemyCount">0</b></span><span>BASE HP <b id="baseHp">20 / 20</b></span><span>GAME SPEED <b id="speed">1x</b></span></div>
+   <div class="actionbar">
+    <button id="startBattle" class="primary">⚔ 防衛を開始</button>
+    <button id="speedBtn" class="mutebtn">速度 1x</button>
+    <button id="saveBtn" class="mutebtn">セーブ</button>
+    <button id="loadBtn" class="mutebtn">ロード</button>
+    <span class="hint" id="canvasHint">タワーを選んで、道の近くの空き地をクリック</span>
+   </div>
+  </section>
+  <aside class="side">
+   <section class="panel">
+    <div class="panelhead"><div><div class="phase"><i class="dot"></i><span id="phaseName">LIVE AUCTION</span></div><h2 style="margin-top:5px">タワーオークション</h2></div><span class="tag" id="lotCount">LOT 1 / 3</span></div>
+    <div class="sidebody" id="auctionBody">
+     <div class="lot selected"><div class="lotrow"><div class="towericon" id="lotIcon">⚔️</div><div style="flex:1"><h3 id="lotName">ストライカー</h3><p id="lotDesc">高速連射。単体への継続火力に優れる。</p></div><span class="tag" id="lotRarity">COMMON</span></div>
+      <div class="bidinfo"><span>現在価格</span><span class="price" id="currentBid">150 G</span></div>
+      <div class="bidinfo"><span>最低入札</span><b id="minBid">150 G</b></div>
+      <div class="progress"><i id="auctionProgress"></i></div>
+      <div class="bidrow"><button id="bidBtn" class="primary">入札 +25G</button><button id="passBtn">この競売を終了</button></div>
+      <div class="bidinfo"><span id="auctionStatus">ライバルが様子を見ている…</span><span id="timer">12秒</span></div>
+     </div>
+    </div>
+   </section>
+   <section class="panel">
+    <div class="panelhead"><h2>獲得タワー</h2><span class="tag" id="ownedCount">0 UNITS</span></div>
+    <div class="sidebody"><div class="towerlist" id="ownedList"><div class="empty">まだタワーを所持していません。<br>オークションで獲得しよう。</div></div></div>
+   </section>
+   <section class="panel wide">
+    <div class="panelhead"><h2>戦況レポート</h2><span class="tag">LIVE LOG</span></div>
+    <div class="sidebody"><div class="log" id="log"><div class="logline">王国の防衛司令部へようこそ。まずは競売に参加しよう。</div></div></div>
+   </section>
+  </aside>
+ </div>
+</main>
+<footer>TOWER AUCTION • EARLY PLAYABLE BUILD • セーブデータはこのブラウザに保存されます</footer>
+<div class="modalback" id="modal"><div class="modal"><div class="eyebrow" id="modalEyebrow">STAGE CLEAR</div><h2 id="modalTitle">防衛成功！</h2><div class="big" id="modalReward">+250 G</div><p id="modalText">次のステージに進む準備ができました。</p><div class="modalactions"><button id="modalClose">閉じる</button><button id="nextStage" class="primary">次のステージへ</button></div></div></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+const W=960,H=540;
+const defs={
+ striker:{name:'ストライカー',icon:'⚔️',cost:150,rarity:'COMMON',desc:'高速連射。5発ごとに強烈なクリティカル。',damage:18,rate:0.52,range:145,color:'#e7bd68',type:'single'},
+ frost:{name:'フロストタワー',icon:'❄️',cost:250,rarity:'UNCOMMON',desc:'範囲に氷結ダメージ。敵の移動速度を40%低下。',damage:10,rate:1.2,range:130,color:'#83d9f4',type:'slow'},
+ thunder:{name:'サンダーコア',icon:'⚡',cost:400,rarity:'RARE',desc:'最大5体へ連鎖する雷撃。攻撃間隔は長め。',damage:52,rate:2.15,range:175,color:'#c5a5ff',type:'chain'},
+ gold:{name:'ゴールドマスター',icon:'💰',cost:350,rarity:'RARE',desc:'撃破した敵1体につき追加で3Gを獲得。',damage:8,rate:1.1,range:125,color:'#f4d06c',type:'gold'},
+ necro:{name:'ネクロタワー',icon:'☠️',cost:550,rarity:'EPIC',desc:'撃破時に魂を集め、10個で守護者を召喚。',damage:23,rate:1.5,range:150,color:'#b58bf0',type:'necro'},
+ dragon:{name:'ドラゴンキャノン',icon:'🐉',cost:800,rarity:'LEGENDARY',desc:'高威力の爆発弾。攻撃は遅いが範囲が広い。',damage:115,rate:3.1,range:205,color:'#f18b59',type:'splash'}
+};
+const paths=[[{x:-20,y:115},{x:150,y:115},{x:150,y:265},{x:340,y:265},{x:340,y:120},{x:540,y:120},{x:540,y:390},{x:760,y:390},{x:760,y:260},{x:980,y:260}]];
+const lots=['striker','frost','thunder','gold','necro','dragon'];
+let gold=1000,crystals=0,stage=1,baseHp=20,phase='auction',lotIndex=0,lotKey='striker',bid=150,highest='player',auctionTicks=12,auctionActive=true;
+let owned=[],placed=[],enemies=[],projectiles=[],particles=[],wave=0,waveLeft=0,spawnClock=0,gameSpeed=1,running=false,selectedTower=null,selectedOwned=null,frame=0,last=0,raf=0,earned=0;
+const rand=(a,b)=>Math.random()*(b-a)+a,dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function log(s,type=''){let el=document.createElement('div');el.className='logline '+type;el.textContent=s;$('log').prepend(el);while($('log').children.length>18)$('log').lastChild.remove()}
+function fmt(n){return Math.floor(n).toLocaleString('ja-JP')}
+function updateHUD(){$('gold').textContent=fmt(gold)+' G';$('crystals').textContent=crystals;$('stageNum').textContent=String(stage).padStart(2,'0');$('baseHp').textContent=baseHp+' / 20';$('enemyCount').textContent=enemies.length;$('wave').textContent=phase==='battle'?wave+'/3':'準備中';$('speed').textContent=gameSpeed+'x';$('ownedCount').textContent=owned.length+' UNITS';$('phaseTag').textContent=phase==='auction'?'AUCTION PHASE':phase==='battle'?'DEFENCE PHASE':'STAGE CLEAR';}
+function renderOwned(){let el=$('ownedList');el.innerHTML='';if(!owned.length){el.innerHTML='<div class="empty">まだタワーを所持していません。<br>オークションで獲得しよう。</div>';return}owned.forEach((t,i)=>{let d=defs[t.key],div=document.createElement('div');div.className='toweritem';div.innerHTML='<div class="mini">'+d.icon+'</div><div style="flex:1"><b>'+d.name+'</b><small>'+(t.placed?'配置済み':'未配置')+' ・ Lv.'+t.level+'</small></div><span class="tag">'+d.rarity+'</span>';div.onclick=()=>{if(phase==='battle'&&!t.placed){selectedOwned=i;selectedTower=t;log(d.name+'を選択。マップの空き地をクリックして配置。','warn');$('canvasHint').textContent=d.name+'を配置する場所をクリック';}else if(t.placed){let p=placed.find(x=>x.owner===t);if(p){selectedOwned=i;selectedTower=t;log(d.name+'を選択。もう一度クリックで強化情報を確認。');}}};el.append(div)})}
+function showLot(){if(lotIndex>=3){auctionActive=false;$('auctionBody').innerHTML='<div class="empty">今回の競売は終了！<br>獲得したタワーを配置して防衛しよう。</div>';$('phaseName').textContent='AUCTION CLOSED';$('startBattle').disabled=false;$('startBattle').textContent='⚔ 防衛を開始';$('canvasHint').textContent='防衛開始を押すと戦闘が始まります';return}
+lotKey=lots[(stage-1+lotIndex*2)%lots.length];let d=defs[lotKey];bid=d.cost;highest='player';auctionTicks=12;auctionActive=true;
+$('lotIcon').textContent=d.icon;$('lotName').textContent=d.name;$('lotDesc').textContent=d.desc;$('lotRarity').textContent=d.rarity;$('currentBid').textContent=fmt(bid)+' G';$('minBid').textContent=fmt(d.cost)+' G';$('auctionProgress').style.width='0%';$('timer').textContent='12秒';$('auctionStatus').textContent='ライバルが様子を見ている…';$('lotCount').textContent='LOT '+(lotIndex+1)+' / 3';$('bidBtn').disabled=gold<bid+25;$('passBtn').disabled=false;$('startBattle').disabled=true;$('phaseName').textContent='LIVE AUCTION';}
+function settleLot(winner){if(!auctionActive)return;auctionActive=false;let d=defs[lotKey];if(winner==='player'){gold-=bid;owned.push({key:lotKey,level:1,placed:false,xp:0});log(d.name+'を'+fmt(bid)+'Gで落札！','good')}else{log('ライバルが'+d.name+'を'+fmt(bid)+'Gで落札。','warn')}
+updateHUD();renderOwned();lotIndex++;setTimeout(()=>{if(phase==='auction')showLot()},900)}
+function bidPlayer(){if(!auctionActive||gold<bid+25)return;bid+=25;highest='player';$('currentBid').textContent=fmt(bid)+' G';$('auctionStatus').textContent='あなたが最高入札者！';$('bidBtn').disabled=gold<bid+25; $('auctionProgress').style.width=Math.min(100,(12-auctionTicks)/12*100)+'%';}
+$('bidBtn').onclick=bidPlayer;$('passBtn').onclick=()=>settleLot(highest==='player'?'player':'rival');
+function auctionTick(){if(phase!=='auction'||!auctionActive)return;auctionTicks--;if(auctionTicks===8||auctionTicks===5||auctionTicks===2){let d=defs[lotKey],limit=d.cost*(lotKey==='dragon'?1.3:1.65);if(highest==='player'&&Math.random()<.48&&bid+25<=limit&&bid+25<gold){bid+=25;highest='rival';$('auctionStatus').textContent='ライバルが入札！';log('ライバルが'+fmt(bid)+'Gで入札。','warn')}else if(highest==='rival'&&Math.random()<.65&&bid+25<gold){bid+=25;highest='player';$('auctionStatus').textContent='あなたが最高入札者！';log('入札競争で最高額を更新！','good')}}
+$('currentBid').textContent=fmt(bid)+' G';$('timer').textContent=auctionTicks+'秒';$('auctionProgress').style.width=((12-auctionTicks)/12*100)+'%';$('bidBtn').disabled=gold<bid+25;
+if(auctionTicks<=0){if(highest==='rival'&&Math.random()<.35)settleLot('rival');else settleLot(highest)}
+}
+function drawMap(){ctx.clearRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1b3a32');g.addColorStop(1,'#10251f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+for(let i=0;i<110;i++){let x=(i*137)%W,y=(i*83)%H;ctx.fillStyle=i%3?'#29483b':'#31533e';ctx.beginPath();ctx.arc(x,y,rand(3,10),0,Math.PI*2);ctx.fill();ctx.fillStyle='#41674b';ctx.beginPath();ctx.arc(x-2,y-3,rand(2,6),0,Math.PI*2);ctx.fill()}
+let p=paths[0];ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.strokeStyle='#392f25';ctx.lineWidth=86;ctx.stroke();ctx.strokeStyle='#a18b68';ctx.lineWidth=72;ctx.stroke();ctx.strokeStyle='#c3ad82';ctx.lineWidth=2;ctx.setLineDash([10,13]);ctx.stroke();ctx.setLineDash([]);
+for(let i=0;i<12;i++){let x=40+i*78,y=25+(i%2)*24;ctx.fillStyle='#3d654c';ctx.beginPath();ctx.arc(x,y,18,0,7);ctx.fill();ctx.fillStyle='#527d59';ctx.beginPath();ctx.arc(x-4,y-5,11,0,7);ctx.fill()}
+ctx.fillStyle='#d6c28f';ctx.font='bold 13px system-ui';ctx.fillText('ENEMY GATE',20,82);ctx.fillText('KINGDOM CORE',812,225);
+ctx.fillStyle='#e4d4ad';ctx.beginPath();ctx.arc(900,260,28,0,7);ctx.fill();ctx.fillStyle='#d19d4c';ctx.beginPath();ctx.arc(900,260,18,0,7);ctx.fill();ctx.fillStyle='#fff1c9';ctx.beginPath();ctx.arc(900,260,8,0,7);ctx.fill();
+placed.forEach(t=>drawTower(t));enemies.forEach(drawEnemy);projectiles.forEach(drawProjectile);particles.forEach(drawParticle);
+if(selectedTower&&phase==='battle'&&!selectedTower.placed){let m=mouse; if(m){ctx.beginPath();ctx.arc(m.x,m.y,defs[selectedTower.key].range,0,7);ctx.fillStyle='#b9d7ff12';ctx.fill();ctx.strokeStyle='#b9d7ff55';ctx.setLineDash([6,6]);ctx.stroke();ctx.setLineDash([])}}
+}
+let mouse=null;canvas.addEventListener('mousemove',e=>{let r=canvas.getBoundingClientRect();mouse={x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}});
+canvas.addEventListener('click',e=>{if(phase!=='battle'||!running)return;let r=canvas.getBoundingClientRect(),pt={x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H};
+if(selectedTower&&!selectedTower.placed){let d=defs[selectedTower.key],nearPath=pathDistance(pt)<62,nearTower=placed.some(t=>dist(t,pt)<46);if(nearPath||nearTower||pt.x<25||pt.x>935||pt.y<20||pt.y>520){log('そこには配置できない。道・障害物から離れた場所を選ぼう。','warn');return}let t={x:pt.x,y:pt.y,key:selectedTower.key,owner:selectedTower,level:selectedTower.level,cool:0,shots:0,souls:0};placed.push(t);selectedTower.placed=true;selectedTower.x=pt.x;selectedTower.y=pt.y;selectedTower=null;renderOwned();$('canvasHint').textContent='タワー配置完了。ほかのタワーも配置できる';log(d.name+'を戦場に配置！','good');return}
+let found=placed.find(t=>dist(t,pt)<28);if(found){let d=defs[found.key];if(gold>=Math.max(100,d.cost*.55)){gold-=Math.max(100,d.cost*.55);found.level++;found.owner.level=found.level;found.damageBonus=(found.damageBonus||0)+.25;log(d.name+'をLv.'+found.level+'に強化！','good');updateHUD();renderOwned()}else log('強化には'+Math.max(100,d.cost*.55)+'G必要。','warn')}
+});
+function pathDistance(pt){let min=1e9,p=paths[0];for(let i=1;i<p.length;i++){let a=p[i-1],b=p[i],dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((pt.x-a.x)*dx+(pt.y-a.y)*dy)/(dx*dx+dy*dy)));min=Math.min(min,Math.hypot(pt.x-(a.x+t*dx),pt.y-(a.y+t*dy)))}return min}
+function drawTower(t){let d=defs[t.key],r=d.range;ctx.save();ctx.translate(t.x,t.y);ctx.beginPath();ctx.arc(0,0,20,0,7);ctx.fillStyle='#101b27';ctx.fill();ctx.strokeStyle=d.color;ctx.lineWidth=3;ctx.stroke();ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fillStyle=d.color+'55';ctx.fill();ctx.fillStyle='#fff';ctx.font='18px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.icon,0,1);ctx.fillStyle='#fff';ctx.font='bold 10px system-ui';ctx.fillText('★'+t.level,0,31);ctx.restore();if(selectedTower===t.owner){ctx.beginPath();ctx.arc(t.x,t.y,r,0,7);ctx.strokeStyle=d.color+'66';ctx.stroke()}}
+function drawEnemy(e){ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle='#090f15aa';ctx.beginPath();ctx.ellipse(0,12,15,6,0,0,7);ctx.fill();ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(0,0,e.radius,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-4,-2,2,0,7);ctx.arc(4,-2,2,0,7);ctx.fill();ctx.fillStyle='#26313b';ctx.fillRect(-16,-e.radius-12,32,4);ctx.fillStyle='#e66e68';ctx.fillRect(-16,-e.radius-12,32*Math.max(0,e.hp/e.maxHp),4);ctx.restore()}
+function drawProjectile(p){ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,7);ctx.fill();ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.strokeStyle=p.color;ctx.stroke();ctx.shadowBlur=0}
+function drawParticle(p){ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();ctx.globalAlpha=1}
+const enemyDefs=[{name:'ゴブリン',hp:100,speed:46,reward:5,color:'#8ac36e',r:10},{name:'スカウト',hp:65,speed:82,reward:7,color:'#c5d27b',r:8},{name:'アーマーオーク',hp:450,speed:28,reward:18,color:'#a77c5c',r:15},{name:'シールドガード',hp:300,speed:32,reward:15,color:'#9aa8bb',r:14},{name:'ダークシャーマン',hp:180,speed:35,reward:20,color:'#aa82d7',r:12},{name:'トロール',hp:1500,speed:19,reward:50,color:'#5c9c76',r:20}];
+function spawnEnemy(){let idx=stage<3?Math.floor(rand(0,2)):Math.floor(rand(0,Math.min(6,2+Math.floor(stage/2))));let d=enemyDefs[idx],scale=1+(stage-1)*.16;let e={x:paths[0][0].x,y:paths[0][0].y,seg:0,progress:0,hp:d.hp*scale,maxHp:d.hp*scale,speed:d.speed*(1+stage*.012),reward:d.reward+Math.floor(stage*1.2),color:d.color,radius:d.r,slow:0,name:d.name,dead:false};enemies.push(e)}
+function moveEnemy(e,dt){if(e.slow>0)e.slow-=dt;let speed=e.speed*(e.slow>0?.6:1);let p=paths[0],remaining=speed*dt;while(remaining>0&&e.seg<p.length-1){let a=p[e.seg],b=p[e.seg+1],len=Math.hypot(b.x-a.x,b.y-a.y),left=len-e.progress,step=Math.min(left,remaining);e.progress+=step;remaining-=step;let t=e.progress/len;e.x=a.x+(b.x-a.x)*t;e.y=a.y+(b.y-a.y)*t;if(e.progress>=len){e.seg++;e.progress=0}}if(e.seg>=p.length-1){e.dead=true;baseHp--;log(e.name+'が王国の防衛線を突破！','warn');if(baseHp<=0)endGame(false)}}
+function towerAttack(t,dt){let d=defs[t.key];t.cool-=dt;if(t.cool>0)return;let targets=enemies.filter(e=>!e.dead&&dist(e,t)<d.range).sort((a,b)=>b.seg-a.seg||b.progress-a.progress);if(!targets.length)return;t.cool=d.rate*(t.key==='striker'?1:1);let target=targets[0],damage=d.damage*(1+(t.level-1)*.25)*(1+(t.damageBonus||0));t.shots++;if(t.key==='striker'&&t.shots%5===0)damage*=2.5;
+if(t.key==='frost'){targets.filter(e=>dist(e,t)<70).forEach(e=>{e.hp-=damage;e.slow=4;});projectiles.push({x:t.x,y:t.y,tx:target.x,ty:target.y,life:.22,color:d.color,radius:6,kind:'beam'})}
+else if(t.key==='thunder'){targets.slice(0,5).forEach((e,i)=>{e.hp-=damage*(1-i*.12);particles.push({x:e.x,y:e.y,life:.3,color:d.color,r:5})})}
+else{projectiles.push({x:t.x,y:t.y,target,damage,color:d.color,radius:t.key==='dragon'?7:4,kind:t.key==='dragon'?'splash':'shot',speed:420})}
+}
+function update(dt){if(!running||phase!=='battle')return;dt*=gameSpeed;frame+=dt;spawnClock-=dt;if(waveLeft>0&&spawnClock<=0){spawnEnemy();waveLeft--;spawnClock=.8}
+enemies.forEach(e=>{if(!e.dead)moveEnemy(e,dt)});placed.forEach(t=>towerAttack(t,dt));
+projectiles.forEach(p=>{if(p.kind==='beam'){p.life-=dt;return}if(!p.target||p.target.dead){p.life=0;return}let dx=p.target.x-p.x,dy=p.target.y-p.y,len=Math.hypot(dx,dy),step=p.speed*dt;if(len<=step+3){if(p.kind==='splash'){enemies.filter(e=>!e.dead&&dist(e,p.target)<60).forEach(e=>e.hp-=p.damage)}else p.target.hp-=p.damage;p.life=0;particles.push({x:p.target.x,y:p.target.y,life:.45,color:p.color,r:7})}else{p.x+=dx/len*step;p.y+=dy/len*step}}
+);
+enemies.forEach(e=>{if(e.hp<=0&&!e.dead){e.dead=true;gold+=e.reward;earned+=e.reward;let bonus=placed.find(t=>t.key==='gold');if(bonus){gold+=3;earned+=3}if(placed.some(t=>t.key==='necro')){let n=placed.find(t=>t.key==='necro');n.souls++;if(n.souls>=10){n.souls=0;gold+=15;log('ネクロタワーが守護者を召喚！魂の力で追加報酬。','good')}}particles.push({x:e.x,y:e.y,life:.7,color:'#f5d18a',r:10})}});
+enemies=enemies.filter(e=>!e.dead);projectiles=projectiles.filter(p=>p.life===undefined||p.life>0);particles.forEach(p=>p.life-=dt);particles=particles.filter(p=>p.life>0);
+if(waveLeft===0&&enemies.length===0){if(wave<3){wave++;waveLeft=8+wave*3;spawnClock=1.4;log('WAVE '+wave+' が接近中！','warn')}else endGame(true)}
+updateHUD()}
+function loop(ts){let dt=Math.min(.05,(ts-last)/1000||0);last=ts;update(dt);drawMap();raf=requestAnimationFrame(loop)}
+function startBattle(){if(phase!=='auction')return;phase='battle';running=true;wave=1;waveLeft=10;spawnClock=1;earned=0;selectedTower=null;selectedOwned=null;$('screenTitle').textContent='DEFEND THE KINGDOM';$('screenSub').textContent='タワーを道の周囲に配置し、3つのウェーブを突破しよう。';$('mapSub').textContent='タワーを選択してマップをクリック。配置後はタワーをクリックすると強化できる。';$('startBattle').disabled=true;$('startBattle').textContent='防衛中…';$('canvasHint').textContent='未配置タワーを選択して空き地をクリック';$('phaseName').textContent='BATTLE IN PROGRESS';log('防衛開始！敵の進行ルートを守れ。','good');updateHUD()}
+function endGame(win){if(phase!=='battle')return;running=false;phase='result';let reward=win?150+stage*50:0;if(win){gold+=reward;crystals+=stage%5===0?3:1;log('ステージクリア！報酬 '+reward+'G と結晶を獲得。','good')}else{let loss=Math.floor(gold*.2);gold-=loss;log('防衛失敗。所持Gの20%（'+loss+'G）を失った。','warn')}
+$('modalEyebrow').textContent=win?'STAGE CLEAR':'DEFENCE FAILED';$('modalTitle').textContent=win?'王国を守り抜いた！':'防衛線が突破された…';$('modalReward').textContent=win?'+'+reward+' G　◆ +'+(stage%5===0?3:1)+'素材':'-'+Math.floor((gold+Math.floor(gold*.25))*.2)+' G';$('modalText').textContent=win?'敵の侵攻を退けた。報酬を使って次の競売に備えよう。':'所持済みタワーと獲得済み素材は保持される。戦力を整えて再挑戦しよう。';$('nextStage').style.display=win?'inline-block':'none';$('modal').classList.add('show');updateHUD()}
+$('modalClose').onclick=()=>{$('modal').classList.remove('show');if(phase==='result')resetAfterResult(false)};
+$('nextStage').onclick=()=>{$('modal').classList.remove('show');stage++;resetAfterResult(true)};
+function resetAfterResult(next){phase='auction';running=false;placed=[];enemies=[];projectiles=[];particles=[];baseHp=20;wave=0;lotIndex=0;owned.forEach(t=>t.placed=false);if(next){gold+=100;log('次のステージ準備金 +100G','good')}else{log('再挑戦の準備をしよう。','warn')}$('screenTitle').textContent='THE AUCTION HALL';$('screenSub').textContent='競り落としたタワーで、迫りくるモンスターから王国を守れ。';$('mapSub').textContent='敵の進行ルートを確認してタワーを配置しよう';$('startBattle').textContent='⚔ 防衛を開始';$('startBattle').disabled=true;renderOwned();showLot();updateHUD()}
+$('startBattle').onclick=startBattle;
+$('speedBtn').onclick=()=>{gameSpeed=gameSpeed===1?2:gameSpeed===2?3:1;$('speedBtn').textContent='速度 '+gameSpeed+'x';updateHUD()};
+function save(){let data={gold,crystals,stage,owned,baseHp};localStorage.setItem('towerAuctionSave',JSON.stringify(data));log('セーブ完了。ブラウザに進行状況を保存した。','good')}
+function load(){let raw=localStorage.getItem('towerAuctionSave');if(!raw){log('セーブデータが見つかりません。','warn');return}try{let d=JSON.parse(raw);gold=d.gold;crystals=d.crystals;stage=d.stage;owned=d.owned||[];baseHp=20;phase='auction';running=false;placed=[];enemies=[];lotIndex=0;$('modal').classList.remove('show');renderOwned();showLot();updateHUD();log('セーブデータをロードした。','good')}catch(e){log('セーブデータを読み込めませんでした。','warn')}}
+$('saveBtn').onclick=save;$('loadBtn').onclick=load;
+showLot();renderOwned();updateHUD();drawMap();raf=requestAnimationFrame(loop);
+setInterval(auctionTick,1000);
+})();
+</script>
+</body></html>
