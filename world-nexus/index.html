@@ -58,8 +58,6 @@
 </div>
 <div class="toast" id="toast"></div>
 <div class="modalback" id="modal"><div class="modal"><h2 id="modaltitle">確認</h2><p id="modaltext"></p><div class="modalfoot"><button id="modalcancel">キャンセル</button><button class="primary" id="modalok">実行する</button></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
 <script>
 (function(){
 "use strict";
@@ -86,7 +84,7 @@ const cities=[
 {id:"solaris",name:"ソラリス・ポート",country:"架空都市",region:"南太平洋",lat:-28,lon:-150,pop:125000,econ:65,demand:3,fictional:true}
 ];
 const base={money:1000000000,day:1,date:"2026-01-01",selected:"tokyo",stations:[],routes:[],level:1,xp:0,totalProfit:0,paused:false,speed:1,mode:"select"};
-let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,ctx=null,canvas=$("map"),modalAction=null,routeStart=null,tick=null,toastTimer=null;
+let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null;
 const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000, valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000;
 function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 function addNews(s){let el=document.createElement("div");el.className="newsitem";el.append(document.createTextNode(s));let sm=document.createElement("small");sm.textContent="DAY "+state.day+" · WORLD NEXUS";el.append(sm);$("news").prepend(el);while($("news").children.length>4)$("news").lastChild.remove()}
@@ -159,7 +157,23 @@ document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>switchPage(b.d
 $("modalcancel").onclick=()=>$("modal").classList.remove("open");$("modalok").onclick=()=>{if(modalAction)modalAction();$("modal").classList.remove("open")};
 $("newgame").onclick=()=>confirm("新しいゲームを開始","現在の進行状況をリセットします。保存していないデータは失われます。",()=>{state=JSON.parse(JSON.stringify(base));cities.forEach((c,i)=>{let original=[14000000,2750000,1970000,9400000,24800000,5900000,12400000,3600000,8900000,2100000,3700000,8800000,3900000,12300000,4400000,5300000,180000,95000,125000];c.pop=original[i]});routeStart=null;mapScale=1;mapX=0;mapY=0;$("news").innerHTML="<div class='newsitem'>新しい会社を設立しました。<small>DAY 1 · SYSTEM</small></div>";render();drawMap();save(true);notify("新しいゲームを開始しました")});
 window.addEventListener("resize",drawMap);
-async function loadWorld(){try{let [topoRes]=await Promise.all([fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")]);if(!topoRes.ok)throw Error("map data unavailable");let topo=await topoRes.json();if(!window.topojson||!window.d3)throw Error("map libraries unavailable");let countries=topojson.feature(topo,topo.objects.countries);world={land:countries,borders:topojson.mesh(topo,topo.objects.countries,(a,b)=>a!==b)};$("mapstatus").textContent="WORLD MAP DATA READY";drawMap()}catch(e){$("mapstatus").textContent="ILLUSTRATED MAP MODE";drawMap()}}
+function loadScript(src){return new Promise((resolve,reject)=>{let script=document.createElement("script"),done=false,timer=setTimeout(()=>finish(new Error("script timeout")),8000);function finish(err){if(done)return;done=true;clearTimeout(timer);if(err){script.remove();reject(err)}else resolve()}script.src=src;script.async=true;script.onload=()=>finish();script.onerror=()=>finish(new Error("script load failed"));document.head.appendChild(script)})}
+async function loadWorld(){try{
+ // The hand-drawn map is rendered immediately. Load the detailed map libraries in the background.
+ await Promise.all([
+  loadScript("https://cdn.jsdelivr.net/npm/topojson-client@3"),
+  loadScript("https://cdn.jsdelivr.net/npm/d3-geo@3")
+ ]);
+ let controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
+ let topoRes;try{topoRes=await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",{signal:controller.signal})}finally{clearTimeout(timeout)}
+ if(!topoRes.ok)throw Error("map data unavailable");
+ let topo=await topoRes.json();
+ if(!window.topojson||!window.d3)throw Error("map libraries unavailable");
+ let countries=topojson.feature(topo,topo.objects.countries);
+ world={land:countries,borders:topojson.mesh(topo,topo.objects.countries,(a,b)=>a!==b)};
+ $("mapstatus").textContent="WORLD MAP DATA READY";drawMap();
+ }catch(e){world=null;$("mapstatus").textContent="ILLUSTRATED MAP MODE · OFFLINE READY";drawMap()}
+}
 function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
 init();
 })();
