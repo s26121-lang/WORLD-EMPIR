@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071321">
+<title>WORLD NEXUS — Build Cities. Connect Nations.</title>
+<style>
+:root{--bg:#071321;--panel:#101f30;--panel2:#15283b;--line:#263d52;--muted:#8da5bb;--text:#edf5fb;--cyan:#55d5e8;--green:#61d6a3;--gold:#f1c66c;--red:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,"Noto Sans JP",system-ui,sans-serif}button{font:inherit;cursor:pointer;color:inherit;border:1px solid var(--line);background:#172a3e;border-radius:9px;padding:9px 12px}button:hover{border-color:var(--cyan);background:#1b354b}button:disabled{opacity:.45;cursor:not-allowed}.app{min-height:100vh;display:grid;grid-template-rows:auto 1fr}.top{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line);background:#091827;gap:12px}.brand{display:flex;align-items:center;gap:12px}.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#42c8dd,#2872a7);display:grid;place-items:center;color:#061421;font-weight:900;font-size:19px}.brand strong{letter-spacing:2px;font-size:16px}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px}.topstats{display:flex;gap:22px;align-items:center}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{font-size:15px;font-variant-numeric:tabular-nums}.positive{color:var(--green)}.layout{display:grid;grid-template-columns:260px minmax(0,1fr) 285px;min-height:calc(100vh - 68px)}.side{background:#0b1a29;padding:17px;border-right:1px solid var(--line);min-width:0}.right{border-right:0;border-left:1px solid var(--line)}.section-title{font-size:10px;color:var(--muted);letter-spacing:1.6px;font-weight:800;margin:3px 0 12px}.nav{display:grid;gap:6px;margin-bottom:22px}.nav button{text-align:left;background:transparent;border-color:transparent;color:#c1d0dc}.nav button.active{background:#16364b;border-color:#28556a;color:#eafaff}.nav button span{display:inline-block;width:25px;color:var(--cyan)}.card{background:linear-gradient(150deg,#14283a,#102033);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px}.card h3{margin:0 0 10px;font-size:13px}.muted{color:var(--muted)}.small{font-size:11px}.big{font-size:23px;font-weight:800;letter-spacing:-.5px}.bar{height:6px;background:#263c50;border-radius:20px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#36b9d2,#6be0bd);width:42%;border-radius:20px}.main{min-width:0;display:flex;flex-direction:column;padding:16px;gap:12px}.map-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.map-head h1{font-size:18px;margin:0}.map-head p{margin:2px 0 0;color:var(--muted);font-size:11px}.map-actions{display:flex;gap:7px;flex-wrap:wrap}.map-actions button{font-size:11px;padding:7px 10px}.map-wrap{position:relative;min-height:430px;flex:1;background:#0a2639;border:1px solid #24465b;border-radius:15px;overflow:hidden;box-shadow:0 15px 45px #0004}.map-wrap canvas{display:block;width:100%;height:100%;min-height:430px;touch-action:none;cursor:grab}.map-wrap canvas.dragging{cursor:grabbing}.map-overlay{position:absolute;pointer-events:none;left:15px;top:14px;background:#071725c9;border:1px solid #35536a;border-radius:9px;padding:8px 11px;font-size:10px;color:#bdd0df;backdrop-filter:blur(8px)}.map-legend{position:absolute;right:14px;bottom:14px;background:#071725d9;border:1px solid #35536a;border-radius:9px;padding:9px 11px;font-size:10px;color:#c4d6e4;display:grid;gap:5px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}.map-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.hint{color:var(--muted);font-size:11px}.primary{background:linear-gradient(120deg,#1b9db4,#287eaa);border-color:#3bc2d5;color:white;font-weight:700}.gold{color:var(--gold)}.city-name{font-size:17px;font-weight:800}.city-country{color:var(--muted);font-size:11px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.detail-cell{background:#0b1a29;border:1px solid #233b50;border-radius:9px;padding:9px}.detail-cell small{display:block;color:var(--muted);font-size:10px}.detail-cell b{font-size:14px}.full{width:100%;margin-top:8px}.feed{display:grid;gap:9px}.feed-item{border-left:2px solid #2f8ca6;padding-left:9px;font-size:11px;color:#c2d1dd}.feed-item time{display:block;color:var(--muted);font-size:10px}.bottomline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{font-size:10px;padding:4px 8px;border:1px solid #345269;border-radius:30px;color:#b8cddd}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#17364a;border:1px solid #4c91a9;border-radius:10px;padding:10px 16px;transition:.25s;z-index:10;box-shadow:0 8px 30px #0008}.toast.show{opacity:1;transform:translate(-50%,0)}.modal-back{position:fixed;inset:0;background:#020912b8;display:none;place-items:center;padding:16px;z-index:20}.modal-back.open{display:grid}.modal{width:min(430px,100%);background:#102236;border:1px solid #36536b;border-radius:16px;padding:20px;box-shadow:0 20px 70px #0009}.modal h2{margin:0 0 8px}.modal p{color:var(--muted);font-size:12px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.route-list{display:grid;gap:7px}.route-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;border-bottom:1px solid #263d52;padding:7px 0}.mobile-tabs{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:220px minmax(0,1fr)}.right{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:12px}.right .section-title{grid-column:1/-1}.right .card{margin:0}.map-wrap{min-height:390px}}
+@media(max-width:700px){.top{height:auto;min-height:62px;padding:10px 13px;align-items:flex-start}.brand strong{font-size:13px}.topstats{gap:10px}.stat b{font-size:12px}.stat small{font-size:9px}.layout{display:flex;flex-direction:column}.side{border-right:0;border-bottom:1px solid var(--line);padding:10px 12px}.side .section-title,.side .card{display:none}.nav{display:flex;overflow:auto;margin:0;gap:5px}.nav button{white-space:nowrap;padding:8px 10px;font-size:11px}.main{padding:11px}.map-wrap,.map-wrap canvas{min-height:390px}.right{display:grid;grid-template-columns:1fr;border-top:1px solid var(--line);padding:12px}.right .section-title{grid-column:auto}.right .card{margin:0}.topstats .stat:nth-child(3){display:none}.map-head h1{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+ <div class="brand"><div class="logo">N</div><div><strong>WORLD NEXUS</strong><small>BUILD CITIES. CONNECT NATIONS.</small></div></div>
+ <div class="topstats">
+  <div class="stat"><small>会社資金</small><b id="money">¥1,000,000,000</b></div>
+  <div class="stat"><small>総人口</small><b id="population">—</b></div>
+  <div class="stat"><small>企業価値</small><b id="value">¥1,000,000,000</b></div>
+  <div class="stat"><small>ゲーム内日付</small><b id="date">2026年 1月 1日</b></div>
+ </div>
+</header>
+<div class="layout">
+<aside class="side">
+ <div class="section-title">COMMAND CENTER</div>
+ <nav class="nav">
+  <button class="active" data-tab="world"><span>◎</span>世界地図</button>
+  <button data-tab="transport"><span>⇄</span>交通ネットワーク</button>
+  <button data-tab="cities"><span>▦</span>都市管理</button>
+  <button data-tab="company"><span>▣</span>企業経営</button>
+ </nav>
+ <div class="card">
+  <h3>会社の成長</h3><div class="muted small">企業レベル <b id="level">1</b></div>
+  <div class="bar"><i id="growthbar"></i></div>
+  <div class="muted small" style="margin-top:8px">次のレベルまで <b id="growthtext">0 / 100</b></div>
+ </div>
+ <div class="card">
+  <h3>本日の経営状況</h3>
+  <div class="muted small">輸送収入</div><div class="big positive" id="income">¥0</div>
+  <div class="muted small" style="margin-top:9px">維持費</div><div class="big" id="cost">¥0</div>
+ </div>
+</aside>
+<main class="main">
+ <div class="map-head"><div><h1 id="viewtitle">世界ネットワーク</h1><p id="viewdesc">都市を選択して、世界をつなぐ最初の一歩を踏み出そう。</p></div>
+ <div class="map-actions"><button id="zoomout">−</button><button id="zoomlevel">100%</button><button id="zoomin">＋</button><button id="resetview">全体表示</button></div></div>
+ <div class="map-wrap"><canvas id="world" aria-label="世界地図。都市をクリックして選択できます"></canvas>
+  <div class="map-overlay">EARTH • GLOBAL VIEW<br><span id="mapdate">2026.01.01 / DAY 1</span></div>
+  <div class="map-legend"><span><i class="dot" style="background:#62d9bd"></i>都市</span><span><i class="dot" style="background:#f3c86d"></i>自社拠点</span><span><i class="dot" style="background:#56d5e8"></i>鉄道路線</span></div>
+ </div>
+ <div class="map-bottom"><div class="hint" id="maphint">都市マーカーをクリックすると詳細を確認できます。ドラッグで地図を移動。</div><div class="bottomline"><span class="pill" id="modepill">選択モード</span><button id="buildmode" class="primary">＋ 駅を建設</button><button id="routeMode">路線を引く</button></div></div>
+</main>
+<aside class="side right">
+ <div class="section-title">CITY / NETWORK DETAILS</div>
+ <div class="card" id="citycard">
+  <div class="muted small">選択中の都市</div><div class="city-name" id="cityname">東京</div><div class="city-country" id="citycountry">日本 • アジア</div>
+  <div class="detail-grid">
+   <div class="detail-cell"><small>人口</small><b id="citypop">1,400万人</b></div>
+   <div class="detail-cell"><small>経済指数</small><b id="cityecon">92</b></div>
+   <div class="detail-cell"><small>駅・拠点</small><b id="citystations">0</b></div>
+   <div class="detail-cell"><small>交通需要</small><b id="citydemand">高</b></div>
+  </div>
+  <button class="full primary" id="citybuild">この都市に駅を建設</button>
+ </div>
+ <div class="card" id="networkcard"><h3>自社ネットワーク</h3><div class="route-list" id="routes"><div class="muted small">まだ路線がありません。</div></div></div>
+ <div class="card"><h3>世界のニュース</h3><div class="feed" id="news"><div class="feed-item">WORLD NEXUSへようこそ。あなたの会社の歴史がここから始まります。<time>DAY 1</time></div></div></div>
+</aside>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-back" id="modal"><div class="modal"><h2 id="modaltitle">確認</h2><p id="modaltext"></p><div class="modal-actions"><button id="cancelmodal">キャンセル</button><button class="primary" id="confirmmodal">実行する</button></div></div></div>
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id), fmt=n=>"¥"+Math.round(n).toLocaleString("ja-JP"), compact=n=>n>=1e8?(n/1e8).toFixed(1)+"億人":n>=1e4?(n/1e4).toFixed(0)+"万人":Math.round(n).toLocaleString()+"人";
+const cities=[
+{id:"tokyo",name:"東京",country:"日本",region:"アジア",lat:35.68,lon:139.69,pop:14000000,econ:92,demand:5,fictional:false},
+{id:"osaka",name:"大阪",country:"日本",region:"アジア",lat:34.69,lon:135.50,pop:2750000,econ:84,demand:4,fictional:false},
+{id:"singapore",name:"シンガポール",country:"シンガポール",region:"アジア",lat:1.35,lon:103.82,pop:5900000,econ:90,demand:5,fictional:false},
+{id:"seoul",name:"ソウル",country:"韓国",region:"アジア",lat:37.56,lon:126.98,pop:9400000,econ:88,demand:5,fictional:false},
+{id:"shanghai",name:"上海",country:"中国",region:"アジア",lat:31.23,lon:121.47,pop:24800000,econ:95,demand:5,fictional:false},
+{id:"mumbai",name:"ムンバイ",country:"インド",region:"アジア",lat:19.07,lon:72.87,pop:12400000,econ:79,demand:5,fictional:false},
+{id:"dubai",name:"ドバイ",country:"UAE",region:"中東",lat:25.20,lon:55.27,pop:3600000,econ:89,demand:4,fictional:false},
+{id:"london",name:"ロンドン",country:"イギリス",region:"ヨーロッパ",lat:51.50,lon:-0.12,pop:8900000,econ:96,demand:5,fictional:false},
+{id:"paris",name:"パリ",country:"フランス",region:"ヨーロッパ",lat:48.86,lon:2.35,pop:2100000,econ:93,demand:5,fictional:false},
+{id:"berlin",name:"ベルリン",country:"ドイツ",region:"ヨーロッパ",lat:52.52,lon:13.40,pop:3700000,econ:88,demand:4,fictional:false},
+{id:"newyork",name:"ニューヨーク",country:"アメリカ",region:"北アメリカ",lat:40.71,lon:-74.00,pop:8800000,econ:99,demand:5,fictional:false},
+{id:"la",name:"ロサンゼルス",country:"アメリカ",region:"北アメリカ",lat:34.05,lon:-118.24,pop:3900000,econ:91,demand:4,fictional:false},
+{id:"saopaulo",name:"サンパウロ",country:"ブラジル",region:"南アメリカ",lat:-23.55,lon:-46.63,pop:12300000,econ:82,demand:5,fictional:false},
+{id:"nairobi",name:"ナイロビ",country:"ケニア",region:"アフリカ",lat:-1.29,lon:36.82,pop:4400000,econ:69,demand:3,fictional:false},
+{id:"sydney",name:"シドニー",country:"オーストラリア",region:"オセアニア",lat:-33.87,lon:151.21,pop:5300000,econ:91,demand:4,fictional:false},
+{id:"nexusbay",name:"ネクサス・ベイ",country:"架空都市",region:"太平洋",lat:15,lon:170,pop:180000,econ:62,demand:3,fictional:true},
+{id:"aurora",name:"オーロラ・シティ",country:"架空都市",region:"北大西洋",lat:61,lon:-28,pop:95000,econ:58,demand:2,fictional:true}
+];
+const land=[
+[[-168,70],[-150,72],[-132,62],[-124,50],[-117,32],[-105,22],[-97,17],[-82,9],[-77,25],[-65,45],[-52,55],[-60,68],[-90,75],[-120,73],[-145,75]],
+[[-81,12],[-68,9],[-50,-2],[-35,-8],[-42,-25],[-52,-45],[-68,-56],[-76,-35],[-80,-10]],
+[[-11,72],[25,71],[55,60],[65,48],[48,35],[35,30],[30,10],[12,-5],[-5,5],[-17,30],[-10,48]],
+[[35,70],[70,75],[110,68],[150,60],[178,52],[160,40],[140,35],[125,20],[105,5],[80,8],[60,25],[45,38],[35,55]],
+[[112,-11],[130,-12],[150,-20],[154,-35],[138,-42],[115,-34]],
+[[-52,82],[-20,80],[-18,60],[-42,58],[-58,68]]
+];
+let state={money:1000000000,day:1,date:"2026-01-01",income:0,cost:0,selected:"tokyo",stations:[],routes:[],mode:"select",level:1,xp:0,zoom:1,panX:0,panY:0,paused:false};
+const canvas=$("world"),ctx=canvas.getContext("2d");let W=1000,H=520,dpr=1,drag=null,modalAction=null;
+const totalPop=()=>cities.reduce((s,c)=>s+c.pop,0);
+function project(lon,lat){return{x:(lon+180)/360*W,y:(90-lat)/180*H}}
+function screenPoint(lon,lat){const p=project(lon,lat);return{x:(p.x-W/2)*state.zoom+W/2+state.panX,y:(p.y-H/2)*state.zoom+H/2+state.panY}}
+function draw(){
+ const rect=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);const nw=Math.max(1,Math.floor(rect.width*dpr)),nh=Math.max(1,Math.floor(rect.height*dpr));if(canvas.width!==nw||canvas.height!==nh){canvas.width=nw;canvas.height=nh}W=rect.width;H=rect.height;ctx.setTransform(dpr,0,0,dpr,0,0);
+ const sx=W/1000,sy=H/520;ctx.fillStyle="#09283b";ctx.fillRect(0,0,W,H);ctx.save();ctx.scale(sx,sy);ctx.translate(500,260);ctx.scale(state.zoom,state.zoom);ctx.translate(-500+state.panX/sx,-260+state.panY/sy);
+ // ocean grid
+ ctx.strokeStyle="rgba(93,170,194,.10)";ctx.lineWidth=1;for(let lon=-180;lon<=180;lon+=30){let x=(lon+180)/360*1000;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,520);ctx.stroke()}for(let lat=-60;lat<=60;lat+=30){let y=(90-lat)/180*520;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(1000,y);ctx.stroke()}
+ // land masses
+ land.forEach(poly=>{ctx.beginPath();poly.forEach((p,i)=>{let q=project(p[0],p[1]);i?ctx.lineTo(q.x/ W*1000,q.y/H*520):ctx.moveTo(q.x/W*1000,q.y/H*520)});ctx.closePath();ctx.fillStyle="#254c54";ctx.fill();ctx.strokeStyle="#47736e";ctx.lineWidth=1.2;ctx.stroke()});
+ // subtle country-like divisions
+ ctx.strokeStyle="rgba(143,190,164,.17)";ctx.lineWidth=.7;for(let i=0;i<18;i++){let x=70+i*49;ctx.beginPath();ctx.moveTo(x,70+(i%4)*13);ctx.lineTo(x+20,240+(i%3)*25);ctx.stroke()}
+ // route lines
+ state.routes.forEach(r=>{const a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);if(!a||!b)return;const p=project(a.lon,a.lat),q=project(b.lon,b.lat);ctx.beginPath();ctx.moveTo(p.x/W*1000,p.y/H*520);ctx.lineTo(q.x/W*1000,q.y/H*520);ctx.strokeStyle="#54d4e8";ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.stroke();ctx.setLineDash([])});
+ // stations
+ state.stations.forEach(id=>{let c=cities.find(x=>x.id===id);if(!c)return;let p=project(c.lon,c.lat);ctx.beginPath();ctx.arc(p.x/W*1000,p.y/H*520,7,0,Math.PI*2);ctx.fillStyle="#f0c66e";ctx.fill();ctx.strokeStyle="#fff0c5";ctx.lineWidth=2;ctx.stroke()});
+ // city markers
+ cities.forEach(c=>{let p=project(c.lon,c.lat),x=p.x/W*1000,y=p.y/H*520,selected=c.id===state.selected,owned=state.stations.includes(c.id);ctx.beginPath();ctx.arc(x,y,selected?7:owned?5.5:4,0,Math.PI*2);ctx.fillStyle=selected?"#fff":owned?"#f0c66e":c.fictional?"#b69aff":"#62d9bd";ctx.fill();ctx.strokeStyle=selected?"#55d5e8":"#0b2839";ctx.lineWidth=selected?3:1.5;ctx.stroke();if(selected||owned||state.zoom>1.25){ctx.font="bold 11px system-ui";ctx.textAlign="left";ctx.fillStyle="#e9f4f6";ctx.shadowColor="#062033";ctx.shadowBlur=5;ctx.fillText(c.name,x+9,y-8);ctx.shadowBlur=0}});
+ ctx.restore();$("zoomlevel").textContent=Math.round(state.zoom*100)+"%";
+}
+function city(){return cities.find(c=>c.id===state.selected)||cities[0]}
+function update(){
+ $("money").textContent=fmt(state.money);$("population").textContent=compact(totalPop());$("value").textContent=fmt(state.money+state.stations.length*50000000+state.routes.length*120000000);$("date").textContent=state.date.replaceAll("-","年 ").replace(/年 (\d+)年/,"年 $1月").replace(/-(\d+)/,"月 $1日");
+ $("income").textContent=fmt(state.income);$("cost").textContent=fmt(state.cost);$("level").textContent=state.level;$("growthtext").textContent=state.xp+" / "+(state.level*100);$("growthbar").style.width=Math.min(100,state.xp/(state.level*100)*100)+"%";
+ $("mapdate").textContent=state.date.replaceAll("-",".")+" / DAY "+state.day;
+ const c=city();$("cityname").textContent=c.name;$("citycountry").textContent=c.country+" • "+c.region+(c.fictional?" • 架空都市":"");$("citypop").textContent=compact(c.pop);$("cityecon").textContent=c.econ;$("citystations").textContent=state.stations.includes(c.id)?"1":"0";$("citydemand").textContent=["低","やや低","普通","中","高","非常に高"][c.demand];
+ $("routes").innerHTML=state.routes.length?state.routes.map(r=>{let a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);return '<div class="route-row"><span>'+a.name+' ⇄ '+b.name+'</span><b class="positive">'+fmt(r.daily)+'/日</b></div>'}).join(""):'<div class="muted small">まだ路線がありません。2都市に駅を建設して路線を引こう。</div>';
+ $("modepill").textContent=state.mode==="build"?"駅建設モード":state.mode==="route"?"路線接続モード":"選択モード";$("buildmode").classList.toggle("primary",state.mode==="build");$("routeMode").classList.toggle("primary",state.mode==="route");
+ $("maphint").textContent=state.mode==="build"?"駅を建設したい都市をクリックしてください。":state.mode==="route"?"駅のある都市を2つ選択して路線を接続します。":"都市マーカーをクリックすると詳細を確認できます。ドラッグで地図を移動。";
+}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300)}
+function news(msg){const n=$("news"),d=document.createElement("div");d.className="feed-item";d.textContent=msg;const time=document.createElement("time");time.textContent="DAY "+state.day;d.appendChild(time);n.prepend(d);while(n.children.length>4)n.lastChild.remove()}
+function select(id){state.selected=id;update();draw()}
+function build(id){let c=cities.find(x=>x.id===id);if(state.stations.includes(id)){toast(c.name+"にはすでに駅があります");return}const price=50000000;if(state.money<price){toast("資金が足りません（建設費 ¥5,000万）");return}state.money-=price;state.stations.push(id);state.xp+=35;news(c.name+"に新しい駅を建設しました");toast(c.name+"に駅を建設しました！");state.mode="select";update();draw();save()}
+function clickCity(id){if(state.mode==="build"){build(id);return}if(state.mode==="route"){if(!state.stations.includes(id)){toast("先にこの都市へ駅を建設してください");return}if(!window.routeStart){window.routeStart=id;select(id);toast("接続先の駅がある都市を選んでください");return}if(window.routeStart===id){toast("別の都市を選んでください");return}let exists=state.routes.some(r=>(r.a===window.routeStart&&r.b===id)||(r.a===id&&r.b===window.routeStart));if(exists){toast("この路線はすでに存在します");window.routeStart=null;return}let a=cities.find(c=>c.id===window.routeStart),b=cities.find(c=>c.id===id),distance=Math.round(Math.hypot((a.lon-b.lon)*Math.cos((a.lat+b.lat)/2*Math.PI/180),a.lat-b.lat)*111);let price=distance*90000;if(state.money<price){toast("路線建設の資金が足りません。必要額 "+fmt(price));window.routeStart=null;return}state.money-=price;let daily=Math.round((a.pop+b.pop)/3000*(a.demand+b.demand)*1200);state.routes.push({a:a.id,b:b.id,distance,price,daily});state.xp+=60;news(a.name+"〜"+b.nameの鉄道路線が開通しました");toast("新路線が開通！ 距離 "+distance.toLocaleString()+" km");window.routeStart=null;state.mode="select";update();draw();save();return}select(id)}
+function hit(x,y){let best=null,dist=18;for(const c of cities){let p=screenPoint(c.lon,c.lat),d=Math.hypot(p.x/W*canvas.clientWidth-x,p.y/H*canvas.clientHeight-y);if(d<dist){dist=d;best=c}}return best}
+function resize(){draw()}
+canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY,moved:false};canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener("pointermove",e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>4)drag.moved=true;if(drag.moved){state.panX=drag.px+dx;state.panY=drag.py+dy;canvas.classList.add("dragging");draw()}});
+canvas.addEventListener("pointerup",e=>{if(!drag)return;let moved=drag.moved;drag=null;canvas.classList.remove("dragging");if(!moved){let r=canvas.getBoundingClientRect(),c=hit(e.clientX-r.left,e.clientY-r.top);if(c)clickCity(c.id)}});
+canvas.addEventListener("pointercancel",()=>{drag=null;canvas.classList.remove("dragging")});
+function zoom(f){state.zoom=Math.max(.75,Math.min(3,state.zoom*f));draw()}
+$("zoomin").onclick=()=>zoom(1.2);$("zoomout").onclick=()=>zoom(.83);$("resetview").onclick=()=>{state.zoom=1;state.panX=0;state.panY=0;draw()};$("buildmode").onclick=()=>{state.mode=state.mode==="build"?"select":"build";update()};$("routeMode").onclick=()=>{window.routeStart=null;state.mode=state.mode==="route"?"select":"route";update()};
+$("citybuild").onclick=()=>build(state.selected);
+$("cancelmodal").onclick=()=>$("modal").classList.remove("open");
+$("confirmmodal").onclick=()=>{if(modalAction)modalAction();$("modal").classList.remove("open")};
+function showModal(title,text,action){$("modaltitle").textContent=title;$("modaltext").textContent=text;modalAction=action;$("modal").classList.add("open")}
+function save(){try{localStorage.setItem("worldNexusSave",JSON.stringify(state));toast("ゲームを保存しました")}catch(e){toast("保存できませんでした")}}
+function load(){try{let s=JSON.parse(localStorage.getItem("worldNexusSave"));if(s&&typeof s.money==="number"){state={...state,...s};update();draw();toast("セーブデータを読み込みました")}else toast("セーブデータがありません")}catch(e){toast("セーブデータを読み込めませんでした")}}
+$("news").addEventListener("click",()=>{});
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");const tab=b.dataset.tab;const titles={world:["世界ネットワーク","都市を選択して、世界をつなぐ最初の一歩を踏み出そう。"],transport:["交通ネットワーク","駅を建設し、都市同士を鉄道路線で接続しよう。"],cities:["都市管理","世界の都市の人口・経済・交通需要を確認しよう。"],company:["企業経営","会社の資金・収益・成長を管理しよう。"]};$("viewtitle").textContent=titles[tab][0];$("viewdesc").textContent=titles[tab][1];if(tab==="transport")state.mode="route";else if(state.mode==="route")state.mode="select";update()});
+function advanceDay(){state.day++;let d=new Date(state.date+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+1);state.date=d.toISOString().slice(0,10);state.income=state.routes.reduce((s,r)=>s+r.daily,0);state.cost=state.stations.length*65000+state.routes.length*120000;let profit=state.income-state.cost;state.money+=profit;state.xp+=Math.max(1,Math.floor(Math.max(0,profit)/1000000));cities.forEach(c=>{c.pop=Math.round(c.pop*(1+(c.econ/10000))) });if(state.xp>=state.level*100){state.xp-=state.level*100;state.level++;news("会社がレベル "+state.level+" に成長しました！")}if(state.day%10===0)news("世界経済レポート：輸送需要が更新されました");update();draw();saveQuiet()}
+function saveQuiet(){try{localStorage.setItem("worldNexusSave",JSON.stringify(state))}catch(e){}}
+document.addEventListener("keydown",e=>{if(e.key==="+"||e.key==="=")zoom(1.15);if(e.key==="-")zoom(.87);if(e.key==="Escape"){state.mode="select";window.routeStart=null;update()}});
+function init(){const saved=localStorage.getItem("worldNexusSave");if(saved){try{const s=JSON.parse(saved);if(s&&typeof s.money==="number")state={...state,...s}}catch(e){}}update();draw();window.addEventListener("resize",resize);setInterval(()=>{if(!state.paused)advanceDay()},15000)}
+init();
+})();
+</script>
+</body></html>
