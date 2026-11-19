@@ -165,6 +165,7 @@ function updateMapTooltip(c,clientX,clientY){
  mapTooltip.style.top=Math.max(8,Math.min(rect.height-76,py))+"px";
  mapTooltip.classList.add("visible");
 }
+function scheduleMapPulse(){if(mapFrame||!state.stations.length)return;mapFrame=requestAnimationFrame(t=>{mapFrame=0;if(t-lastPulseDraw>=48){lastPulseDraw=t;drawMap()}else scheduleMapPulse()})}
 function drawMap(){
  let size=projectSetup();if(!size||size.w<2||size.h<2)return;
  let w=size.w,h=size.h;ctx.clearRect(0,0,w,h);
@@ -208,7 +209,7 @@ function drawMap(){
  });
  ctx.restore();
  $("mapstatus").textContent=(world?"WORLD ATLAS · ":"TACTICAL VECTOR MAP · ")+cities.length+" CITIES · "+state.stations.length+" STATIONS";
- if(state.stations.length&&!mapFrame){mapFrame=requestAnimationFrame(t=>{mapFrame=0;if(t-lastPulseDraw>35){lastPulseDraw=t;drawMap()}else if(state.stations.length)drawMap()})}
+ scheduleMapPulse();
 }
 function hitCity(clientX,clientY){let r=canvas.getBoundingClientRect(),x=clientX-r.left,y=clientY-r.top,w=r.width,h=r.height,proj=mapProjection(w,h),best=null,dist=14;for(let c of cities){let p=mapXY(c,proj,w,h),sx=(p[0]-w/2)*mapScale+w/2+mapX,sy=(p[1]-h/2)*mapScale+h/2+mapY,d=Math.hypot(sx-x,sy-y);if(d<dist){dist=d;best=c}}return best}
 canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,ox:mapX,oy:mapY,moved:false};canvas.setPointerCapture(e.pointerId)});
