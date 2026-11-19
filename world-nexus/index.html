@@ -507,7 +507,7 @@ function drawCityMap(){
   if(station.id===localRouteStart){context.beginPath();context.arc(station.x,station.y,36,0,Math.PI*2);context.strokeStyle="#fff";context.lineWidth=3;context.stroke()}
  });
  // Multiple vehicles travel both ways along each local route. Underground trains are translucent.
- if(zoom>=.48){
+ if(zoom>=.28){
   routes.forEach((route,routeIndex)=>{
    const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
    const type=transitCatalog[route.mode]||transitCatalog.subway,routePath=localRoutePath(route,a,b,layout);
