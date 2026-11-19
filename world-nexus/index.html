@@ -133,7 +133,7 @@ const cities=[
 ];
 const base={money:1000000000,day:1,date:"2026-01-01",selected:"tokyo",stations:[],routes:[],localStations:{},localRoutes:[],localBuildings:{},localRouteType:"subway",level:1,xp:0,totalProfit:0,paused:false,speed:1,mode:"select"};
 let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null,cityMapCanvas=$("citymapcanvas"),cityMapCtx=cityMapCanvas.getContext("2d"),cityMiniCanvas=$("cityMiniMap"),cityMiniCtx=cityMiniCanvas.getContext("2d"),localMapMode="view",localRouteStart=null,localMapSeedCache={},localCityCamera={x:950,y:1000,zoom:.34},localPan=null,localVehicleFrame=0;
-const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), localStationTotal=()=>Object.values(state.localStations||{}).reduce((n,list)=>n+(Array.isArray(list)?list.length:0),0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0)+(state.localRoutes||[]).reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000+localStationTotal()*12000+(state.localRoutes||[]).length*18000, valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000+localStationTotal()*4500000+(state.localRoutes||[]).length*12000000;
+const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), localStationTotal=()=>Object.values(state.localStations||{}).reduce((n,list)=>n+(Array.isArray(list)?list.length:0),0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0)+(state.localRoutes||[]).reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000+Object.values(state.localStations||{}).reduce((sum,list)=>sum+(list||[]).reduce((n,s)=>n+(transitCatalog[s.type]?.maintenance||12000),0),0)+(state.localRoutes||[]).reduce((sum,r)=>sum+(r.maintenance||18000),0), valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000+localStationTotal()*4500000+(state.localRoutes||[]).length*12000000;
 function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 function addNews(s){let el=document.createElement("div");el.className="newsitem";el.append(document.createTextNode(s));let sm=document.createElement("small");sm.textContent="DAY "+state.day+" · WORLD NEXUS";el.append(sm);$("news").prepend(el);while($("news").children.length>4)$("news").lastChild.remove()}
 function city(){return cities.find(c=>c.id===state.selected)||cities[0]}
@@ -178,154 +178,277 @@ function closeCityMap(){
  $("pagesub").textContent="地球規模の交通網を築き、都市と都市をつなごう。";
  drawMap();
 }
-function cityMapRandom(seed){
- let value=seed>>>0;return ()=>{value=(value*1664525+1013904223)>>>0;return value/4294967296};
-}
+const CITY_WORLD_SIZE=4000;
+const transitCatalog={
+ bus:{name:"路線バス",cost:2800000,maintenance:18000,capacity:800,speed:35,color:"#f2b84b",fare:190,kind:"line"},
+ lrt:{name:"路面電車 / LRT",cost:9000000,maintenance:45000,capacity:2600,speed:55,color:"#8bd36e",fare:260,kind:"line"},
+ subway:{name:"地下鉄",cost:25000000,maintenance:110000,capacity:12000,speed:80,color:"#00f2fe",fare:320,kind:"line"},
+ monorail:{name:"モノレール",cost:18000000,maintenance:70000,capacity:4500,speed:65,color:"#c18bff",fare:300,kind:"line"},
+ ferry:{name:"水上バス / フェリー",cost:8000000,maintenance:35000,capacity:1800,speed:45,color:"#46b6ff",fare:280,kind:"line"},
+ hsr:{name:"新幹線 / 高速鉄道駅",cost:150000000,maintenance:300000,capacity:18000,speed:240,color:"#ff805c",fare:1800,kind:"hub"},
+ airport:{name:"国際空港",cost:500000000,maintenance:1200000,capacity:35000,speed:650,color:"#ffca63",fare:3800,kind:"hub"},
+ port:{name:"旅客・貿易港",cost:250000000,maintenance:450000,capacity:15000,speed:50,color:"#61d9c3",fare:1200,kind:"hub"}
+};
+const buildingCatalog={
+ office:{name:"超高層オフィスビル",zone:"business",cost:22000000,demand:1800,color:"#56cde2",w:62,h:88,icon:"▥"},
+ mall:{name:"ショッピングモール",zone:"commercial",cost:16000000,demand:2400,color:"#4ac4b0",w:90,h:65,icon:"▦"},
+ finance:{name:"金融センター",zone:"business",cost:30000000,demand:2100,color:"#75d6e9",w:72,h:92,icon:"▤"},
+ hotel:{name:"高級ホテル",zone:"tourism",cost:14000000,demand:1300,color:"#d6b56f",w:58,h:72,icon:"▣"},
+ tower:{name:"タワーマンション",zone:"residential",cost:18000000,demand:1600,color:"#69a9d9",w:58,h:84,icon:"▥"},
+ housing:{name:"一般住宅街",zone:"residential",cost:6500000,demand:1100,color:"#5d9bc8",w:82,h:56,icon:"⌂"},
+ newtown:{name:"郊外ニュータウン",zone:"residential",cost:26000000,demand:3100,color:"#6e9fbe",w:112,h:78,icon:"⌂"},
+ factory:{name:"工場・工業団地",zone:"industry",cost:19000000,demand:900,color:"#9586d7",w:96,h:68,icon:"▧"},
+ warehouse:{name:"大型物流倉庫",zone:"industry",cost:12000000,demand:750,color:"#9b8bdc",w:82,h:58,icon:"▤"},
+ power:{name:"発電所",zone:"industry",cost:38000000,demand:350,color:"#c18bff",w:96,h:74,icon:"ϟ"},
+ university:{name:"大学・研究学園都市",zone:"public",cost:28000000,demand:2800,color:"#68d4c0",w:100,h:78,icon:"⚑"},
+ hospital:{name:"総合病院",zone:"public",cost:24000000,demand:2100,color:"#ea8caa",w:82,h:70,icon:"✚"},
+ stadium:{name:"サッカースタジアム・ドーム",zone:"tourism",cost:65000000,demand:5200,color:"#d7ad63",w:120,h:92,icon:"◉"},
+ landmark:{name:"観光名所",zone:"tourism",cost:42000000,demand:3600,color:"#e1b65d",w:70,h:96,icon:"♜"},
+ park:{name:"大型公園",zone:"public",cost:15000000,demand:1250,color:"#55b98e",w:110,h:90,icon:"❋"}
+};
+function cityMapRandom(seed){let v=seed>>>0;return ()=>{v=(v*1664525+1013904223)>>>0;return v/4294967296}}
 function cityMapLayout(c){
  if(localMapSeedCache[c.id])return localMapSeedCache[c.id];
  let seed=0;for(const ch of c.id)seed=(seed*31+ch.charCodeAt(0))>>>0;
- const random=cityMapRandom(seed||12345),riverAxis=Math.floor(random()*3),riverShift=(random()-.5)*.22;
- const airportSide=random()>.5?"left":"right",portSide=random()>.5?"top":"bottom";
- const cbd={x:.46+(random()-.5)*.1,y:.43+(random()-.5)*.12,w:.23,h:.20};
- const residential=[
-  {x:.18+random()*.08,y:.20+random()*.08,w:.23,h:.20},
-  {x:.16+random()*.08,y:.58+random()*.08,w:.25,h:.19},
-  {x:.65+random()*.04,y:.20+random()*.06,w:.22,h:.20},
-  {x:.65+random()*.04,y:.60+random()*.06,w:.22,h:.20}
+ const rand=cityMapRandom(seed||12345),riverAxis=Math.floor(rand()*3),riverShift=(rand()-.5)*.16;
+ const zones=[
+  {id:"cbd",name:"中心業務地区",x:1650+rand()*280,y:1650+rand()*300,w:720,h:560,color:"#55d8e7"},
+  {id:"res-nw",name:"北西住宅地区",x:400+rand()*180,y:450+rand()*150,w:900,h:700,color:"#5ba9dc"},
+  {id:"res-sw",name:"南西住宅地区",x:350+rand()*230,y:2700+rand()*150,w:1000,h:680,color:"#5ba9dc"},
+  {id:"res-ne",name:"北東住宅地区",x:2850+rand()*100,y:500+rand()*180,w:800,h:680,color:"#5ba9dc"},
+  {id:"res-se",name:"南東住宅地区",x:2800+rand()*130,y:2800+rand()*130,w:800,h:650,color:"#5ba9dc"},
+  {id:"airport",name:"国際空港地区",x:3000+rand()*150,y:1650+rand()*200,w:720,h:570,color:"#d9ad63"},
+  {id:"port",name:"港湾・物流地区",x:1200+rand()*180,y:3300+rand()*100,w:1050,h:450,color:"#d9ad63"},
+  {id:"industrial",name:"工業地区",x:250+rand()*180,y:1550+rand()*180,w:780,h:680,color:"#8b80df"},
+  {id:"university",name:"研究・学園地区",x:2350+rand()*170,y:950+rand()*170,w:650,h:500,color:"#68d4c0"},
+  {id:"tourism",name:"観光・娯楽地区",x:2450+rand()*180,y:2400+rand()*150,w:760,h:520,color:"#d7ad63"}
  ];
- const airport={x:airportSide==="left"?.035:.79,y:.40+random()*.1,w:.17,h:.19};
- const port={x:.36+random()*.1,y:portSide==="top"?.035:.77,w:.20,h:.15};
- const industrial={x:airportSide==="left"?.72:.10,y:portSide==="top"?.72:.10,w:.17,h:.15};
- const commercial={x:.38+random()*.18,y:.70+random()*.04,w:.20,h:.12};
- return localMapSeedCache[c.id]={seed,riverAxis,riverShift,airportSide,portSide,cbd,residential,airport,port,industrial,commercial};
+ return localMapSeedCache[c.id]={seed,riverAxis,riverShift,zones};
 }
-function roundLocalRect(ctx,x,y,w,h,r){
- ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
- ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+function generateCityBuildings(c){
+ const current=localBuildingsFor(c.id);if(current.length)return current;
+ const layout=cityMapLayout(c),rand=cityMapRandom(layout.seed^0x5f3759df),buildings=[];
+ layout.zones.forEach((zone,zi)=>{
+  const count=zi===0?35:zi>=5?13:24;
+  for(let i=0;i<count;i++){
+   let kind;
+   if(zone.id.startsWith("res-"))kind=rand()<.18?"tower":rand()<.24?"newtown":"housing";
+   else if(zone.id==="airport"||zone.id==="port")kind=rand()<.65?"warehouse":"hotel";
+   else if(zone.id==="industrial")kind=rand()<.65?"factory":"warehouse";
+   else if(zone.id==="university")kind=rand()<.55?"university":"housing";
+   else if(zone.id==="tourism")kind=rand()<.45?"landmark":rand()<.6?"stadium":"hotel";
+   else {const choices=["office","office","mall","finance","hotel","tower"];kind=choices[Math.floor(rand()*choices.length)]}
+   const def=buildingCatalog[kind],pad=30;
+   buildings.push({id:"auto-"+c.id+"-"+buildings.length,type:kind,x:zone.x+pad+rand()*Math.max(30,zone.w-def.w-pad*2),y:zone.y+pad+rand()*Math.max(30,zone.h-def.h-pad*2),w:def.w,h:def.h,auto:true});
+  }
+ });
+ state.localBuildings[c.id]=buildings;return buildings;
+}
+function clampLocalCamera(){
+ const vw=cityMapCanvas.clientWidth||800,vh=cityMapCanvas.clientHeight||520,z=localCityCamera.zoom;
+ localCityCamera.x=Math.max(0,Math.min(CITY_WORLD_SIZE-vw/z,localCityCamera.x));
+ localCityCamera.y=Math.max(0,Math.min(CITY_WORLD_SIZE-vh/z,localCityCamera.y));
+}
+function screenToCityWorld(clientX,clientY){
+ const r=cityMapCanvas.getBoundingClientRect();
+ return {x:(clientX-r.left)/localCityCamera.zoom+localCityCamera.x,y:(clientY-r.top)/localCityCamera.zoom+localCityCamera.y};
+}
+function cityZoomAt(factor,sx,sy){
+ const r=cityMapCanvas.getBoundingClientRect(),px=sx??r.width/2,py=sy??r.height/2;
+ const anchor={x:localCityCamera.x+px/localCityCamera.zoom,y:localCityCamera.y+py/localCityCamera.zoom};
+ localCityCamera.zoom=Math.max(.12,Math.min(2.4,localCityCamera.zoom*factor));
+ localCityCamera.x=anchor.x-px/localCityCamera.zoom;localCityCamera.y=anchor.y-py/localCityCamera.zoom;
+ clampLocalCamera();drawCityMap();
+}
+function resetCityCamera(){localCityCamera={x:800,y:850,zoom:.34};clampLocalCamera();drawCityMap()}
+function roundLocalRect(context,x,y,w,h,r){
+ context.beginPath();context.moveTo(x+r,y);context.arcTo(x+w,y,x+w,y+h,r);context.arcTo(x+w,y+h,x,y+h,r);
+ context.arcTo(x,y+h,x,y,r);context.arcTo(x,y,x+w,y,r);context.closePath();
 }
 function renderCityMapUI(){
- const c=city(),stations=localStationsFor(c.id),routes=localRoutesFor(c.id);
- $("localBreadcrumbName").textContent=c.name;$("localMapTitle").textContent=c.name.toUpperCase()+" / LOCAL DISTRICT MAP";
- $("localMapSub").textContent=c.country.toUpperCase()+" · URBAN GRID / DEVELOPMENT ZONES";
- $("localStationCount").textContent=stations.length;$("localRouteCount").textContent=routes.length;
+ const c=city(),stations=localStationsFor(c.id),routes=localRoutesFor(c.id),buildings=generateCityBuildings(c);
+ $("localBreadcrumbName").textContent=c.name;$("localMapTitle").textContent=c.name.toUpperCase()+" / METROPOLITAN AREA";
+ $("localMapSub").textContent="4,000 × 4,000 VIRTUAL CITY · PAN / ZOOM / LOD";
+ $("localStationCount").textContent=stations.length;$("localRouteCount").textContent=routes.length;$("localBuildingCount").textContent=buildings.length;
  $("localEconomyValue").textContent=c.econ+" / 100";$("localDemandValue").textContent=c.demand+" / 5";
+ const type=transitCatalog[$("localTransportType").value]||transitCatalog.subway;
+ $("localBuildCost").textContent=money(type.cost);
+ $("localBuildSpec").textContent="維持費 "+money(type.maintenance)+"/日 · 輸送力 "+num(type.capacity)+"/日 · "+type.speed+" km/h";
  $("localBuildStation").classList.toggle("primary",localMapMode==="station");
  $("localBuildRoute").classList.toggle("primary",localMapMode==="route");
- $("localRouteSubway").classList.toggle("active",state.localRouteType==="subway");
- $("localRouteBus").classList.toggle("active",state.localRouteType==="bus");
- $("localMapHint").textContent=localMapMode==="station"?"建設したい場所をクリックしてください。駅の建設費は ¥8,000,000 です。":
-  localMapMode==="route"?(localRouteStart?"接続先となる2つ目の市内駅をクリックしてください。":"路線の起点となる市内駅をクリックしてください。"):
-  "エリアをクリックして市内駅を建設。駅を2か所選ぶと市内路線を接続できます。";
+ $("localBuildBuilding").classList.toggle("primary",localMapMode==="building");
+ $("localMapHint").textContent=localMapMode==="station"?"選択した交通施設を置く場所をクリック。建設コストは上部に表示。":
+  localMapMode==="route"?(localRouteStart?"接続先となる2つ目の交通施設をクリックしてください。":"路線の起点となる交通施設をクリックしてください。"):
+  localMapMode==="building"?"選択した建物を配置する場所をクリックしてください。":"ドラッグで移動、ホイールまたは＋／−でズーム。ズームインすると建物・駅名・車両が表示されます。";
+ $("cityMapCoords").textContent="X "+Math.round(localCityCamera.x)+" · Y "+Math.round(localCityCamera.y)+" · ZOOM "+localCityCamera.zoom.toFixed(2)+"×";
+}
+function drawMiniMap(){
+ if($("cityMapView").hidden)return;
+ const r=cityMiniCanvas.getBoundingClientRect();if(r.width<2||r.height<2)return;
+ const dpr=Math.min(window.devicePixelRatio||1,2),w=r.width,h=r.height;
+ cityMiniCanvas.width=Math.floor(w*dpr);cityMiniCanvas.height=Math.floor(h*dpr);cityMiniCtx.setTransform(dpr,0,0,dpr,0,0);
+ const context=cityMiniCtx;context.clearRect(0,0,w,h);context.fillStyle="#061321";context.fillRect(0,0,w,h);
+ const scale=Math.min((w-12)/CITY_WORLD_SIZE,(h-12)/CITY_WORLD_SIZE),ox=(w-CITY_WORLD_SIZE*scale)/2,oy=(h-CITY_WORLD_SIZE*scale)/2;
+ const c=city(),layout=cityMapLayout(c);
+ layout.zones.forEach(z=>{context.fillStyle=z.color+"35";context.fillRect(ox+z.x*scale,oy+z.y*scale,z.w*scale,z.h*scale)});
+ context.strokeStyle="rgba(0,242,254,.2)";context.lineWidth=.5;
+ for(let v=0;v<=CITY_WORLD_SIZE;v+=400){context.beginPath();context.moveTo(ox+v*scale,oy);context.lineTo(ox+v*scale,oy+CITY_WORLD_SIZE*scale);context.stroke();context.beginPath();context.moveTo(ox,oy+v*scale);context.lineTo(ox+CITY_WORLD_SIZE*scale,oy+v*scale);context.stroke()}
+ const stations=localStationsFor(c.id);
+ localRoutesFor(c.id).forEach(route=>{const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;context.beginPath();context.moveTo(ox+a.x*scale,oy+a.y*scale);context.lineTo(ox+b.x*scale,oy+b.y*scale);context.strokeStyle=(transitCatalog[route.mode]||transitCatalog.subway).color;context.lineWidth=1.4;context.stroke()});
+ stations.forEach(s=>{context.fillStyle=(transitCatalog[s.type]||transitCatalog.subway).color;context.fillRect(ox+s.x*scale-1,oy+s.y*scale-1,3,3)});
+ const vw=cityMapCanvas.clientWidth/localCityCamera.zoom,vh=cityMapCanvas.clientHeight/localCityCamera.zoom;
+ context.strokeStyle="#fff";context.lineWidth=1.4;context.strokeRect(ox+localCityCamera.x*scale,oy+localCityCamera.y*scale,vw*scale,vh*scale);
+ context.strokeStyle="rgba(0,242,254,.55)";context.lineWidth=1;context.strokeRect(ox,oy,CITY_WORLD_SIZE*scale,CITY_WORLD_SIZE*scale);
 }
 function drawCityMap(){
  if($("cityMapView").hidden)return;
- const c=city(),rect=cityMapCanvas.getBoundingClientRect();if(rect.width<2||rect.height<2)return;
- const dpr=Math.min(window.devicePixelRatio||1,2),w=rect.width,h=rect.height;
- cityMapCanvas.width=Math.max(1,Math.floor(w*dpr));cityMapCanvas.height=Math.max(1,Math.floor(h*dpr));
- cityMapCtx.setTransform(dpr,0,0,dpr,0,0);
- const ctx=cityMapCtx;
- const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,"#091e30");bg.addColorStop(1,"#050f1c");ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
- const layout=cityMapLayout(c);
- // City footprint is deterministic per city ID, so each city keeps its own urban shape.
- ctx.beginPath();
- for(let i=0;i<18;i++){const a=Math.PI*2*i/18-Math.PI/2;const noise=.91+(((layout.seed>>>((i%4)*4))&15)/100);const px=w*(.5+Math.cos(a)*.47*noise),py=h*(.5+Math.sin(a)*.43*noise);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}
- ctx.closePath();
- const landGrad=ctx.createLinearGradient(0,0,w,h);landGrad.addColorStop(0,"#1b384b");landGrad.addColorStop(.52,"#183144");landGrad.addColorStop(1,"#102638");
- ctx.fillStyle=landGrad;ctx.fill();ctx.strokeStyle="rgba(0,242,254,.48)";ctx.lineWidth=1.6;ctx.shadowColor="#00f2fe";ctx.shadowBlur=14;ctx.stroke();ctx.shadowBlur=0;
- ctx.save();ctx.clip();
- // Waterway pattern varies between cities: vertical river, horizontal river, or winding estuary.
- ctx.lineCap="round";ctx.lineJoin="round";
+ const c=city(),r=cityMapCanvas.getBoundingClientRect();if(r.width<2||r.height<2)return;
+ const dpr=Math.min(window.devicePixelRatio||1,2),w=r.width,h=r.height;
+ cityMapCanvas.width=Math.floor(w*dpr);cityMapCanvas.height=Math.floor(h*dpr);cityMapCtx.setTransform(dpr,0,0,dpr,0,0);
+ const context=cityMapCtx,layout=cityMapLayout(c),zoom=localCityCamera.zoom;
+ const bg=context.createLinearGradient(0,0,0,h);bg.addColorStop(0,"#091e30");bg.addColorStop(1,"#050f1c");context.fillStyle=bg;context.fillRect(0,0,w,h);
+ context.save();context.translate(-localCityCamera.x*zoom,-localCityCamera.y*zoom);context.scale(zoom,zoom);
+ context.fillStyle="#102638";context.fillRect(0,0,CITY_WORLD_SIZE,CITY_WORLD_SIZE);
+ // River and bay.
+ context.lineCap="round";context.lineJoin="round";
  if(layout.riverAxis===0){
-  const x=w*(.46+layout.riverShift);ctx.beginPath();ctx.moveTo(x-w*.08,-20);ctx.bezierCurveTo(x+w*.14,h*.28,x-w*.16,h*.55,x+w*.1,h+20);
-  ctx.strokeStyle="#09263e";ctx.lineWidth=43;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=34;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+  const x=2000+layout.riverShift*CITY_WORLD_SIZE;context.beginPath();context.moveTo(x-100,-120);context.bezierCurveTo(x+250,900,x-250,2200,x+170,4150);
+  context.strokeStyle="#082238";context.lineWidth=160;context.stroke();context.strokeStyle="#105071";context.lineWidth=128;context.stroke();context.strokeStyle="rgba(0,242,254,.20)";context.lineWidth=3;context.stroke();
  }else if(layout.riverAxis===1){
-  const y=h*(.48+layout.riverShift);ctx.beginPath();ctx.moveTo(-20,y);ctx.bezierCurveTo(w*.28,y-h*.13,w*.58,y+h*.15,w+20,y-h*.08);
-  ctx.strokeStyle="#09263e";ctx.lineWidth=45;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=35;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+  const y=2000+layout.riverShift*CITY_WORLD_SIZE;context.beginPath();context.moveTo(-120,y);context.bezierCurveTo(850,y-220,2400,y+250,4150,y-130);
+  context.strokeStyle="#082238";context.lineWidth=170;context.stroke();context.strokeStyle="#105071";context.lineWidth=135;context.stroke();context.strokeStyle="rgba(0,242,254,.20)";context.lineWidth=3;context.stroke();
  }else{
-  ctx.beginPath();ctx.moveTo(w*.12,-20);ctx.bezierCurveTo(w*.3,h*.28,w*.62,h*.15,w*.46,h*.55);ctx.bezierCurveTo(w*.3,h*.82,w*.72,h*.65,w*.95,h+20);
-  ctx.strokeStyle="#09263e";ctx.lineWidth=46;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=36;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+  context.beginPath();context.moveTo(420,-100);context.bezierCurveTo(900,750,2560,500,1850,2200);context.bezierCurveTo(1200,3100,2700,2700,3900,4160);
+  context.strokeStyle="#082238";context.lineWidth=178;context.stroke();context.strokeStyle="#105071";context.lineWidth=138;context.stroke();context.strokeStyle="rgba(0,242,254,.20)";context.lineWidth=3;context.stroke();
  }
- const bayX=layout.portSide==="bottom"?w*.83:w*.16;
- ctx.beginPath();ctx.moveTo(bayX,h*.78);ctx.bezierCurveTo(bayX-w*.12,h*.66,bayX+w*.08,h*.48,bayX,h*.26);
- ctx.strokeStyle="#09263e";ctx.lineWidth=55;ctx.stroke();ctx.strokeStyle="#104b69";ctx.lineWidth=45;ctx.stroke();
- const zones=[
-  {name:"中心ビジネス街",sub:"CENTRAL BUSINESS DISTRICT",box:layout.cbd,fill:"rgba(0,242,254,.20)",line:"#55d8e7"},
-  ...layout.residential.map((box,i)=>({name:"住宅エリア "+(i+1),sub:"RESIDENTIAL",box,fill:"rgba(67,145,202,.20)",line:"#5ba9dc"})),
-  {name:"空港",sub:"AIRPORT",box:layout.airport,fill:"rgba(217,173,99,.22)",line:"#d9ad63"},
-  {name:"港湾地区",sub:"SEAPORT",box:layout.port,fill:"rgba(217,173,99,.18)",line:"#d9ad63"},
-  {name:"工業地帯",sub:"INDUSTRIAL",box:layout.industrial,fill:"rgba(139,128,223,.22)",line:"#8b80df"},
-  {name:"商業エリア",sub:"COMMERCIAL",box:layout.commercial,fill:"rgba(74,191,166,.16)",line:"#4abfa6"}
- ];
- zones.forEach(z=>{
-  const x=z.box.x*w,y=z.box.y*h,bw=z.box.w*w,bh=z.box.h*h;roundLocalRect(ctx,x,y,bw,bh,9);
-  ctx.fillStyle=z.fill;ctx.fill();ctx.strokeStyle=z.line;ctx.lineWidth=1.1;ctx.stroke();
-  ctx.fillStyle="rgba(231,246,252,.86)";ctx.font="600 10px 'Noto Sans JP',sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(z.name,x+bw/2,y+bh/2-3);
-  ctx.fillStyle="rgba(155,190,205,.68)";ctx.font="8px 'DM Sans',sans-serif";ctx.fillText(z.sub,x+bw/2,y+bh/2+10);
+ const bayX=layout.seed%2?3650:350;context.beginPath();context.moveTo(bayX,4100);context.bezierCurveTo(bayX-320,3200,bayX+260,2250,bayX,900);
+ context.strokeStyle="#082238";context.lineWidth=190;context.stroke();context.strokeStyle="#104b69";context.lineWidth=150;context.stroke();
+ // District polygons and large labels.
+ layout.zones.forEach(z=>{
+  roundLocalRect(context,z.x,z.y,z.w,z.h,28);context.fillStyle=z.color+"1b";context.fill();context.strokeStyle=z.color+"88";context.lineWidth=2;context.stroke();
+  if(zoom<.95){context.fillStyle=z.color+"bb";context.font="600 30px 'Noto Sans JP',sans-serif";context.textAlign="center";context.fillText(z.name,z.x+z.w/2,z.y+z.h/2)}
  });
- // Local street mesh and highlighted urban arterial roads.
- ctx.strokeStyle="rgba(113,153,176,.16)";ctx.lineWidth=.75;
- for(let x=w*.04;x<w;x+=w*.045){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+w*.02,h);ctx.stroke()}
- for(let y=h*.05;y<h;y+=h*.055){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-h*.015);ctx.stroke()}
- for(let i=0;i<4;i++){
-  const yy=h*(.22+i*.19);ctx.beginPath();ctx.moveTo(w*.04,yy);ctx.bezierCurveTo(w*.35,yy-h*.05,w*.62,yy+h*.05,w*.96,yy-h*.025);
-  ctx.strokeStyle="rgba(4,16,27,.9)";ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle="rgba(83,193,211,.47)";ctx.lineWidth=1.3;ctx.stroke();
+ // Main roads.
+ context.strokeStyle="rgba(6,18,30,.95)";context.lineCap="round";context.lineWidth=42;
+ for(let i=1;i<8;i++){const x=i*CITY_WORLD_SIZE/8;context.beginPath();context.moveTo(x,0);context.lineTo(x,CITY_WORLD_SIZE);context.stroke()}
+ for(let i=1;i<8;i++){const y=i*CITY_WORLD_SIZE/8;context.beginPath();context.moveTo(0,y);context.lineTo(CITY_WORLD_SIZE,y);context.stroke()}
+ context.strokeStyle="rgba(82,192,213,.42)";context.lineWidth=3;
+ for(let i=1;i<8;i++){const x=i*CITY_WORLD_SIZE/8,y=i*CITY_WORLD_SIZE/8;context.beginPath();context.moveTo(x,0);context.lineTo(x,CITY_WORLD_SIZE);context.stroke();context.beginPath();context.moveTo(0,y);context.lineTo(CITY_WORLD_SIZE,y);context.stroke()}
+ // LOD: local streets.
+ if(zoom>=.34){
+  context.strokeStyle="rgba(112,159,183,.13)";context.lineWidth=4;
+  for(let x=100;x<CITY_WORLD_SIZE;x+=95){context.beginPath();context.moveTo(x,0);context.lineTo(x,CITY_WORLD_SIZE);context.stroke()}
+  for(let y=100;y<CITY_WORLD_SIZE;y+=95){context.beginPath();context.moveTo(0,y);context.lineTo(CITY_WORLD_SIZE,y);context.stroke()}
  }
- for(let i=0;i<4;i++){
-  const xx=w*(.19+i*.2);ctx.beginPath();ctx.moveTo(xx,h*.04);ctx.bezierCurveTo(xx+w*.04,h*.32,xx-w*.03,h*.68,xx+w*.015,h*.96);
-  ctx.strokeStyle="rgba(4,16,27,.9)";ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle="rgba(83,193,211,.47)";ctx.lineWidth=1.3;ctx.stroke();
- }
- const stations=localStationsFor(c.id),routes=localRoutesFor(c.id);
+ const stations=localStationsFor(c.id),routes=localRoutesFor(c.id),buildings=generateCityBuildings(c);
  routes.forEach(route=>{
   const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
-  ctx.beginPath();ctx.moveTo(a.x*w,a.y*h);ctx.lineTo(b.x*w,b.y*h);
-  if(route.mode==="bus"){ctx.setLineDash([7,5]);ctx.strokeStyle="#f0b75d"}else{ctx.setLineDash([]);ctx.strokeStyle="#00f2fe"}
-  ctx.lineWidth=route.mode==="bus"?2.4:3.2;ctx.shadowColor=route.mode==="bus"?"#f0b75d":"#00f2fe";ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);
+  const type=transitCatalog[route.mode]||transitCatalog.subway;
+  context.beginPath();context.moveTo(a.x,a.y);
+  if(route.mode==="bus"||route.mode==="lrt"){const mid=(a.x+b.x)/2;context.lineTo(mid,a.y);context.lineTo(mid,b.y)}else context.lineTo(b.x,b.y);
+  context.strokeStyle=type.color;context.lineWidth=route.mode==="subway"||route.mode==="hsr"?12:8;context.shadowColor=type.color;context.shadowBlur=zoom>.25?12:4;
+  if(route.mode==="bus"||route.mode==="ferry")context.setLineDash([22,12]);else context.setLineDash([]);
+  context.stroke();context.setLineDash([]);context.shadowBlur=0;
  });
- stations.forEach((station,index)=>{
-  const x=station.x*w,y=station.y*h;
-  ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fillStyle="rgba(0,242,254,.13)";ctx.fill();
-  if(station.id===localRouteStart){ctx.beginPath();ctx.arc(x,y,16,0,Math.PI*2);ctx.strokeStyle="#f6c66d";ctx.lineWidth=2;ctx.shadowColor="#f6c66d";ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0}
-  ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle="#eaffff";ctx.shadowColor="#00f2fe";ctx.shadowBlur=13;ctx.fill();ctx.shadowBlur=0;
-  ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.5;ctx.stroke();
-  const label=station.name||("駅 "+(index+1));ctx.font="600 9px 'Noto Sans JP',sans-serif";ctx.textAlign="left";
-  const tw=ctx.measureText(label).width;roundLocalRect(ctx,Math.min(w-tw-24,x+9),Math.max(4,y-23),tw+12,17,4);
-  ctx.fillStyle="rgba(3,13,23,.86)";ctx.fill();ctx.fillStyle="#e8faff";ctx.fillText(label,Math.min(w-tw-18,x+15),Math.max(15,y-11));
+ // Building footprints at close zoom.
+ if(zoom>=.72){
+  buildings.forEach(b=>{
+   const def=buildingCatalog[b.type];if(!def)return;
+   context.fillStyle=def.color+"aa";context.strokeStyle=def.color;context.lineWidth=zoom>1.25?3:1.5;
+   context.fillRect(b.x,b.y,b.w,b.h);context.strokeRect(b.x,b.y,b.w,b.h);
+   if(zoom>=1.25){context.fillStyle="rgba(3,13,23,.85)";context.font="17px sans-serif";context.textAlign="center";context.fillText(def.icon,b.x+b.w/2,b.y+b.h/2+6)}
+  });
+ }
+ stations.forEach(station=>{
+  const type=transitCatalog[station.type]||transitCatalog.subway,hub=type.kind==="hub";
+  context.beginPath();context.arc(station.x,station.y,hub?28:18,0,Math.PI*2);context.fillStyle=type.color+"22";context.fill();
+  context.beginPath();context.arc(station.x,station.y,hub?12:8,0,Math.PI*2);context.fillStyle="#f1fbff";context.strokeStyle=type.color;context.lineWidth=5;context.shadowColor=type.color;context.shadowBlur=16;context.fill();context.stroke();context.shadowBlur=0;
+  if(zoom>=.78){context.fillStyle="rgba(3,13,23,.9)";context.font="600 21px 'Noto Sans JP',sans-serif";context.textAlign="left";context.fillText(station.name||type.name,station.x+22,station.y-13)}
+  if(station.id===localRouteStart){context.beginPath();context.arc(station.x,station.y,36,0,Math.PI*2);context.strokeStyle="#fff";context.lineWidth=3;context.stroke()}
  });
- ctx.restore();
- ctx.fillStyle="rgba(220,241,248,.55)";ctx.font="9px 'DM Sans',sans-serif";ctx.textAlign="right";ctx.fillText("URBAN GRID / "+c.id.toUpperCase()+" · ZOOM 1.0×",w-17,h-17);
- ctx.fillStyle="#b7d3df";ctx.textAlign="left";ctx.font="600 10px 'Noto Sans JP',sans-serif";ctx.fillText(c.name+" 都市圏",18,h-17);
+ // Moving vehicles reveal only at high zoom.
+ if(zoom>=1.15){
+  const now=performance.now()/2800;
+  routes.forEach(route=>{
+   const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
+   const p=(now+((route.id.length*13)%100)/100)%1,x=a.x+(b.x-a.x)*p,y=a.y+(b.y-a.y)*p;
+   context.beginPath();context.arc(x,y,10,0,Math.PI*2);context.fillStyle=(transitCatalog[route.mode]||transitCatalog.subway).color;context.shadowColor=context.fillStyle;context.shadowBlur=12;context.fill();context.shadowBlur=0;
+   context.fillStyle="#051320";context.font="bold 10px sans-serif";context.textAlign="center";context.fillText(route.mode==="bus"?"B":route.mode==="ferry"?"F":route.mode==="airport"?"✈":"M",x,y+3);
+  });
+  localVehicleFrame=requestAnimationFrame(()=>{localVehicleFrame=0;if(!$("cityMapView").hidden)drawCityMap()});
+ }
+ context.restore();drawMiniMap();
+ $("cityMapCoords").textContent="X "+Math.round(localCityCamera.x)+" · Y "+Math.round(localCityCamera.y)+" · ZOOM "+zoom.toFixed(2)+"×";
 }
-function localMapClick(event){
- const rect=cityMapCanvas.getBoundingClientRect(),x=(event.clientX-rect.left)/rect.width,y=(event.clientY-rect.top)/rect.height;
- if(x<.04||x>.96||y<.04||y>.96){notify("都市圏の内側を選択してください");return}
- const stations=localStationsFor();
- if(localMapMode==="station"){
-  const cost=8000000;if(state.money<cost){notify("市内駅の建設資金が不足しています（"+money(cost)+"）");return}
-  const station={id:"local-"+state.selected+"-"+(stations.length+1),name:city().name+"駅 "+(stations.length+1),x,y};
-  state.money-=cost;stations.push(station);state.xp+=12;addNews(city().name+"に市内駅を建設しました。");
-  render();drawCityMap();save(true);notify(station.name+"を建設しました。");return;
+function buildLocalStationAt(point){
+ const c=city(),typeId=$("localTransportType").value,type=transitCatalog[typeId]||transitCatalog.subway,stations=localStationsFor(c.id);
+ if(state.money<type.cost){notify("資金不足：必要額 "+money(type.cost));return}
+ if((typeId==="airport"||typeId==="port")&&stations.some(s=>s.type===typeId)){notify(type.name+"はこの都市に1か所までです");return}
+ const station={id:"local-"+c.id+"-"+Date.now().toString(36)+"-"+(stations.length+1),name:type.name+" "+(stations.length+1),type:typeId,x:point.x,y:point.y,worldUnits:true};
+ state.money-=type.cost;stations.push(station);state.xp+=type.kind==="hub"?55:18;
+ if(type.kind==="hub"){c.econ=Math.min(100,c.econ+1);c.demand=Math.min(5,c.demand+1)}
+ addNews(c.name+"に"+type.name+"を建設しました。");save(true);render();renderCityMapUI();drawCityMap();notify(type.name+"を建設しました。");
+}
+function nearbyBuildingDemand(point,buildings,range=560){
+ const found=buildings.filter(b=>Math.hypot(b.x+b.w/2-point.x,b.y+b.h/2-point.y)<range);
+ return {demand:found.reduce((s,b)=>s+(buildingCatalog[b.type]?.demand||0),0),types:new Set(found.map(b=>buildingCatalog[b.type]?.zone))};
+}
+function localMapClickWorld(point){
+ const c=city(),stations=localStationsFor(c.id),buildings=generateCityBuildings(c);
+ if(localMapMode==="station"){buildLocalStationAt(point);return}
+ if(localMapMode==="building"){
+  const typeId=$("localBuildingType").value,def=buildingCatalog[typeId];if(!def)return;
+  if(state.money<def.cost){notify("建設資金が不足しています："+money(def.cost));return}
+  state.money-=def.cost;localBuildingsFor(c.id).push({id:"built-"+c.id+"-"+Date.now().toString(36),type:typeId,x:point.x-def.w/2,y:point.y-def.h/2,w:def.w,h:def.h,auto:false});
+  state.xp+=20;addNews(c.name+"に"+def.name+"を建設しました。");save(true);render();renderCityMapUI();drawCityMap();notify(def.name+"を建設しました。");return;
  }
  if(localMapMode==="route"){
-  let nearest=null,nearestDistance=.045;
-  stations.forEach(s=>{const d=Math.hypot(s.x-x,s.y-y);if(d<nearestDistance){nearest=s;nearestDistance=d}});
-  if(!nearest){notify("既存の市内駅をクリックして選択してください");return}
+  let nearest=null,nearestDistance=62;
+  stations.forEach(s=>{const d=Math.hypot(s.x-point.x,s.y-point.y);if(d<nearestDistance){nearest=s;nearestDistance=d}});
+  if(!nearest){notify("既存の交通施設のマーカーをクリックしてください");return}
   if(!localRouteStart){localRouteStart=nearest.id;renderCityMapUI();drawCityMap();notify(nearest.name+"を路線の起点に設定しました");return}
-  if(localRouteStart===nearest.id){notify("別の駅を選択してください");return}
-  const existing=localRoutesFor().some(route=>(route.a===localRouteStart&&route.b===nearest.id)||(route.a===nearest.id&&route.b===localRouteStart));
-  if(existing){notify("この市内路線はすでに接続されています");localRouteStart=null;renderCityMapUI();return}
+  if(localRouteStart===nearest.id){notify("別の交通施設を選択してください");return}
+  if(localRoutesFor(c.id).some(r=>(r.a===localRouteStart&&r.b===nearest.id)||(r.a===nearest.id&&r.b===localRouteStart))){notify("この区間はすでに接続されています");localRouteStart=null;renderCityMapUI();drawCityMap();return}
   const first=stations.find(s=>s.id===localRouteStart);if(!first){localRouteStart=null;return}
-  const distance=Math.max(1,Math.round(Math.hypot((first.x-nearest.x)*1.15,first.y-nearest.y)*48));
-  const mode=state.localRouteType==="bus"?"bus":"subway";
-  const cost=Math.max(mode==="bus"?1200000:2500000,distance*(mode==="bus"?70000:150000));
-  if(state.money<cost){notify("市内路線の建設資金が不足しています（"+money(cost)+"）");localRouteStart=null;renderCityMapUI();return}
-  const daily=Math.round(city().pop/100000*(distance+1)*(mode==="bus"?80:120));
-  state.money-=cost;state.localRoutes.push({id:"route-"+state.selected+"-"+(state.localRoutes.length+1),cityId:state.selected,a:first.id,b:nearest.id,mode,distance,cost,daily});
-  const currentCity=city();currentCity.econ=Math.min(100,currentCity.econ+2);currentCity.demand=Math.min(5,currentCity.demand+1);
-  state.xp+=28;localRouteStart=null;localMapMode="view";
-  addNews(currentCity.name+"で市内"+(mode==="bus"?"バス":"地下鉄")+"路線が開通。経済指数と交通需要が上昇しました。");
-  render();drawCityMap();save(true);notify("市内路線が開通！ 経済指数 +2、交通需要が上昇しました。");
+  const typeId=$("localTransportType").value,type=transitCatalog[typeId]||transitCatalog.subway;
+  const distance=Math.max(1,Math.round(Math.hypot(first.x-nearest.x,first.y-nearest.y)/100));
+  const routeCost=Math.max(type.cost*.18,distance*type.cost/40);
+  if(state.money<routeCost){notify("路線建設の資金が不足しています："+money(routeCost));return}
+  const startDemand=nearbyBuildingDemand(first,buildings),endDemand=nearbyBuildingDemand(nearest,buildings);
+  const commuteBonus=(startDemand.types.has("residential")&&endDemand.types.has("business"))||(endDemand.types.has("residential")&&startDemand.types.has("business"))?3200:0;
+  const tourismBonus=((startDemand.types.has("tourism")||startDemand.types.has("public"))&&(endDemand.types.has("tourism")||endDemand.types.has("public")))?2600:0;
+  const passengerDemand=Math.min(type.capacity,Math.max(240,startDemand.demand+endDemand.demand+commuteBonus+tourismBonus));
+  const daily=Math.round(passengerDemand*type.fare*.12),maintenance=Math.round(type.maintenance*Math.max(.7,distance/10));
+  state.money-=routeCost;state.localRoutes.push({id:"line-"+c.id+"-"+Date.now().toString(36),cityId:c.id,a:first.id,b:nearest.id,mode:typeId,distance,cost:routeCost,daily,maintenance,passengers:passengerDemand});
+  c.econ=Math.min(100,c.econ+(commuteBonus||tourismBonus?3:2));c.demand=Math.min(5,c.demand+1);
+  state.xp+=35;localRouteStart=null;localMapMode="view";
+  addNews(c.name+"で"+type.name+"の路線が開通。乗客需要 "+num(passengerDemand)+"人/日、経済指数と交通需要が上昇しました。");
+  save(true);render();renderCityMapUI();drawCityMap();notify("路線開通！ 需要 "+num(passengerDemand)+"人/日 · 経済指数 +"+(commuteBonus||tourismBonus?3:2));
  }
 }
+function cityMapPointerDown(event){
+ if(event.button!==0)return;cityMapCanvas.setPointerCapture(event.pointerId);
+ localPan={id:event.pointerId,x:event.clientX,y:event.clientY,cameraX:localCityCamera.x,cameraY:localCityCamera.y,moved:false};
+}
+function cityMapPointerMove(event){
+ if(!localPan||localPan.id!==event.pointerId)return;
+ const dx=event.clientX-localPan.x,dy=event.clientY-localPan.y;
+ if(Math.hypot(dx,dy)>4)localPan.moved=true;
+ if(localPan.moved){localCityCamera.x=localPan.cameraX-dx/localCityCamera.zoom;localCityCamera.y=localPan.cameraY-dy/localCityCamera.zoom;clampLocalCamera();drawCityMap()}
+}
+function cityMapPointerUp(event){
+ if(!localPan||localPan.id!==event.pointerId)return;
+ const moved=localPan.moved;localPan=null;
+ if(!moved)localMapClickWorld(screenToCityWorld(event.clientX,event.clientY));
+}
+function cityMiniMapClick(event){
+ const r=cityMiniCanvas.getBoundingClientRect(),w=r.width,h=r.height;
+ const scale=Math.min((w-12)/CITY_WORLD_SIZE,(h-12)/CITY_WORLD_SIZE),ox=(w-CITY_WORLD_SIZE*scale)/2,oy=(h-CITY_WORLD_SIZE*scale)/2;
+ const px=(event.clientX-r.left-ox)/scale,py=(event.clientY-r.top-oy)/scale;
+ const vw=cityMapCanvas.clientWidth/localCityCamera.zoom,vh=cityMapCanvas.clientHeight/localCityCamera.zoom;
+ localCityCamera.x=px-vw/2;localCityCamera.y=py-vh/2;clampLocalCamera();drawCityMap();
+}
+
 function switchPage(name){
  isCityMapOpen=false;$("worldMapView").hidden=false;$("cityMapView").hidden=true;
  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
@@ -585,18 +708,23 @@ $("plus").onclick=()=>zoom(1.2);$("minus").onclick=()=>zoom(.83);$("home").oncli
 $("buildstation").onclick=()=>{state.mode=state.mode==="build"?"select":"build";render()};$("buildroute").onclick=()=>{state.mode=state.mode==="route"?"select":"route";routeStart=null;render()};
 $("citybuild").onclick=()=>buildStation(state.selected);
  $("openCityMap").onclick=openCityMap;$("backWorldMap").onclick=closeCityMap;
+ $("localTransportType").onchange=()=>renderCityMapUI();
+ $("localBuildingType").onchange=()=>{$("localBuildCost").textContent=money(buildingCatalog[$("localBuildingType").value].cost);$("localBuildSpec").textContent="乗客需要 "+num(buildingCatalog[$("localBuildingType").value].demand)+" 人/日"};
  $("localBuildStation").onclick=()=>{localMapMode=localMapMode==="station"?"view":"station";localRouteStart=null;renderCityMapUI()};
  $("localBuildRoute").onclick=()=>{localMapMode=localMapMode==="route"?"view":"route";localRouteStart=null;renderCityMapUI()};
- $("localRouteSubway").onclick=()=>{state.localRouteType="subway";renderCityMapUI()};
- $("localRouteBus").onclick=()=>{state.localRouteType="bus";renderCityMapUI()};
- cityMapCanvas.addEventListener("click",localMapClick);
+ $("localBuildBuilding").onclick=()=>{localMapMode=localMapMode==="building"?"view":"building";localRouteStart=null;renderCityMapUI()};
+ cityMapCanvas.addEventListener("pointerdown",cityMapPointerDown);cityMapCanvas.addEventListener("pointermove",cityMapPointerMove);cityMapCanvas.addEventListener("pointerup",cityMapPointerUp);
+ cityMapCanvas.addEventListener("pointercancel",()=>{localPan=null});
+ cityMapCanvas.addEventListener("wheel",event=>{event.preventDefault();const r=cityMapCanvas.getBoundingClientRect();cityZoomAt(event.deltaY<0?1.16:.86,event.clientX-r.left,event.clientY-r.top)},{passive:false});
+ $("cityZoomIn").onclick=()=>cityZoomAt(1.25);$("cityZoomOut").onclick=()=>cityZoomAt(.8);$("cityZoomReset").onclick=resetCityCamera;
+ cityMiniCanvas.addEventListener("click",cityMiniMapClick);
 $("save").onclick=()=>save(false);$("companysave").onclick=()=>save(false);$("load").onclick=load;
 $("pause").onclick=()=>{state.paused=!state.paused;$("pause").textContent=state.paused?"▶":"Ⅱ";notify(state.paused?"ゲーム時間を一時停止しました":"ゲームを再開しました")};
 document.querySelectorAll("[data-speed]").forEach(b=>b.onclick=()=>setSpeed(Number(b.dataset.speed)));
 document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
 $("modalcancel").onclick=()=>$("modal").classList.remove("open");$("modalok").onclick=()=>{if(modalAction)modalAction();$("modal").classList.remove("open")};
 $("newgame").onclick=()=>confirm("新しいゲームを開始","現在の進行状況をリセットします。保存していないデータは失われます。",()=>{state=JSON.parse(JSON.stringify(base));cities.forEach((c,i)=>{let original=[14000000,2750000,1970000,9400000,24800000,5900000,12400000,3600000,8900000,2100000,3700000,8800000,3900000,12300000,4400000,5300000,180000,95000,125000];c.pop=original[i]});routeStart=null;mapScale=1;mapX=0;mapY=0;$("news").innerHTML="<div class='newsitem'>新しい会社を設立しました。<small>DAY 1 · SYSTEM</small></div>";render();drawMap();save(true);notify("新しいゲームを開始しました")});
-window.addEventListener("resize",()=>{drawMap();drawCityMap()});
+window.addEventListener("resize",()=>{drawMap();drawCityMap();drawMiniMap()});
 function loadScript(src){return new Promise((resolve,reject)=>{let script=document.createElement("script"),done=false,timer=setTimeout(()=>finish(new Error("script timeout")),8000);function finish(err){if(done)return;done=true;clearTimeout(timer);if(err){script.remove();reject(err)}else resolve()}script.src=src;script.async=true;script.onload=()=>finish();script.onerror=()=>finish(new Error("script load failed"));document.head.appendChild(script)})}
 async function loadWorld(){
  try{
