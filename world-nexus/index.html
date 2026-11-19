@@ -280,7 +280,7 @@ function drawVehicleGlyph(context,x,y,angle,mode,scale=1,alpha=1){
  const colors={air:"#f5fbff",ship:"#65c7ef",rail:"#e9f6fc",hsr:"#ff9275",bus:"#f4c05e",lrt:"#a7e27d",subway:"#6ceaf4",monorail:"#c59aff",ferry:"#6cc8ff",airport:"#f5fbff",port:"#65c7ef"};
  const icon=icons[mode]||"🚆",color=colors[mode]||"#e9f6fc";
  context.save();context.translate(x,y);context.rotate(angle+((mode==="air"||mode==="airport")?-Math.PI/2:0));context.globalAlpha=alpha;
- context.shadowColor=color;context.shadowBlur=12*scale;context.font=Math.max(10,22*scale)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';
+ context.shadowColor=color;context.shadowBlur=12*scale;context.font=(22*scale)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';
  context.textAlign="center";context.textBaseline="middle";context.fillStyle=color;context.fillText(icon,0,0);context.restore();
 }
 function registerArrival(key,motion,endpointA,endpointB,amount,color,target){
@@ -297,8 +297,8 @@ function drawArrivalEffects(context,list,scale){
  list.forEach(effect=>{
   const age=vehicleClock-effect.start;if(age>1.7)return;alive.push(effect);
   const alpha=1-age/1.7,offset=age*24;
-  context.save();context.globalAlpha=alpha;context.font="700 "+Math.max(9,13*scale)+'px "DM Sans","Noto Sans JP",sans-serif';
-  context.textAlign="center";context.textBaseline="middle";context.lineWidth=Math.max(2,4*scale);context.strokeStyle="rgba(3,13,23,.9)";
+  context.save();context.globalAlpha=alpha;context.font="700 "+(13*scale)+'px "DM Sans","Noto Sans JP",sans-serif';
+  context.textAlign="center";context.textBaseline="middle";context.lineWidth=4*scale;context.strokeStyle="rgba(3,13,23,.9)";
   context.strokeText(effect.text,effect.x,effect.y-offset);context.fillStyle=effect.color;context.fillText(effect.text,effect.x,effect.y-offset);context.restore();
  });
  list.length=0;list.push(...alive);
@@ -326,10 +326,7 @@ function drawGlobalVehicles(projectCity){
  });
  drawArrivalEffects(ctx,globalArrivalEffects,1/mapScale);
 }
-function hasAnyVehicleRoutes(){
- if((state.routes||[]).length)return true;
- return Object.values(state.localRoutes||{}).some(list=>Array.isArray(list)&&list.length>0);
-}
+function hasAnyVehicleRoutes(){return (state.routes||[]).length>0||(state.localRoutes||[]).length>0}
 function ensureVehicleAnimation(){
  if(vehicleRaf||!hasAnyVehicleRoutes())return;
  vehicleLastTs=0;vehicleRaf=requestAnimationFrame(vehicleAnimationFrame);
