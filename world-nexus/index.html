@@ -178,4 +178,66 @@ function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let
 init();
 })();
 </script>
+
+<script>
+/* WORLD NEXUS emergency map renderer: independent of D3/TopoJSON. */
+(function(){
+ const canvas=document.getElementById('map');
+ const status=document.getElementById('mapstatus');
+ if(!canvas||!status||!status.textContent.includes('LOADING')) return;
+ const ctx=canvas.getContext('2d'); if(!ctx) return;
+ const cities=[
+  ['tokyo','東京',35.68,139.69],['osaka','大阪',34.69,135.50],['sapporo','札幌',43.06,141.35],
+  ['seoul','ソウル',37.56,126.98],['shanghai','上海',31.23,121.47],['singapore','シンガポール',1.35,103.82],
+  ['mumbai','ムンバイ',19.07,72.87],['dubai','ドバイ',25.20,55.27],['london','ロンドン',51.50,-.12],
+  ['paris','パリ',48.86,2.35],['berlin','ベルリン',52.52,13.40],['newyork','ニューヨーク',40.71,-74],
+  ['losangeles','ロサンゼルス',34.05,-118.24],['saopaulo','サンパウロ',-23.55,-46.63],
+  ['nairobi','ナイロビ',-1.29,36.82],['sydney','シドニー',-33.87,151.21],
+  ['nexusbay','ネクサス・ベイ',15,170],['aurora','オーロラ・シティ',61,-28],['solaris','ソラリス・ポート',-28,-150]
+ ];
+ const stations=new Set(); let selected='tokyo',scale=1,dx=0,dy=0,drag=null;
+ const land=[
+ [[.04,.25],[.08,.13],[.16,.10],[.22,.18],[.23,.31],[.19,.43],[.15,.48],[.13,.62],[.10,.54],[.07,.39]],
+ [[.21,.49],[.27,.52],[.30,.66],[.28,.82],[.25,.91],[.22,.77]],
+ [[.40,.20],[.47,.13],[.54,.16],[.57,.27],[.54,.39],[.49,.45],[.45,.36],[.42,.30]],
+ [[.53,.15],[.63,.10],[.75,.13],[.86,.18],[.94,.29],[.90,.38],[.82,.43],[.75,.39],[.70,.51],[.63,.44],[.57,.34]],
+ [[.77,.61],[.84,.60],[.90,.68],[.89,.79],[.84,.87],[.78,.79]]
+ ];
+ function xy(lat,lon,w,h){return [(lon+180)/360*w,(90-lat)/180*h]}
+ function draw(){
+  const r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));
+  ctx.setTransform(dpr,0,0,dpr,0,0);const w=r.width,h=r.height;
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#0d3044');g.addColorStop(1,'#071d2e');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  ctx.save();ctx.translate(w/2+dx,h/2+dy);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);
+  ctx.strokeStyle='rgba(130,190,205,.15)';ctx.lineWidth=1;
+  for(let i=0;i<=12;i++){let x=w*i/12;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+  for(let i=0;i<=6;i++){let y=h*i/6;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+  land.forEach(poly=>{ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(p[0]*w,p[1]*h):ctx.moveTo(p[0]*w,p[1]*h));ctx.closePath();ctx.fillStyle='#31565a';ctx.fill();ctx.strokeStyle='#6c8b83';ctx.lineWidth=1;ctx.stroke()});
+  cities.forEach(c=>{let p=xy(c[2],c[3],w,h),sel=c[0]===selected,st=stations.has(c[0]);ctx.beginPath();ctx.arc(p[0],p[1],sel?6:st?5:3.5,0,Math.PI*2);ctx.fillStyle=sel?'#fff':st?'#efc476':c[0]==='nexusbay'||c[0]==='aurora'||c[0]==='solaris'?'#b8a0ff':'#68d9c1';ctx.fill();ctx.strokeStyle=sel?'#65d4df':'#09283a';ctx.lineWidth=sel?2:1;ctx.stroke();if(sel||st||scale>1.3){ctx.font='11px sans-serif';ctx.fillStyle='#eef7fa';ctx.fillText(c[1],p[0]+8,p[1]-7)}});
+  ctx.restore();status.textContent='OFFLINE MAP · '+cities.length+' CITIES · '+stations.size+' STATIONS';
+ }
+ function select(id){
+  const c=cities.find(x=>x[0]===id);if(!c)return;selected=id;
+  const name=document.getElementById('cityname'),meta=document.getElementById('citymeta'),station=document.getElementById('citystation');
+  if(name)name.textContent=c[1];if(meta)meta.textContent='都市情報 · WORLD NEXUS';
+  if(station)station.textContent=stations.has(id)?'建設済み':'未建設';
+  const b=document.getElementById('citybuild');if(b){b.disabled=stations.has(id);b.textContent=stations.has(id)?'駅を建設済み':'この都市に駅を建設'}
+  draw();
+ }
+ function build(){if(stations.has(selected))return;stations.add(selected);select(selected);const funds=document.getElementById('funds');if(funds)funds.textContent='駅建設済み';}
+ function hit(e){const r=canvas.getBoundingClientRect(),w=r.width,h=r.height,x=e.clientX-r.left,y=e.clientY-r.top;let best=null,dist=18;cities.forEach(c=>{let p=xy(c[2],c[3],w,h),sx=(p[0]-w/2)*scale+w/2+dx,sy=(p[1]-h/2)*scale+h/2+dy,d=Math.hypot(sx-x,sy-y);if(d<dist){dist=d;best=c}});if(best)select(best[0])}
+ canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,dx,dy,moved:false};canvas.setPointerCapture(e.pointerId)});
+ canvas.addEventListener('pointermove',e=>{if(!drag)return;let x=e.clientX-drag.x,y=e.clientY-drag.y;if(Math.hypot(x,y)>4)drag.moved=true;if(drag.moved){dx=drag.dx+x;dy=drag.dy+y;draw()}});
+ canvas.addEventListener('pointerup',e=>{if(!drag)return;let moved=drag.moved;drag=null;if(!moved)hit(e)});
+ canvas.addEventListener('pointercancel',()=>drag=null);
+ const byId=id=>document.getElementById(id);
+ if(byId('buildstation'))byId('buildstation').addEventListener('click',()=>{byId('maphint').textContent='駅を建設する都市をクリックしてください。'});
+ if(byId('citybuild'))byId('citybuild').addEventListener('click',build);
+ if(byId('plus'))byId('plus').addEventListener('click',()=>{scale=Math.min(3.5,scale*1.2);draw()});
+ if(byId('minus'))byId('minus').addEventListener('click',()=>{scale=Math.max(.8,scale*.83);draw()});
+ if(byId('home'))byId('home').addEventListener('click',()=>{scale=1;dx=dy=0;draw()});
+ window.addEventListener('resize',draw);draw();
+})();
+</script>
 </body></html>
