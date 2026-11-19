@@ -13,7 +13,7 @@
 .citymap-card canvas{width:100%;height:100%;min-height:500px;display:block;touch-action:none;cursor:crosshair}
 .citymap-hud{position:absolute;left:14px;top:14px;pointer-events:none;background:rgba(4,15,27,.88);border:1px solid rgba(0,242,254,.25);border-radius:9px;padding:9px 12px;backdrop-filter:blur(10px)}
 .citymap-hud strong{display:block;font-size:10px;letter-spacing:1.3px;color:#e9fbff}.citymap-hud span{display:block;color:#76b9c8;font-size:9px;margin-top:3px}
-.citymap-legend{position:absolute;left:14px;bottom:14px;display:flex;gap:10px;flex-wrap:wrap;background:rgba(4,15,27,.88);border:1px solid rgba(0,242,254,.22);border-radius:9px;padding:8px 10px;font-size:9px;color:#c2d6df}
+.citymap-legend{position:absolute;left:14px;bottom:14px;pointer-events:none;display:flex;gap:10px;flex-wrap:wrap;background:rgba(4,15,27,.88);border:1px solid rgba(0,242,254,.22);border-radius:9px;padding:8px 10px;font-size:9px;color:#c2d6df}
 .citymap-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .local-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.local-controls button{font-size:10px;padding:8px 10px}
 .local-statrow{display:flex;gap:8px;flex-wrap:wrap}.local-stat{border:1px solid #294354;background:#0b1b29;border-radius:9px;padding:8px 11px;min-width:110px}
@@ -265,6 +265,7 @@ function drawCityMap(){
  stations.forEach((station,index)=>{
   const x=station.x*w,y=station.y*h;
   ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fillStyle="rgba(0,242,254,.13)";ctx.fill();
+  if(station.id===localRouteStart){ctx.beginPath();ctx.arc(x,y,16,0,Math.PI*2);ctx.strokeStyle="#f6c66d";ctx.lineWidth=2;ctx.shadowColor="#f6c66d";ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0}
   ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle="#eaffff";ctx.shadowColor="#00f2fe";ctx.shadowBlur=13;ctx.fill();ctx.shadowBlur=0;
   ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.5;ctx.stroke();
   const label=station.name||("駅 "+(index+1));ctx.font="600 9px 'Noto Sans JP',sans-serif";ctx.textAlign="left";
@@ -289,7 +290,7 @@ function localMapClick(event){
   let nearest=null,nearestDistance=.045;
   stations.forEach(s=>{const d=Math.hypot(s.x-x,s.y-y);if(d<nearestDistance){nearest=s;nearestDistance=d}});
   if(!nearest){notify("既存の市内駅をクリックして選択してください");return}
-  if(!localRouteStart){localRouteStart=nearest.id;renderCityMapUI();notify(nearest.name+"を路線の起点に設定しました");return}
+  if(!localRouteStart){localRouteStart=nearest.id;renderCityMapUI();drawCityMap();notify(nearest.name+"を路線の起点に設定しました");return}
   if(localRouteStart===nearest.id){notify("別の駅を選択してください");return}
   const existing=localRoutesFor().some(route=>(route.a===localRouteStart&&route.b===nearest.id)||(route.a===nearest.id&&route.b===localRouteStart));
   if(existing){notify("この市内路線はすでに接続されています");localRouteStart=null;renderCityMapUI();return}
