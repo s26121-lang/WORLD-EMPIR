@@ -259,7 +259,22 @@ async function loadCloud(){
 $('accountBtn').onclick=openAuth;
 $('closeAuth').onclick=()=>$('authModal').classList.remove('show');
 $('authModal').onclick=e=>{if(e.target===$('authModal'))$('authModal').classList.remove('show')};
-$('signUpBtn').onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<8){toast('メールアドレスと8文字以上のパスワードを入力してください');return;}const {error}=await supabaseClient.auth.signUp({email,password});if(error)toast(error.message);else toast('確認メールを確認して登録を完了してください');};
+$('signUpBtn').onclick=async()=>{
+ const email=$('authEmail').value.trim(),password=$('authPassword').value;
+ const btn=$('signUpBtn'),status=$('authStatus');
+ if(!email||password.length<8){status.textContent='メールアドレスと8文字以上のパスワードを入力してください。';return;}
+ btn.disabled=true;btn.textContent='登録処理中…';status.textContent='Supabaseに接続しています。少し待ってください…';
+ try{
+  const result=await Promise.race([
+   supabaseClient.auth.signUp({email,password}),
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error('接続がタイムアウトしました。通信状態を確認して、もう一度お試しください。')),15000))
+  ]);
+  if(result.error){status.textContent='登録できませんでした：'+result.error.message;return;}
+  if(result.data.session){status.textContent='登録・ログインできました！セーブデータを準備しています。';$('authModal').classList.remove('show');toast('アカウントを作成しました');}
+  else{status.textContent='確認メールを送信しました。メール内のリンクを開いて登録を完了してください。迷惑メールフォルダも確認してください。';}
+ }catch(err){status.textContent='登録処理で問題が発生しました：'+(err?.message||'不明なエラー');}
+ finally{btn.disabled=false;btn.textContent='新規登録';}
+};
 $('signInBtn').onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){toast('メールアドレスとパスワードを入力してください');return;}const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)toast(error.message);else{$('authModal').classList.remove('show');toast('ログインしました');}};
 $('googleBtn').onclick=async()=>{const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});if(error)toast(error.message);};
 $('signOutBtn').onclick=async()=>{await saveCloud(false);const {error}=await supabaseClient.auth.signOut();if(error)toast(error.message);else{$('authModal').classList.remove('show');toast('ログアウトしました');}};
