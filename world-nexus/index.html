@@ -114,7 +114,59 @@ function save(silent){try{localStorage.setItem("worldNexusSaveV2",JSON.stringify
 function load(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(!raw){notify("セーブデータがありません");return}let obj=JSON.parse(raw);if(!obj.state||!Array.isArray(obj.state.stations)||!Array.isArray(obj.state.routes))throw Error("invalid");state=Object.assign({},base,obj.state);if(Array.isArray(obj.cities))obj.cities.forEach(saved=>{let c=cities.find(x=>x.id===saved.id);if(c&&Number.isFinite(saved.pop))c.pop=saved.pop});render();drawMap();notify("セーブデータをロードしました")}catch(e){notify("データを読み込めませんでした")}}
 function confirm(title,text,action){$("modaltitle").textContent=title;$("modaltext").textContent=text;modalAction=action;$("modal").classList.add("open")}
 function buildStation(id){let c=cities.find(x=>x.id===id);if(!c)return;if(state.stations.includes(id)){notify("この都市にはすでに駅があります");return}let cost=c.fictional?22000000:35000000;if(state.money<cost){notify("資金不足：必要額 "+money(cost));return}state.money-=cost;state.stations.push(id);state.xp+=30;state.mode="select";addNews(c.name+"に新しい駅が完成しました。");render();drawMap();save(true);notify(c.name+"に駅を建設しました！")}
-function connectRoute(id){if(!state.stations.includes(id)){notify("先にこの都市に駅を建設してください");return}if(!routeStart){routeStart=id;state.selected=id;render();drawMap();notify("接続先の駅がある都市を選択してください");return}if(routeStart===id){notify("別の都市を選択してください");return}if(state.routes.some(r=>(r.a===routeStart&&r.b===id)||(r.a===id&&r.b===routeStart))){notify("この路線はすでに開通しています");routeStart=null;return}let a=cities.find(c=>c.id===routeStart),b=cities.find(c=>c.id===id);let rad=Math.PI/180,cos=Math.cos((a.lat+b.lat)/2*rad),dlon=(b.lon-a.lon)*cos,dlat=b.lat-a.lat,dist=Math.round(Math.sqrt(dlon*dlon+dlat*dlat)*111.2),cost=Math.max(18000000,dist*72000);if(state.money<cost){notify("路線建設の資金が不足しています（"+money(cost)+"）");routeStart=null;return}let daily=Math.round((a.pop+b.pop)/1000*(a.demand+b.demand)*22);state.money-=cost;state.routes.push({a:a.id,b:b.id,distance:dist,cost,daily});state.xp+=65;addNews(a.name+"〜"+b.name間の鉄道路線が開通しました。");routeStart=null;state.mode="select";render();drawMap();save(true);notify("新路線が開通！ 毎日 "+money(daily)+" の収入見込み")}
+function connectRoute(id){
+ if(!state.stations.includes(id)){
+  notify("先にこの都市に駅を建設してください");
+  return;
+ }
+ if(!routeStart){
+  routeStart=id;
+  state.selected=id;
+  render();
+  drawMap();
+  notify("接続先の駅がある都市を選択してください");
+  return;
+ }
+ if(routeStart===id){
+  notify("別の都市を選択してください");
+  return;
+ }
+ const duplicate=state.routes.some(r=>(r.a===routeStart&&r.b===id)||(r.a===id&&r.b===routeStart));
+ if(duplicate){
+  notify("この路線はすでに開通しています");
+  routeStart=null;
+  return;
+ }
+ const a=cities.find(c=>c.id===routeStart);
+ const b=cities.find(c=>c.id===id);
+ if(!a||!b){
+  notify("都市データを確認できませんでした");
+  routeStart=null;
+  return;
+ }
+ const radians=Math.PI/180;
+ const cos=Math.cos((a.lat+b.lat)/2*radians);
+ const dlon=(b.lon-a.lon)*cos;
+ const dlat=b.lat-a.lat;
+ const dist=Math.round(Math.sqrt(dlon*dlon+dlat*dlat)*111.2);
+ const cost=Math.max(18000000,dist*72000);
+ if(state.money<cost){
+  notify("路線建設の資金が不足しています（"+money(cost)+"）");
+  routeStart=null;
+  return;
+ }
+ const daily=Math.round((a.pop+b.pop)/1000*(a.demand+b.demand)*22);
+ state.money-=cost;
+ state.routes.push({a:a.id,b:b.id,distance:dist,cost:cost,daily:daily});
+ state.xp+=65;
+ addNews(a.name+"〜"+b.name+"間の鉄道路線が開通しました。");
+ routeStart=null;
+ state.mode="select";
+ render();
+ drawMap();
+ save(true);
+ notify("新路線が開通！ 毎日 "+money(daily)+" の収入見込み");
+}
 function handleCity(id){if(state.mode==="build"){buildStation(id);return}if(state.mode==="route"){connectRoute(id);return}state.selected=id;render();drawMap()}
 function advanceDay(){state.day++;let d=new Date(state.date+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+1);state.date=d.toISOString().slice(0,10);let income=routesIncome(),cost=dailyCost(),profit=income-cost;state.money+=profit;state.totalProfit+=profit;state.xp+=Math.max(1,Math.floor(Math.max(0,profit)/1200000));cities.forEach(c=>{let growth=(c.econ/100000)*((c.demand+1)/5);c.pop=Math.round(c.pop*(1+growth))});if(state.xp>=state.level*100){state.xp-=state.level*100;state.level++;addNews("会社レベルが "+state.level+" に上がりました。事業が成長しています。")}if(state.day%7===0){let c=cities[Math.floor(Math.random()*cities.length)];addNews(c.name+"で交通需要が変化しています。");}render();drawMap();save(true)}
 function setSpeed(n){state.speed=n;document.querySelectorAll("[data-speed]").forEach(b=>b.classList.toggle("active",Number(b.dataset.speed)===n));if(tick)clearInterval(tick);tick=setInterval(()=>{if(!state.paused)advanceDay()},18000/n)}
