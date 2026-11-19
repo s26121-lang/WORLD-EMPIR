@@ -8,7 +8,17 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#081521;--panel:#101f2d;--panel2:#142738;--panel3:#1a3042;--line:#263d4f;--text:#eef5f8;--muted:#8ca3b4;--cyan:#65d4df;--mint:#72d6b2;--gold:#e9bd70;--red:#ee8989;--blue:#70aee8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.55 "DM Sans","Noto Sans JP",sans-serif;min-height:100vh}button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:#172b3c;border-radius:9px;padding:9px 12px;transition:.18s}button:hover{background:#203a4e;border-color:#4c8797;transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}button.primary{background:linear-gradient(135deg,#187f91,#276e91);border-color:#399eae;color:#fff;font-weight:700}button.ghost{background:transparent}button.active{background:#1a3b4e;border-color:#3d7d8d;color:#eaffff}.app{min-height:100vh}.topbar{height:72px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#0b1a27;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:12px;min-width:225px}.brandmark{width:39px;height:39px;border-radius:12px;background:linear-gradient(145deg,#78e0db,#26839c 65%,#205170);display:grid;place-items:center;color:#06202b;font-size:21px;font-weight:900;box-shadow:0 5px 20px #36b8c533}.brandname{font-size:15px;letter-spacing:2.4px;font-weight:800}.tagline{font-size:9px;letter-spacing:1.8px;color:#829cad}.topmetrics{display:flex;align-items:center;gap:clamp(12px,2.4vw,34px)}.metric small{display:block;color:var(--muted);font-size:10px;letter-spacing:.5px}.metric strong{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}.metric .green{color:var(--mint)}.topright{display:flex;align-items:center;gap:8px}.datechip{border:1px solid var(--line);background:#102333;border-radius:9px;padding:7px 11px;font-size:11px;color:#c7d9e2;white-space:nowrap}.shell{display:grid;grid-template-columns:218px minmax(400px,1fr) 300px;min-height:calc(100vh - 72px)}.sidebar{background:#0b1926;border-right:1px solid var(--line);padding:20px 13px}.navlabel,.eyebrow{font-size:9px;font-weight:800;letter-spacing:1.8px;color:#7892a5}.navlabel{padding:0 10px;margin:2px 0 12px}.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border-color:transparent;color:#b6c7d2;padding:11px 12px}.nav button .ico{width:20px;text-align:center;font-size:16px;color:#7fa6b7}.nav button.active{background:linear-gradient(90deg,#18394b,#142b3c);border-color:#28566b;color:#f0fbff}.nav button.active .ico{color:var(--cyan)}.side-divider{height:1px;background:var(--line);margin:19px 7px}.mini-card{border:1px solid var(--line);background:linear-gradient(145deg,#142738,#0f202f);border-radius:12px;padding:13px;margin:12px 3px}.mini-title{font-size:11px;color:#d7e5ec;font-weight:700;margin-bottom:9px}.muted{color:var(--muted)}.tiny{font-size:10px}.levelrow{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.progress{height:5px;background:#263e50;border-radius:9px;margin-top:8px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4bb9cc,#7cdbb7);border-radius:9px}.main{padding:19px;min-width:0;display:flex;flex-direction:column;gap:14px}.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px}.pagehead h1{font-size:20px;letter-spacing:-.4px;margin:2px 0 3px}.pagehead p{margin:0;color:var(--muted);font-size:11px}.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.actions button{font-size:11px;padding:7px 10px}.mapcard{position:relative;flex:1;min-height:470px;border:1px solid rgba(0,242,254,.24);border-radius:15px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#111a2e 0%,#060911 100%);box-shadow:0 18px 50px #0005,0 0 25px rgba(0,242,254,.05)}.mapcard canvas{width:100%;height:100%;min-height:470px;display:block;touch-action:none;cursor:grab}.maptooltip{position:absolute;z-index:4;pointer-events:none;display:flex;flex-direction:column;gap:3px;min-width:172px;max-width:220px;padding:9px 11px;border:1px solid rgba(0,242,254,.62);border-radius:9px;background:rgba(11,15,25,.95);box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 16px rgba(0,242,254,.18);backdrop-filter:blur(10px);opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}.maptooltip.visible{opacity:1;transform:translateY(0)}.maptooltip strong{font-size:11px;color:#f2fbff}.maptooltip span{font-size:10px;color:#b5d0dc}.maptooltip small{font-size:9px;color:#70cbd7}.mapcard canvas.drag{cursor:grabbing}.maphud{position:absolute;top:14px;left:15px;pointer-events:none;background:#081a29d9;border:1px solid #35556a;border-radius:9px;padding:9px 12px;backdrop-filter:blur(10px)}.maphud strong{font-size:10px;letter-spacing:1.4px}.maphud span{display:block;font-size:9px;color:#8eaabb;margin-top:2px}.legend{position:absolute;bottom:14px;left:15px;display:flex;gap:12px;flex-wrap:wrap;background:#081a29db;border:1px solid #35556a;border-radius:9px;padding:8px 11px;font-size:9px;color:#c1d1db}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.maptools{position:absolute;right:14px;top:14px;display:grid;gap:5px}.maptools button{width:32px;height:32px;padding:0;background:#0a1d2cdd;border-color:#3a5c70;font-size:16px}.mapfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.maphint{font-size:10px;color:var(--muted)}.modepill{font-size:9px;border:1px solid #34576a;border-radius:20px;padding:5px 9px;color:#b9d1dc}.mapfootright{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.mapfootright button{font-size:10px;padding:8px 11px}.rightbar{border-left:1px solid var(--line);background:#0b1926;padding:18px 14px;min-width:0}.rightheading{font-size:9px;letter-spacing:1.8px;color:#7892a5;font-weight:800;margin:3px 4px 12px}.panel{border:1px solid var(--line);background:linear-gradient(145deg,#142738,#102130);border-radius:12px;padding:14px;margin-bottom:11px}.panel h3{font-size:12px;margin:0 0 11px}.citytop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.cityname{font-size:18px;font-weight:800;letter-spacing:-.3px}.citymeta{font-size:10px;color:var(--muted)}.status{font-size:9px;color:var(--mint);background:#1b4a4238;border:1px solid #32695e;border-radius:20px;padding:4px 7px;white-space:nowrap}.citystats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:13px 0}.cell{background:#0b1a27;border:1px solid #243b4d;border-radius:8px;padding:9px}.cell small{display:block;color:#829bac;font-size:9px}.cell b{font-size:13px}.full{width:100%;margin-top:7px}.routeitem{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #24394a;font-size:10px}.routeitem:last-child{border:0}.routeitem b{color:var(--mint);white-space:nowrap}.newsitem{font-size:10px;color:#c4d2dc;border-left:2px solid #4a9bae;padding-left:9px;margin:9px 0}.newsitem small{display:block;color:#7893a5;font-size:9px;margin-top:3px}.contentcard{border:1px solid var(--line);background:linear-gradient(145deg,#132638,#0e1e2d);border-radius:14px;padding:16px}.contentgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.kpi{background:#0c1b29;border:1px solid #263f51;border-radius:11px;padding:13px}.kpi small{color:var(--muted);font-size:10px}.kpi strong{display:block;font-size:20px;margin-top:5px}.table{width:100%;border-collapse:collapse;font-size:11px}.table th{text-align:left;color:#8ea7b8;font-weight:600;font-size:9px;letter-spacing:.7px;padding:10px;border-bottom:1px solid var(--line)}.table td{padding:11px 10px;border-bottom:1px solid #223849}.table tr:last-child td{border:0}.table button{font-size:10px;padding:6px 9px}.cityrow{cursor:pointer}.cityrow:hover{background:#1a3446}.pill{border:1px solid #35546a;border-radius:20px;padding:3px 7px;font-size:9px;color:#b6d0dd}.green{color:var(--mint)}.gold{color:var(--gold)}.red{color:var(--red)}.notice{padding:11px 13px;border-radius:10px;background:#112a3b;border:1px solid #2c5267;color:#bdd4df;font-size:10px}.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translate(-50%,18px);opacity:0;pointer-events:none;padding:11px 16px;background:#17394a;border:1px solid #4d92a4;border-radius:10px;box-shadow:0 10px 35px #0008;transition:.2s;font-size:11px}.toast.show{opacity:1;transform:translate(-50%,0)}.modalback{position:fixed;inset:0;background:#020a11c9;z-index:30;display:none;place-items:center;padding:16px}.modalback.open{display:grid}.modal{width:min(440px,100%);background:#112536;border:1px solid #3a5a70;border-radius:15px;padding:20px;box-shadow:0 25px 80px #000a}.modal h2{font-size:17px;margin:0 0 7px}.modal p{color:#a4b8c6;font-size:11px;line-height:1.7}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.empty{padding:22px;text-align:center;color:var(--muted);font-size:11px}.speed{display:flex;gap:4px}.speed button{padding:6px 8px;font-size:9px}.mobilebar{display:none}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.55 "DM Sans","Noto Sans JP",sans-serif;min-height:100vh}button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:#172b3c;border-radius:9px;padding:9px 12px;transition:.18s}button:hover{background:#203a4e;border-color:#4c8797;transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}button.primary{background:linear-gradient(135deg,#187f91,#276e91);border-color:#399eae;color:#fff;font-weight:700}button.ghost{background:transparent}button.active{background:#1a3b4e;border-color:#3d7d8d;color:#eaffff}.app{min-height:100vh}.topbar{height:72px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#0b1a27;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:12px;min-width:225px}.brandmark{width:39px;height:39px;border-radius:12px;background:linear-gradient(145deg,#78e0db,#26839c 65%,#205170);display:grid;place-items:center;color:#06202b;font-size:21px;font-weight:900;box-shadow:0 5px 20px #36b8c533}.brandname{font-size:15px;letter-spacing:2.4px;font-weight:800}.tagline{font-size:9px;letter-spacing:1.8px;color:#829cad}.topmetrics{display:flex;align-items:center;gap:clamp(12px,2.4vw,34px)}.metric small{display:block;color:var(--muted);font-size:10px;letter-spacing:.5px}.metric strong{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}.metric .green{color:var(--mint)}.topright{display:flex;align-items:center;gap:8px}.datechip{border:1px solid var(--line);background:#102333;border-radius:9px;padding:7px 11px;font-size:11px;color:#c7d9e2;white-space:nowrap}.shell{display:grid;grid-template-columns:218px minmax(400px,1fr) 300px;min-height:calc(100vh - 72px)}.sidebar{background:#0b1926;border-right:1px solid var(--line);padding:20px 13px}.navlabel,.eyebrow{font-size:9px;font-weight:800;letter-spacing:1.8px;color:#7892a5}.navlabel{padding:0 10px;margin:2px 0 12px}.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border-color:transparent;color:#b6c7d2;padding:11px 12px}.nav button .ico{width:20px;text-align:center;font-size:16px;color:#7fa6b7}.nav button.active{background:linear-gradient(90deg,#18394b,#142b3c);border-color:#28566b;color:#f0fbff}.nav button.active .ico{color:var(--cyan)}.side-divider{height:1px;background:var(--line);margin:19px 7px}.mini-card{border:1px solid var(--line);background:linear-gradient(145deg,#142738,#0f202f);border-radius:12px;padding:13px;margin:12px 3px}.mini-title{font-size:11px;color:#d7e5ec;font-weight:700;margin-bottom:9px}.muted{color:var(--muted)}.tiny{font-size:10px}.levelrow{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.progress{height:5px;background:#263e50;border-radius:9px;margin-top:8px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4bb9cc,#7cdbb7);border-radius:9px}.main{padding:19px;min-width:0;display:flex;flex-direction:column;gap:14px}.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px}.pagehead h1{font-size:20px;letter-spacing:-.4px;margin:2px 0 3px}.pagehead p{margin:0;color:var(--muted);font-size:11px}.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.actions button{font-size:11px;padding:7px 10px}.mapcard{position:relative;flex:1;min-height:470px;border:1px solid rgba(0,242,254,.24);border-radius:15px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#111a2e 0%,#060911 100%);box-shadow:0 18px 50px #0005,0 0 25px rgba(0,242,254,.05)}.mapcard canvas{width:100%;height:100%;min-height:470px;display:block;touch-action:none;cursor:grab}.maptooltip{position:absolute;z-index:4;pointer-events:none;display:flex;flex-direction:column;gap:3px;min-width:172px;max-width:220px;padding:9px 11px;border:1px solid rgba(0,242,254,.62);border-radius:9px;background:rgba(11,15,25,.95);box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 16px rgba(0,242,254,.18);backdrop-filter:blur(10px);opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}.maptooltip.visible{opacity:1;transform:translateY(0)}.maptooltip strong{font-size:11px;color:#f2fbff}.maptooltip span{font-size:10px;color:#b5d0dc}.maptooltip small{font-size:9px;color:#70cbd7}.mapcard canvas.drag{cursor:grabbing}
+.citymap-card{position:relative;min-height:500px;height:calc(100vh - 300px);max-height:760px;border:1px solid rgba(0,242,254,.27);border-radius:15px;overflow:hidden;background:#071725;box-shadow:0 18px 50px #0005,0 0 26px rgba(0,242,254,.06)}
+.citymap-card canvas{width:100%;height:100%;min-height:500px;display:block;touch-action:none;cursor:crosshair}
+.citymap-hud{position:absolute;left:14px;top:14px;pointer-events:none;background:rgba(4,15,27,.88);border:1px solid rgba(0,242,254,.25);border-radius:9px;padding:9px 12px;backdrop-filter:blur(10px)}
+.citymap-hud strong{display:block;font-size:10px;letter-spacing:1.3px;color:#e9fbff}.citymap-hud span{display:block;color:#76b9c8;font-size:9px;margin-top:3px}
+.citymap-legend{position:absolute;left:14px;bottom:14px;display:flex;gap:10px;flex-wrap:wrap;background:rgba(4,15,27,.88);border:1px solid rgba(0,242,254,.22);border-radius:9px;padding:8px 10px;font-size:9px;color:#c2d6df}
+.citymap-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+.local-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.local-controls button{font-size:10px;padding:8px 10px}
+.local-statrow{display:flex;gap:8px;flex-wrap:wrap}.local-stat{border:1px solid #294354;background:#0b1b29;border-radius:9px;padding:8px 11px;min-width:110px}
+.local-stat small{display:block;color:#89a4b4;font-size:9px}.local-stat b{font-size:13px;color:#e8f7fb}
+.local-breadcrumb{font-size:10px;color:#8aa6b7;margin-bottom:4px}.local-breadcrumb strong{color:#6ce2ed}.local-mode-note{font-size:10px;color:#a9c1ce}.maphud{position:absolute;top:14px;left:15px;pointer-events:none;background:#081a29d9;border:1px solid #35556a;border-radius:9px;padding:9px 12px;backdrop-filter:blur(10px)}.maphud strong{font-size:10px;letter-spacing:1.4px}.maphud span{display:block;font-size:9px;color:#8eaabb;margin-top:2px}.legend{position:absolute;bottom:14px;left:15px;display:flex;gap:12px;flex-wrap:wrap;background:#081a29db;border:1px solid #35556a;border-radius:9px;padding:8px 11px;font-size:9px;color:#c1d1db}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.maptools{position:absolute;right:14px;top:14px;display:grid;gap:5px}.maptools button{width:32px;height:32px;padding:0;background:#0a1d2cdd;border-color:#3a5c70;font-size:16px}.mapfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.maphint{font-size:10px;color:var(--muted)}.modepill{font-size:9px;border:1px solid #34576a;border-radius:20px;padding:5px 9px;color:#b9d1dc}.mapfootright{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.mapfootright button{font-size:10px;padding:8px 11px}.rightbar{border-left:1px solid var(--line);background:#0b1926;padding:18px 14px;min-width:0}.rightheading{font-size:9px;letter-spacing:1.8px;color:#7892a5;font-weight:800;margin:3px 4px 12px}.panel{border:1px solid var(--line);background:linear-gradient(145deg,#142738,#102130);border-radius:12px;padding:14px;margin-bottom:11px}.panel h3{font-size:12px;margin:0 0 11px}.citytop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.cityname{font-size:18px;font-weight:800;letter-spacing:-.3px}.citymeta{font-size:10px;color:var(--muted)}.status{font-size:9px;color:var(--mint);background:#1b4a4238;border:1px solid #32695e;border-radius:20px;padding:4px 7px;white-space:nowrap}.citystats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:13px 0}.cell{background:#0b1a27;border:1px solid #243b4d;border-radius:8px;padding:9px}.cell small{display:block;color:#829bac;font-size:9px}.cell b{font-size:13px}.full{width:100%;margin-top:7px}.routeitem{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #24394a;font-size:10px}.routeitem:last-child{border:0}.routeitem b{color:var(--mint);white-space:nowrap}.newsitem{font-size:10px;color:#c4d2dc;border-left:2px solid #4a9bae;padding-left:9px;margin:9px 0}.newsitem small{display:block;color:#7893a5;font-size:9px;margin-top:3px}.contentcard{border:1px solid var(--line);background:linear-gradient(145deg,#132638,#0e1e2d);border-radius:14px;padding:16px}.contentgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.kpi{background:#0c1b29;border:1px solid #263f51;border-radius:11px;padding:13px}.kpi small{color:var(--muted);font-size:10px}.kpi strong{display:block;font-size:20px;margin-top:5px}.table{width:100%;border-collapse:collapse;font-size:11px}.table th{text-align:left;color:#8ea7b8;font-weight:600;font-size:9px;letter-spacing:.7px;padding:10px;border-bottom:1px solid var(--line)}.table td{padding:11px 10px;border-bottom:1px solid #223849}.table tr:last-child td{border:0}.table button{font-size:10px;padding:6px 9px}.cityrow{cursor:pointer}.cityrow:hover{background:#1a3446}.pill{border:1px solid #35546a;border-radius:20px;padding:3px 7px;font-size:9px;color:#b6d0dd}.green{color:var(--mint)}.gold{color:var(--gold)}.red{color:var(--red)}.notice{padding:11px 13px;border-radius:10px;background:#112a3b;border:1px solid #2c5267;color:#bdd4df;font-size:10px}.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translate(-50%,18px);opacity:0;pointer-events:none;padding:11px 16px;background:#17394a;border:1px solid #4d92a4;border-radius:10px;box-shadow:0 10px 35px #0008;transition:.2s;font-size:11px}.toast.show{opacity:1;transform:translate(-50%,0)}.modalback{position:fixed;inset:0;background:#020a11c9;z-index:30;display:none;place-items:center;padding:16px}.modalback.open{display:grid}.modal{width:min(440px,100%);background:#112536;border:1px solid #3a5a70;border-radius:15px;padding:20px;box-shadow:0 25px 80px #000a}.modal h2{font-size:17px;margin:0 0 7px}.modal p{color:#a4b8c6;font-size:11px;line-height:1.7}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.empty{padding:22px;text-align:center;color:var(--muted);font-size:11px}.speed{display:flex;gap:4px}.speed button{padding:6px 8px;font-size:9px}.mobilebar{display:none}
 @media(max-width:1100px){.shell{grid-template-columns:190px minmax(0,1fr)}.rightbar{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rightheading{grid-column:1/-1;margin-bottom:0}.rightbar .panel{margin:0}.rightbar .panel:last-child{grid-column:1/-1}}
 @media(max-width:720px){.topbar{height:auto;min-height:65px;padding:10px 12px;align-items:flex-start;flex-wrap:wrap}.brand{min-width:0}.brandname{font-size:12px}.tagline{font-size:8px}.topmetrics{order:3;width:100%;justify-content:space-between;border-top:1px solid var(--line);padding-top:7px}.metric strong{font-size:12px}.topright{margin-left:auto}.datechip{font-size:9px}.shell{display:flex;flex-direction:column}.sidebar{padding:8px;border-right:0;border-bottom:1px solid var(--line)}.navlabel,.sidebar .mini-card,.side-divider{display:none}.nav{display:flex;overflow-x:auto;gap:4px}.nav button{white-space:nowrap;padding:8px 10px;font-size:10px;gap:6px}.nav button .ico{width:auto}.main{padding:11px;gap:10px}.pagehead h1{font-size:17px}.pagehead p{font-size:10px}.mapcard,.mapcard canvas{min-height:410px}.rightbar{display:flex;flex-direction:column;padding:12px}.rightbar .panel{margin:0}.contentgrid{grid-template-columns:1fr 1fr}.table{min-width:530px}.tablewrap{overflow-x:auto}.pagehead{align-items:flex-start;flex-direction:column}.actions{width:100%}}
 </style>
@@ -41,8 +51,28 @@
 <main class="main">
  <div class="pagehead"><div><div class="eyebrow" id="eyebrow">GLOBAL OPERATIONS / 01</div><h1 id="pagetitle">世界ネットワーク</h1><p id="pagesub">地球規模の交通網を築き、都市と都市をつなごう。</p></div><div class="actions"><div class="speed"><button data-speed="1" class="active">1×</button><button data-speed="2">2×</button><button data-speed="4">4×</button></div><button id="newgame" class="ghost">新規ゲーム</button></div></div>
  <section id="worldpage">
-  <div class="mapcard"><canvas id="map" aria-label="世界地図"></canvas><div class="maptooltip" id="maptooltip" role="status"></div><div class="maphud"><strong>EARTH / GLOBAL NETWORK</strong><span id="mapstatus">WORLD MAP DATA LOADING</span></div><div class="maptools"><button id="plus">＋</button><button id="minus">−</button><button id="home" title="全体表示">⌂</button></div><div class="legend"><span><i style="background:#68d9c1"></i>都市</span><span><i style="background:#efc476"></i>自社駅</span><span><i style="background:#65d4df"></i>鉄道路線</span><span><i style="background:#b8a0ff"></i>架空都市</span></div></div>
-  <div class="mapfoot"><div class="maphint" id="maphint">都市をクリックして詳細を確認。ドラッグで地図を移動できます。</div><div class="mapfootright"><span class="modepill" id="mode">SELECT MODE</span><button id="buildstation" class="primary">＋ 駅を建設</button><button id="buildroute">路線を接続</button></div></div>
+  <div id="worldMapView"><div class="mapcard"><canvas id="map" aria-label="世界地図"></canvas><div class="maptooltip" id="maptooltip" role="status"></div><div class="maphud"><strong>EARTH / GLOBAL NETWORK</strong><span id="mapstatus">WORLD MAP DATA LOADING</span></div><div class="maptools"><button id="plus">＋</button><button id="minus">−</button><button id="home" title="全体表示">⌂</button></div><div class="legend"><span><i style="background:#68d9c1"></i>都市</span><span><i style="background:#efc476"></i>自社駅</span><span><i style="background:#65d4df"></i>鉄道路線</span><span><i style="background:#b8a0ff"></i>架空都市</span></div></div>
+  <div class="mapfoot"><div class="maphint" id="maphint">都市をクリックして詳細を確認。ドラッグで地図を移動できます。</div><div class="mapfootright"><span class="modepill" id="mode">SELECT MODE</span><button id="buildstation" class="primary">＋ 駅を建設</button><button id="buildroute">路線を接続</button></div></div></div>
+  <div id="cityMapView" hidden>
+   <div class="local-breadcrumb"><button id="backWorldMap" class="ghost" style="padding:5px 9px;margin-right:5px">← 世界地図に戻る</button>世界地図 ＞ <strong id="localBreadcrumbName">東京</strong></div>
+   <div class="citymap-card">
+    <canvas id="citymapcanvas" aria-label="都市専用2Dマップ"></canvas>
+    <div class="citymap-hud"><strong id="localMapTitle">TOKYO / LOCAL DISTRICT MAP</strong><span id="localMapSub">URBAN GRID · DEVELOPMENT ZONES</span></div>
+    <div class="citymap-legend"><span><i style="background:#55d8e7"></i>中心業務</span><span><i style="background:#5ba9dc"></i>住宅</span><span><i style="background:#d9ad63"></i>空港・港</span><span><i style="background:#8b80df"></i>工業</span><span><i style="background:#00f2fe"></i>地下鉄</span></div>
+   </div>
+   <div class="contentcard" style="margin-top:10px;display:grid;gap:10px">
+    <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap">
+     <div><div class="eyebrow">LOCAL TRANSPORT NETWORK</div><div class="local-mode-note" id="localMapHint">エリアをクリックして市内駅を建設。駅を2か所選ぶと市内路線を接続できます。</div></div>
+     <div class="local-controls"><button id="localBuildStation" class="primary">＋ 地下鉄駅を建設</button><button id="localBuildRoute">路線を接続</button><button id="localRouteSubway" class="active">地下鉄</button><button id="localRouteBus">バス</button></div>
+    </div>
+    <div class="local-statrow">
+     <div class="local-stat"><small>市内駅</small><b id="localStationCount">0</b></div>
+     <div class="local-stat"><small>市内路線</small><b id="localRouteCount">0</b></div>
+     <div class="local-stat"><small>経済指数</small><b id="localEconomyValue">0 / 100</b></div>
+     <div class="local-stat"><small>交通需要</small><b id="localDemandValue">0 / 5</b></div>
+    </div>
+   </div>
+  </div>
  </section>
  <section id="transportpage" hidden><div class="contentcard"><div class="eyebrow">TRANSPORT MANAGEMENT</div><h2 style="margin:4px 0 5px;font-size:17px">鉄道ネットワーク</h2><p class="muted tiny">駅を2つ以上建設すると、都市間の路線を開通できます。路線は毎日収益を生みます。</p><div class="contentgrid" style="margin:15px 0"><div class="kpi"><small>駅の数</small><strong id="stationcount">0</strong></div><div class="kpi"><small>運行路線</small><strong id="routecount">0</strong></div><div class="kpi"><small>路線総延長</small><strong id="routedistance">0 km</strong></div></div><h3 style="font-size:12px">運行中の路線</h3><div class="tablewrap"><table class="table"><thead><tr><th>路線</th><th>距離</th><th>1日収入</th><th>建設費</th></tr></thead><tbody id="routetable"></tbody></table></div></div><div class="notice" style="margin-top:12px">ヒント：世界地図で「駅を建設」を選び、都市をクリック。2都市に駅ができたら「路線を接続」で路線を開通できます。</div></section>
  <section id="citiespage" hidden><div class="contentcard"><div class="eyebrow">CITY INTELLIGENCE</div><h2 style="margin:4px 0 12px;font-size:17px">世界の都市</h2><div class="tablewrap"><table class="table"><thead><tr><th>都市</th><th>国・地域</th><th>人口</th><th>経済指数</th><th>需要</th><th>自社拠点</th></tr></thead><tbody id="citytable"></tbody></table></div></div></section>
@@ -50,7 +80,7 @@
 </main>
 <aside class="rightbar">
  <div class="rightheading">SELECTED CITY / OPERATIONS</div>
- <div class="panel"><div class="citytop"><div><div class="cityname" id="cityname">東京</div><div class="citymeta" id="citymeta">日本 · アジア</div></div><span class="status" id="citytag">METRO</span></div><div class="citystats"><div class="cell"><small>人口</small><b id="citypop">1,400万人</b></div><div class="cell"><small>経済指数</small><b id="cityecon">92 / 100</b></div><div class="cell"><small>交通需要</small><b id="citydemand">非常に高い</b></div><div class="cell"><small>自社駅</small><b id="citystation">未建設</b></div></div><button class="full primary" id="citybuild">この都市に駅を建設</button></div>
+ <div class="panel"><div class="citytop"><div><div class="cityname" id="cityname">東京</div><div class="citymeta" id="citymeta">日本 · アジア</div></div><span class="status" id="citytag">METRO</span></div><div class="citystats"><div class="cell"><small>人口</small><b id="citypop">1,400万人</b></div><div class="cell"><small>経済指数</small><b id="cityecon">92 / 100</b></div><div class="cell"><small>交通需要</small><b id="citydemand">非常に高い</b></div><div class="cell"><small>自社駅</small><b id="citystation">未建設</b></div></div><button class="full primary" id="citybuild">この都市に駅を建設</button><button class="full" id="openCityMap">都市マップを開く（都市詳細へ）</button></div>
  <div class="panel"><h3>NETWORK OVERVIEW</h3><div class="routeitem"><span>建設済み駅</span><b id="sideStations">0</b></div><div class="routeitem"><span>運行中の路線</span><b id="sideRoutes">0</b></div><div class="routeitem"><span>本日の売上</span><b id="sideRevenue">¥0</b></div><div class="routeitem"><span>運営コスト</span><b id="sideCost">¥0</b></div></div>
  <div class="panel"><h3>WORLD BULLETIN</h3><div id="news"><div class="newsitem">WORLD NEXUSへようこそ。あなたの交通帝国を築きましょう。<small>DAY 1 · SYSTEM</small></div></div></div>
 </aside>
@@ -83,35 +113,208 @@ const cities=[
 {id:"aurora",name:"オーロラ・シティ",country:"架空都市",region:"北大西洋",lat:61,lon:-28,pop:95000,econ:58,demand:2,fictional:true},
 {id:"solaris",name:"ソラリス・ポート",country:"架空都市",region:"南太平洋",lat:-28,lon:-150,pop:125000,econ:65,demand:3,fictional:true}
 ];
-const base={money:1000000000,day:1,date:"2026-01-01",selected:"tokyo",stations:[],routes:[],level:1,xp:0,totalProfit:0,paused:false,speed:1,mode:"select"};
-let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null;
-const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000, valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000;
+const base={money:1000000000,day:1,date:"2026-01-01",selected:"tokyo",stations:[],routes:[],localStations:{},localRoutes:[],localRouteType:"subway",level:1,xp:0,totalProfit:0,paused:false,speed:1,mode:"select"};
+let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null,cityMapCanvas=$("citymapcanvas"),cityMapCtx=cityMapCanvas.getContext("2d"),localMapMode="view",localRouteStart=null,localMapSeedCache={};
+const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), localStationTotal=()=>Object.values(state.localStations||{}).reduce((n,list)=>n+(Array.isArray(list)?list.length:0),0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0)+(state.localRoutes||[]).reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000+localStationTotal()*12000+(state.localRoutes||[]).length*18000, valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000+localStationTotal()*4500000+(state.localRoutes||[]).length*12000000;
 function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 function addNews(s){let el=document.createElement("div");el.className="newsitem";el.append(document.createTextNode(s));let sm=document.createElement("small");sm.textContent="DAY "+state.day+" · WORLD NEXUS";el.append(sm);$("news").prepend(el);while($("news").children.length>4)$("news").lastChild.remove()}
 function city(){return cities.find(c=>c.id===state.selected)||cities[0]}
+function localStationsFor(cityId=state.selected){if(!state.localStations)state.localStations={};if(!Array.isArray(state.localStations[cityId]))state.localStations[cityId]=[];return state.localStations[cityId]}
+function localRoutesFor(cityId=state.selected){return (state.localRoutes||[]).filter(route=>route.cityId===cityId)}
 function render(){
  $("funds").textContent=money(state.money);$("revenue").textContent=money(routesIncome());$("valuation").textContent=money(valuation());$("date").textContent=state.date.replaceAll("-",".")+" · DAY "+state.day;
  $("level").textContent=String(state.level).padStart(2,"0");$("xptext").textContent=state.xp+" / "+(state.level*100)+" XP";$("xpbar").style.width=Math.min(100,state.xp/(state.level*100)*100)+"%";
  $("dayincome").textContent=money(routesIncome());$("daycost").textContent=money(dailyCost());
- $("sideStations").textContent=state.stations.length;$("sideRoutes").textContent=state.routes.length;$("sideRevenue").textContent=money(routesIncome());$("sideCost").textContent=money(dailyCost());
- const c=city();$("cityname").textContent=c.name;$("citymeta").textContent=c.country+" · "+c.region+ (c.fictional?" · 架空都市":"");$("citytag").textContent=c.fictional?"NEW CITY":"CITY PROFILE";$("citypop").textContent=compact(c.pop);$("cityecon").textContent=c.econ+" / 100";$("citydemand").textContent=["","低い","やや低い","標準","高い","非常に高い"][c.demand];$("citystation").textContent=state.stations.includes(c.id)?"建設済み":"未建設";$("citybuild").disabled=state.stations.includes(c.id);$("citybuild").textContent=state.stations.includes(c.id)?"駅を建設済み":"この都市に駅を建設";
+ $("sideStations").textContent=state.stations.length+localStationTotal();$("sideRoutes").textContent=state.routes.length+(state.localRoutes||[]).length;$("sideRevenue").textContent=money(routesIncome());$("sideCost").textContent=money(dailyCost());
+ const c=city();$("cityname").textContent=c.name;$("citymeta").textContent=c.country+" · "+c.region+ (c.fictional?" · 架空都市":"");$("citytag").textContent=c.fictional?"NEW CITY":"CITY PROFILE";$("citypop").textContent=compact(c.pop);$("cityecon").textContent=c.econ+" / 100";$("citydemand").textContent=["","低い","やや低い","標準","高い","非常に高い"][c.demand];$("citystation").textContent=state.stations.includes(c.id)?"建設済み":(localStationsFor(c.id).length?localStationsFor(c.id).length+"駅（市内）":"未建設");$("citybuild").disabled=state.stations.includes(c.id);$("citybuild").textContent=state.stations.includes(c.id)?"駅を建設済み":"この都市に駅を建設";$("openCityMap").textContent=c.name+"の都市マップを開く";
  $("mode").textContent=state.mode==="build"?"BUILD STATION":state.mode==="route"?"CONNECT ROUTE":"SELECT MODE";$("buildstation").classList.toggle("primary",state.mode==="build");$("buildroute").classList.toggle("primary",state.mode==="route");
  $("maphint").textContent=state.mode==="build"?"駅を建設する都市をクリックしてください。":state.mode==="route"?"駅のある都市を2つ選択して路線を接続します。":"都市をクリックして詳細を確認。ドラッグで地図を移動できます。";
  $("stationcount").textContent=state.stations.length;$("routecount").textContent=state.routes.length;$("routedistance").textContent=num(state.routes.reduce((s,r)=>s+r.distance,0))+" km";
  $("routetable").innerHTML=state.routes.length?state.routes.map(r=>{let a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);return "<tr><td>"+a.name+" ⇄ "+b.name+"</td><td>"+num(r.distance)+" km</td><td class='green'>"+money(r.daily)+"</td><td>"+money(r.cost)+"</td></tr>"}).join(""):"<tr><td colspan='4' class='empty'>路線はまだありません。2都市に駅を建設して接続しましょう。</td></tr>";
  $("citytable").innerHTML=cities.map(c=>"<tr class='cityrow' data-city='"+c.id+"'><td><b>"+c.name+"</b>"+(c.fictional?" <span class='pill'>架空</span>":"")+"</td><td>"+c.country+"</td><td>"+compact(c.pop)+"</td><td>"+c.econ+"</td><td>"+["","低","やや低","標準","高","非常に高"][c.demand]+"</td><td>"+(state.stations.includes(c.id)?"<span class='green'>建設済み</span>":"—")+"</td></tr>").join("");
- $("cfunds").textContent=money(state.money);$("cvalue").textContent=money(valuation());$("cprofit").textContent=money(state.totalProfit);$("cstations").textContent=state.stations.length;$("croutes").textContent=state.routes.length;$("clevel").textContent=state.level;
+ $("cfunds").textContent=money(state.money);$("cvalue").textContent=money(valuation());$("cprofit").textContent=money(state.totalProfit);$("cstations").textContent=state.stations.length+localStationTotal();$("croutes").textContent=state.routes.length+(state.localRoutes||[]).length;$("clevel").textContent=state.level;
+ if(!$("cityMapView").hidden){renderCityMapUI();drawCityMap()}
  $("routetable").querySelectorAll("tr").forEach(()=>{});
  $("citytable").querySelectorAll("[data-city]").forEach(el=>el.addEventListener("click",()=>{state.selected=el.dataset.city;switchPage("world");render();drawMap()}));
+ if(!$("cityMapView").hidden){renderCityMapUI();drawCityMap()}
+}
+
+let isCityMapOpen=false;
+function openCityMap(){
+ isCityMapOpen=true;localMapMode="view";localRouteStart=null;
+ $("worldMapView").hidden=true;$("cityMapView").hidden=false;
+ const c=city();
+ $("localBreadcrumbName").textContent=c.name;
+ $("localMapTitle").textContent=c.name.toUpperCase()+" / LOCAL DISTRICT MAP";
+ $("localMapSub").textContent=c.country.toUpperCase()+" · URBAN GRID / DEVELOPMENT ZONES";
+ $("eyebrow").textContent="CITY OPERATIONS / LOCAL MAP";
+ $("pagetitle").textContent=c.name+" 都市マップ";
+ $("pagesub").textContent="世界地図 ＞ "+c.name+" · 市内交通網と都市開発";
+ renderCityMapUI();requestAnimationFrame(drawCityMap);
+}
+function closeCityMap(){
+ isCityMapOpen=false;localMapMode="view";localRouteStart=null;
+ $("cityMapView").hidden=true;$("worldMapView").hidden=false;
+ $("eyebrow").textContent="GLOBAL OPERATIONS / 01";$("pagetitle").textContent="世界ネットワーク";
+ $("pagesub").textContent="地球規模の交通網を築き、都市と都市をつなごう。";
+ drawMap();
+}
+function cityMapRandom(seed){
+ let value=seed>>>0;return ()=>{value=(value*1664525+1013904223)>>>0;return value/4294967296};
+}
+function cityMapLayout(c){
+ if(localMapSeedCache[c.id])return localMapSeedCache[c.id];
+ let seed=0;for(const ch of c.id)seed=(seed*31+ch.charCodeAt(0))>>>0;
+ const random=cityMapRandom(seed||12345),riverAxis=Math.floor(random()*3),riverShift=(random()-.5)*.22;
+ const airportSide=random()>.5?"left":"right",portSide=random()>.5?"top":"bottom";
+ const cbd={x:.46+(random()-.5)*.1,y:.43+(random()-.5)*.12,w:.23,h:.20};
+ const residential=[
+  {x:.18+random()*.08,y:.20+random()*.08,w:.23,h:.20},
+  {x:.16+random()*.08,y:.58+random()*.08,w:.25,h:.19},
+  {x:.65+random()*.04,y:.20+random()*.06,w:.22,h:.20},
+  {x:.65+random()*.04,y:.60+random()*.06,w:.22,h:.20}
+ ];
+ const airport={x:airportSide==="left"?.035:.79,y:.40+random()*.1,w:.17,h:.19};
+ const port={x:.36+random()*.1,y:portSide==="top"?.035:.77,w:.20,h:.15};
+ const industrial={x:airportSide==="left"?.72:.10,y:portSide==="top"?.72:.10,w:.17,h:.15};
+ const commercial={x:.38+random()*.18,y:.70+random()*.04,w:.20,h:.12};
+ return localMapSeedCache[c.id]={seed,riverAxis,riverShift,airportSide,portSide,cbd,residential,airport,port,industrial,commercial};
+}
+function roundLocalRect(ctx,x,y,w,h,r){
+ ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+ ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+function renderCityMapUI(){
+ const c=city(),stations=localStationsFor(c.id),routes=localRoutesFor(c.id);
+ $("localBreadcrumbName").textContent=c.name;$("localMapTitle").textContent=c.name.toUpperCase()+" / LOCAL DISTRICT MAP";
+ $("localMapSub").textContent=c.country.toUpperCase()+" · URBAN GRID / DEVELOPMENT ZONES";
+ $("localStationCount").textContent=stations.length;$("localRouteCount").textContent=routes.length;
+ $("localEconomyValue").textContent=c.econ+" / 100";$("localDemandValue").textContent=c.demand+" / 5";
+ $("localBuildStation").classList.toggle("primary",localMapMode==="station");
+ $("localBuildRoute").classList.toggle("primary",localMapMode==="route");
+ $("localRouteSubway").classList.toggle("active",state.localRouteType==="subway");
+ $("localRouteBus").classList.toggle("active",state.localRouteType==="bus");
+ $("localMapHint").textContent=localMapMode==="station"?"建設したい場所をクリックしてください。駅の建設費は ¥8,000,000 です。":
+  localMapMode==="route"?(localRouteStart?"接続先となる2つ目の市内駅をクリックしてください。":"路線の起点となる市内駅をクリックしてください。"):
+  "エリアをクリックして市内駅を建設。駅を2か所選ぶと市内路線を接続できます。";
+}
+function drawCityMap(){
+ if($("cityMapView").hidden)return;
+ const c=city(),rect=cityMapCanvas.getBoundingClientRect();if(rect.width<2||rect.height<2)return;
+ const dpr=Math.min(window.devicePixelRatio||1,2),w=rect.width,h=rect.height;
+ cityMapCanvas.width=Math.max(1,Math.floor(w*dpr));cityMapCanvas.height=Math.max(1,Math.floor(h*dpr));
+ cityMapCtx.setTransform(dpr,0,0,dpr,0,0);
+ const ctx=cityMapCtx;
+ const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,"#091e30");bg.addColorStop(1,"#050f1c");ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ const layout=cityMapLayout(c);
+ // City footprint is deterministic per city ID, so each city keeps its own urban shape.
+ ctx.beginPath();
+ for(let i=0;i<18;i++){const a=Math.PI*2*i/18-Math.PI/2;const noise=.91+(((layout.seed>>>((i%4)*4))&15)/100);const px=w*(.5+Math.cos(a)*.47*noise),py=h*(.5+Math.sin(a)*.43*noise);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}
+ ctx.closePath();
+ const landGrad=ctx.createLinearGradient(0,0,w,h);landGrad.addColorStop(0,"#1b384b");landGrad.addColorStop(.52,"#183144");landGrad.addColorStop(1,"#102638");
+ ctx.fillStyle=landGrad;ctx.fill();ctx.strokeStyle="rgba(0,242,254,.48)";ctx.lineWidth=1.6;ctx.shadowColor="#00f2fe";ctx.shadowBlur=14;ctx.stroke();ctx.shadowBlur=0;
+ ctx.save();ctx.clip();
+ // Waterway pattern varies between cities: vertical river, horizontal river, or winding estuary.
+ ctx.lineCap="round";ctx.lineJoin="round";
+ if(layout.riverAxis===0){
+  const x=w*(.46+layout.riverShift);ctx.beginPath();ctx.moveTo(x-w*.08,-20);ctx.bezierCurveTo(x+w*.14,h*.28,x-w*.16,h*.55,x+w*.1,h+20);
+  ctx.strokeStyle="#09263e";ctx.lineWidth=43;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=34;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+ }else if(layout.riverAxis===1){
+  const y=h*(.48+layout.riverShift);ctx.beginPath();ctx.moveTo(-20,y);ctx.bezierCurveTo(w*.28,y-h*.13,w*.58,y+h*.15,w+20,y-h*.08);
+  ctx.strokeStyle="#09263e";ctx.lineWidth=45;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=35;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+ }else{
+  ctx.beginPath();ctx.moveTo(w*.12,-20);ctx.bezierCurveTo(w*.3,h*.28,w*.62,h*.15,w*.46,h*.55);ctx.bezierCurveTo(w*.3,h*.82,w*.72,h*.65,w*.95,h+20);
+  ctx.strokeStyle="#09263e";ctx.lineWidth=46;ctx.stroke();ctx.strokeStyle="#125273";ctx.lineWidth=36;ctx.stroke();ctx.strokeStyle="rgba(0,242,254,.22)";ctx.lineWidth=1.4;ctx.stroke();
+ }
+ const bayX=layout.portSide==="bottom"?w*.83:w*.16;
+ ctx.beginPath();ctx.moveTo(bayX,h*.78);ctx.bezierCurveTo(bayX-w*.12,h*.66,bayX+w*.08,h*.48,bayX,h*.26);
+ ctx.strokeStyle="#09263e";ctx.lineWidth=55;ctx.stroke();ctx.strokeStyle="#104b69";ctx.lineWidth=45;ctx.stroke();
+ const zones=[
+  {name:"中心ビジネス街",sub:"CENTRAL BUSINESS DISTRICT",box:layout.cbd,fill:"rgba(0,242,254,.20)",line:"#55d8e7"},
+  ...layout.residential.map((box,i)=>({name:"住宅エリア "+(i+1),sub:"RESIDENTIAL",box,fill:"rgba(67,145,202,.20)",line:"#5ba9dc"})),
+  {name:"空港",sub:"AIRPORT",box:layout.airport,fill:"rgba(217,173,99,.22)",line:"#d9ad63"},
+  {name:"港湾地区",sub:"SEAPORT",box:layout.port,fill:"rgba(217,173,99,.18)",line:"#d9ad63"},
+  {name:"工業地帯",sub:"INDUSTRIAL",box:layout.industrial,fill:"rgba(139,128,223,.22)",line:"#8b80df"},
+  {name:"商業エリア",sub:"COMMERCIAL",box:layout.commercial,fill:"rgba(74,191,166,.16)",line:"#4abfa6"}
+ ];
+ zones.forEach(z=>{
+  const x=z.box.x*w,y=z.box.y*h,bw=z.box.w*w,bh=z.box.h*h;roundLocalRect(ctx,x,y,bw,bh,9);
+  ctx.fillStyle=z.fill;ctx.fill();ctx.strokeStyle=z.line;ctx.lineWidth=1.1;ctx.stroke();
+  ctx.fillStyle="rgba(231,246,252,.86)";ctx.font="600 10px 'Noto Sans JP',sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(z.name,x+bw/2,y+bh/2-3);
+  ctx.fillStyle="rgba(155,190,205,.68)";ctx.font="8px 'DM Sans',sans-serif";ctx.fillText(z.sub,x+bw/2,y+bh/2+10);
+ });
+ // Local street mesh and highlighted urban arterial roads.
+ ctx.strokeStyle="rgba(113,153,176,.16)";ctx.lineWidth=.75;
+ for(let x=w*.04;x<w;x+=w*.045){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+w*.02,h);ctx.stroke()}
+ for(let y=h*.05;y<h;y+=h*.055){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-h*.015);ctx.stroke()}
+ for(let i=0;i<4;i++){
+  const yy=h*(.22+i*.19);ctx.beginPath();ctx.moveTo(w*.04,yy);ctx.bezierCurveTo(w*.35,yy-h*.05,w*.62,yy+h*.05,w*.96,yy-h*.025);
+  ctx.strokeStyle="rgba(4,16,27,.9)";ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle="rgba(83,193,211,.47)";ctx.lineWidth=1.3;ctx.stroke();
+ }
+ for(let i=0;i<4;i++){
+  const xx=w*(.19+i*.2);ctx.beginPath();ctx.moveTo(xx,h*.04);ctx.bezierCurveTo(xx+w*.04,h*.32,xx-w*.03,h*.68,xx+w*.015,h*.96);
+  ctx.strokeStyle="rgba(4,16,27,.9)";ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle="rgba(83,193,211,.47)";ctx.lineWidth=1.3;ctx.stroke();
+ }
+ const stations=localStationsFor(c.id),routes=localRoutesFor(c.id);
+ routes.forEach(route=>{
+  const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
+  ctx.beginPath();ctx.moveTo(a.x*w,a.y*h);ctx.lineTo(b.x*w,b.y*h);
+  if(route.mode==="bus"){ctx.setLineDash([7,5]);ctx.strokeStyle="#f0b75d"}else{ctx.setLineDash([]);ctx.strokeStyle="#00f2fe"}
+  ctx.lineWidth=route.mode==="bus"?2.4:3.2;ctx.shadowColor=route.mode==="bus"?"#f0b75d":"#00f2fe";ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);
+ });
+ stations.forEach((station,index)=>{
+  const x=station.x*w,y=station.y*h;
+  ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fillStyle="rgba(0,242,254,.13)";ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle="#eaffff";ctx.shadowColor="#00f2fe";ctx.shadowBlur=13;ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.5;ctx.stroke();
+  const label=station.name||("駅 "+(index+1));ctx.font="600 9px 'Noto Sans JP',sans-serif";ctx.textAlign="left";
+  const tw=ctx.measureText(label).width;roundLocalRect(ctx,Math.min(w-tw-24,x+9),Math.max(4,y-23),tw+12,17,4);
+  ctx.fillStyle="rgba(3,13,23,.86)";ctx.fill();ctx.fillStyle="#e8faff";ctx.fillText(label,Math.min(w-tw-18,x+15),Math.max(15,y-11));
+ });
+ ctx.restore();
+ ctx.fillStyle="rgba(220,241,248,.55)";ctx.font="9px 'DM Sans',sans-serif";ctx.textAlign="right";ctx.fillText("URBAN GRID / "+c.id.toUpperCase()+" · ZOOM 1.0×",w-17,h-17);
+ ctx.fillStyle="#b7d3df";ctx.textAlign="left";ctx.font="600 10px 'Noto Sans JP',sans-serif";ctx.fillText(c.name+" 都市圏",18,h-17);
+}
+function localMapClick(event){
+ const rect=cityMapCanvas.getBoundingClientRect(),x=(event.clientX-rect.left)/rect.width,y=(event.clientY-rect.top)/rect.height;
+ if(x<.04||x>.96||y<.04||y>.96){notify("都市圏の内側を選択してください");return}
+ const stations=localStationsFor();
+ if(localMapMode==="station"){
+  const cost=8000000;if(state.money<cost){notify("市内駅の建設資金が不足しています（"+money(cost)+"）");return}
+  const station={id:"local-"+state.selected+"-"+(stations.length+1),name:city().name+"駅 "+(stations.length+1),x,y};
+  state.money-=cost;stations.push(station);state.xp+=12;addNews(city().name+"に市内駅を建設しました。");
+  render();drawCityMap();save(true);notify(station.name+"を建設しました。");return;
+ }
+ if(localMapMode==="route"){
+  let nearest=null,nearestDistance=.045;
+  stations.forEach(s=>{const d=Math.hypot(s.x-x,s.y-y);if(d<nearestDistance){nearest=s;nearestDistance=d}});
+  if(!nearest){notify("既存の市内駅をクリックして選択してください");return}
+  if(!localRouteStart){localRouteStart=nearest.id;renderCityMapUI();notify(nearest.name+"を路線の起点に設定しました");return}
+  if(localRouteStart===nearest.id){notify("別の駅を選択してください");return}
+  const existing=localRoutesFor().some(route=>(route.a===localRouteStart&&route.b===nearest.id)||(route.a===nearest.id&&route.b===localRouteStart));
+  if(existing){notify("この市内路線はすでに接続されています");localRouteStart=null;renderCityMapUI();return}
+  const first=stations.find(s=>s.id===localRouteStart);if(!first){localRouteStart=null;return}
+  const distance=Math.max(1,Math.round(Math.hypot((first.x-nearest.x)*1.15,first.y-nearest.y)*48));
+  const mode=state.localRouteType==="bus"?"bus":"subway";
+  const cost=Math.max(mode==="bus"?1200000:2500000,distance*(mode==="bus"?70000:150000));
+  if(state.money<cost){notify("市内路線の建設資金が不足しています（"+money(cost)+"）");localRouteStart=null;renderCityMapUI();return}
+  const daily=Math.round(city().pop/100000*(distance+1)*(mode==="bus"?80:120));
+  state.money-=cost;state.localRoutes.push({id:"route-"+state.selected+"-"+(state.localRoutes.length+1),cityId:state.selected,a:first.id,b:nearest.id,mode,distance,cost,daily});
+  const currentCity=city();currentCity.econ=Math.min(100,currentCity.econ+2);currentCity.demand=Math.min(5,currentCity.demand+1);
+  state.xp+=28;localRouteStart=null;localMapMode="view";
+  addNews(currentCity.name+"で市内"+(mode==="bus"?"バス":"地下鉄")+"路線が開通。経済指数と交通需要が上昇しました。");
+  render();drawCityMap();save(true);notify("市内路線が開通！ 経済指数 +2、交通需要が上昇しました。");
+ }
 }
 function switchPage(name){
+ isCityMapOpen=false;$("worldMapView").hidden=false;$("cityMapView").hidden=true;
  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
  ["world","transport","cities","company"].forEach(p=>$(p+"page").hidden=p!==name);
  const data={world:["GLOBAL OPERATIONS / 01","世界ネットワーク","地球規模の交通網を築き、都市と都市をつなごう。"],transport:["TRANSPORT MANAGEMENT / 02","交通ネットワーク","駅・路線・輸送収益を管理しよう。"],cities:["CITY INTELLIGENCE / 03","都市開発","世界の都市の人口・経済・交通需要を確認しよう。"],company:["CORPORATE FINANCE / 04","企業経営","資金・企業価値・日々の収支を確認しよう。"]}[name];
  $("eyebrow").textContent=data[0];$("pagetitle").textContent=data[1];$("pagesub").textContent=data[2];
 }
-function save(silent){try{localStorage.setItem("worldNexusSaveV2",JSON.stringify({state,cities}));if(!silent)notify("セーブデータを保存しました")}catch(e){if(!silent)notify("保存に失敗しました")}}
-function load(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(!raw){notify("セーブデータがありません");return}let obj=JSON.parse(raw);if(!obj.state||!Array.isArray(obj.state.stations)||!Array.isArray(obj.state.routes))throw Error("invalid");state=Object.assign({},base,obj.state);if(Array.isArray(obj.cities))obj.cities.forEach(saved=>{let c=cities.find(x=>x.id===saved.id);if(c&&Number.isFinite(saved.pop))c.pop=saved.pop});render();drawMap();notify("セーブデータをロードしました")}catch(e){notify("データを読み込めませんでした")}}
+function save(silent){try{if(!state.localStations)state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];localStorage.setItem("worldNexusSaveV2",JSON.stringify({state,cities}));if(!silent)notify("セーブデータを保存しました")}catch(e){if(!silent)notify("保存に失敗しました")}}
+function load(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(!raw){notify("セーブデータがありません");return}let obj=JSON.parse(raw);if(!obj.state||!Array.isArray(obj.state.stations)||!Array.isArray(obj.state.routes))throw Error("invalid");state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(Array.isArray(obj.cities))obj.cities.forEach(saved=>{let c=cities.find(x=>x.id===saved.id);if(c&&Number.isFinite(saved.pop))c.pop=saved.pop});render();drawMap();notify("セーブデータをロードしました")}catch(e){notify("データを読み込めませんでした")}}
 function confirm(title,text,action){$("modaltitle").textContent=title;$("modaltext").textContent=text;modalAction=action;$("modal").classList.add("open")}
 function buildStation(id){let c=cities.find(x=>x.id===id);if(!c)return;if(state.stations.includes(id)){notify("この都市にはすでに駅があります");return}let cost=c.fictional?22000000:35000000;if(state.money<cost){notify("資金不足：必要額 "+money(cost));return}state.money-=cost;state.stations.push(id);state.xp+=30;state.mode="select";addNews(c.name+"に新しい駅が完成しました。");render();drawMap();save(true);notify(c.name+"に駅を建設しました！")}
 function connectRoute(id){
@@ -361,13 +564,19 @@ function zoom(f){mapScale=Math.max(.8,Math.min(3.5,mapScale*f));drawMap()}
 $("plus").onclick=()=>zoom(1.2);$("minus").onclick=()=>zoom(.83);$("home").onclick=()=>{mapScale=1;mapX=0;mapY=0;drawMap()};
 $("buildstation").onclick=()=>{state.mode=state.mode==="build"?"select":"build";render()};$("buildroute").onclick=()=>{state.mode=state.mode==="route"?"select":"route";routeStart=null;render()};
 $("citybuild").onclick=()=>buildStation(state.selected);
+ $("openCityMap").onclick=openCityMap;$("backWorldMap").onclick=closeCityMap;
+ $("localBuildStation").onclick=()=>{localMapMode=localMapMode==="station"?"view":"station";localRouteStart=null;renderCityMapUI()};
+ $("localBuildRoute").onclick=()=>{localMapMode=localMapMode==="route"?"view":"route";localRouteStart=null;renderCityMapUI()};
+ $("localRouteSubway").onclick=()=>{state.localRouteType="subway";renderCityMapUI()};
+ $("localRouteBus").onclick=()=>{state.localRouteType="bus";renderCityMapUI()};
+ cityMapCanvas.addEventListener("click",localMapClick);
 $("save").onclick=()=>save(false);$("companysave").onclick=()=>save(false);$("load").onclick=load;
 $("pause").onclick=()=>{state.paused=!state.paused;$("pause").textContent=state.paused?"▶":"Ⅱ";notify(state.paused?"ゲーム時間を一時停止しました":"ゲームを再開しました")};
 document.querySelectorAll("[data-speed]").forEach(b=>b.onclick=()=>setSpeed(Number(b.dataset.speed)));
 document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
 $("modalcancel").onclick=()=>$("modal").classList.remove("open");$("modalok").onclick=()=>{if(modalAction)modalAction();$("modal").classList.remove("open")};
 $("newgame").onclick=()=>confirm("新しいゲームを開始","現在の進行状況をリセットします。保存していないデータは失われます。",()=>{state=JSON.parse(JSON.stringify(base));cities.forEach((c,i)=>{let original=[14000000,2750000,1970000,9400000,24800000,5900000,12400000,3600000,8900000,2100000,3700000,8800000,3900000,12300000,4400000,5300000,180000,95000,125000];c.pop=original[i]});routeStart=null;mapScale=1;mapX=0;mapY=0;$("news").innerHTML="<div class='newsitem'>新しい会社を設立しました。<small>DAY 1 · SYSTEM</small></div>";render();drawMap();save(true);notify("新しいゲームを開始しました")});
-window.addEventListener("resize",drawMap);
+window.addEventListener("resize",()=>{drawMap();drawCityMap()});
 function loadScript(src){return new Promise((resolve,reject)=>{let script=document.createElement("script"),done=false,timer=setTimeout(()=>finish(new Error("script timeout")),8000);function finish(err){if(done)return;done=true;clearTimeout(timer);if(err){script.remove();reject(err)}else resolve()}script.src=src;script.async=true;script.onload=()=>finish();script.onerror=()=>finish(new Error("script load failed"));document.head.appendChild(script)})}
 async function loadWorld(){
  try{
@@ -404,7 +613,7 @@ async function loadWorld(){
   drawMap();
  }
 }
-function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
+function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
 init();
 })();
 </script>
