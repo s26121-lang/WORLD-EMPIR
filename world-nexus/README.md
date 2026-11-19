@@ -1,30 +1,34 @@
 # WORLD NEXUS
 
-Build Cities. Connect Nations.
+**Build Cities. Connect Nations.**
 
-A browser-based 2D global transport, city and company management simulation.
+A browser-based 2D global transport and city management simulation.
 
-## Phase 1 prototype
+## Play
+Open the GitHub Pages site after Pages deployment is enabled:
+`https://s26121-lang.github.io/WORLD-EMPIR/world-nexus/`
 
-Open `index.html` in a modern browser.
-
-### Included
-- Stylized world map with real-world and fictional cities
-- Pan and zoom controls
+## Phase 1 features
+- Responsive management dashboard
+- World map using Natural Earth projection and World Atlas country geometry (with a built-in fallback map)
+- 19 real-world and fictional cities
 - City selection and city information
-- Station construction
-- Railway route connection between owned stations
-- In-game day progression, passenger revenue and maintenance costs
-- Company level and experience
-- Local browser save data (localStorage)
+- Station construction with costs
+- Railway routes between owned stations
+- Daily passenger revenue, maintenance costs and company valuation
+- Population growth, company XP and levels
+- Simulation speed controls and pause
+- Browser save/load using localStorage
 
-### Controls
-- Click a city marker to inspect it
-- Select **駅を建設** and click a city to build a station
-- Build stations in two cities, then select **路線を引く** and click both cities
-- Drag the map to pan; use + / - to zoom
-- Progress is simulated every 15 seconds
-- Save data is stored in the current browser
+## Controls
+1. Select a city marker to inspect it.
+2. Choose **駅を建設** and click a city to build a station.
+3. Build stations in two cities, choose **路線を接続**, then click both cities.
+4. Use drag to pan and + / − to zoom.
+5. Save data is stored in the current browser.
+
+## Deployment
+The repository workflow in `.github/workflows/deploy-world-nexus.yml` publishes this folder to GitHub Pages when the Pages site is configured to use GitHub Actions.
 
 ## Roadmap
 1. Foundation: world map, cities, time, finance
@@ -33,5 +37,3 @@ Open `index.html` in a modern browser.
 4. AI companies and world economy
 5. Underwater cities and ocean transport
 6. Research, rankings, cloud saves and multiplayer groundwork
-
-This prototype is intentionally kept in its own `world-nexus/` folder so existing projects in the repository remain untouched.
