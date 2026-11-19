@@ -132,7 +132,7 @@ const cities=[
 {id:"solaris",name:"ソラリス・ポート",country:"架空都市",region:"南太平洋",lat:-28,lon:-150,pop:125000,econ:65,demand:3,fictional:true}
 ];
 const base={money:1000000000,day:1,date:"2026-01-01",selected:"tokyo",stations:[],routes:[],localStations:{},localRoutes:[],localBuildings:{},localRouteType:"subway",level:1,xp:0,totalProfit:0,paused:false,speed:1,mode:"select"};
-let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null,cityMapCanvas=$("citymapcanvas"),cityMapCtx=cityMapCanvas.getContext("2d"),cityMiniCanvas=$("cityMiniMap"),cityMiniCtx=cityMiniCanvas.getContext("2d"),localMapMode="view",localRouteStart=null,localMapSeedCache={},localCityCamera={x:950,y:1000,zoom:.34},localPan=null,localVehicleFrame=0;
+let state=JSON.parse(JSON.stringify(base)),world=null,projection=null,path=null,drag=null,canvas=$("map"),ctx=canvas.getContext("2d"),modalAction=null,routeStart=null,tick=null,toastTimer=null,cityMapCanvas=$("citymapcanvas"),cityMapCtx=cityMapCanvas.getContext("2d"),cityMiniCanvas=$("cityMiniMap"),cityMiniCtx=cityMiniCanvas.getContext("2d"),localMapMode="view",localRouteStart=null,localMapSeedCache={},localCityCamera={x:950,y:1000,zoom:.34},localPan=null,localVehicleFrame=0,vehicleClock=0,vehicleRaf=0,vehicleLastTs=0,vehicleLegs=new Map(),globalArrivalEffects=[],localArrivalEffects=[];
 const totalPopulation=()=>cities.reduce((s,c)=>s+c.pop,0), localStationTotal=()=>Object.values(state.localStations||{}).reduce((n,list)=>n+(Array.isArray(list)?list.length:0),0), routesIncome=()=>state.routes.reduce((s,r)=>s+r.daily,0)+(state.localRoutes||[]).reduce((s,r)=>s+r.daily,0), dailyCost=()=>state.stations.length*45000+state.routes.length*85000+Object.values(state.localStations||{}).reduce((sum,list)=>sum+(list||[]).reduce((n,s)=>n+(transitCatalog[s.type]?.maintenance||12000),0),0)+(state.localRoutes||[]).reduce((sum,r)=>sum+(r.maintenance||18000),0), valuation=()=>state.money+state.stations.length*35000000+state.routes.length*95000000+localStationTotal()*4500000+(state.localRoutes||[]).length*12000000;
 function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2400)}
 function addNews(s){let el=document.createElement("div");el.className="newsitem";el.append(document.createTextNode(s));let sm=document.createElement("small");sm.textContent="DAY "+state.day+" · WORLD NEXUS";el.append(sm);$("news").prepend(el);while($("news").children.length>4)$("news").lastChild.remove()}
@@ -206,6 +206,145 @@ const buildingCatalog={
  landmark:{name:"観光名所",zone:"tourism",cost:42000000,demand:3600,color:"#e1b65d",w:70,h:96,icon:"♜"},
  park:{name:"大型公園",zone:"public",cost:15000000,demand:1250,color:"#55b98e",w:110,h:90,icon:"❋"}
 };
+
+function clampValue(v,min,max){return Math.max(min,Math.min(max,v))}
+function globalRouteMode(route){
+ const aTypes=(state.localStations?.[route.a]||[]).map(s=>s.type),bTypes=(state.localStations?.[route.b]||[]).map(s=>s.type);
+ if(aTypes.includes("airport")&&bTypes.includes("airport"))return "air";
+ if(aTypes.includes("port")&&bTypes.includes("port"))return "ship";
+ if(aTypes.includes("hsr")&&bTypes.includes("hsr"))return "hsr";
+ if(route.mode==="air"||route.mode==="ship"||route.mode==="hsr")return route.mode;
+ return "rail";
+}
+function globalRoutePath(p,q,mode){
+ const dx=q[0]-p[0],dy=q[1]-p[1],len=Math.max(1,Math.hypot(dx,dy));
+ if(mode==="rail"||mode==="hsr")return {kind:"line",a:{x:p[0],y:p[1]},b:{x:q[0],y:q[1]}};
+ const lift=mode==="air"?clampValue(len*.25,28,145):clampValue(len*.10,12,58),sign=mode==="ship"?1:-1;
+ return {kind:"quad",a:{x:p[0],y:p[1]},c:{x:(p[0]+q[0])/2+(-dy/len)*lift*sign,y:(p[1]+q[1])/2+(dx/len)*lift*sign},b:{x:q[0],y:q[1]}};
+}
+function localRoutePath(route,a,b,layout){
+ const dx=b.x-a.x,dy=b.y-a.y,dist=Math.max(1,Math.hypot(dx,dy));
+ if(route.mode==="bus"||route.mode==="lrt"){
+  const bendX=a.x+dx*.5;
+  return {kind:"poly",points:[{x:a.x,y:a.y},{x:bendX,y:a.y},{x:bendX,y:b.y},{x:b.x,y:b.y}]};
+ }
+ if(route.mode==="monorail")return {kind:"quad",a:{x:a.x,y:a.y},c:{x:(a.x+b.x)/2,y:(a.y+b.y)/2-Math.min(240,dist*.16)},b:{x:b.x,y:b.y}};
+ if(route.mode==="ferry"){
+  const control=layout.riverAxis===0?{x:(a.x+b.x)/2+Math.sign(dx||1)*120,y:(a.y+b.y)/2}:{x:(a.x+b.x)/2,y:(a.y+b.y)/2+Math.sign(dy||1)*120};
+  return {kind:"quad",a:{x:a.x,y:a.y},c:control,b:{x:b.x,y:b.y}};
+ }
+ return {kind:"line",a:{x:a.x,y:a.y},b:{x:b.x,y:b.y}};
+}
+function traceVehiclePath(context,path){
+ context.beginPath();
+ if(path.kind==="quad"){context.moveTo(path.a.x,path.a.y);context.quadraticCurveTo(path.c.x,path.c.y,path.b.x,path.b.y)}
+ else if(path.kind==="poly"){path.points.forEach((p,i)=>i?context.lineTo(p.x,p.y):context.moveTo(p.x,p.y))}
+ else{context.moveTo(path.a.x,path.a.y);context.lineTo(path.b.x,path.b.y)}
+}
+function pointOnVehiclePath(path,t){
+ t=clampValue(t,0,1);
+ if(path.kind==="quad"){
+  const u=1-t,a=path.a,b=path.b,d=path.c;
+  return {x:u*u*a.x+2*u*t*d.x+t*t*b.x,y:u*u*a.y+2*u*t*d.y+t*t*b.y,dx:2*u*(d.x-a.x)+2*t*(b.x-d.x),dy:2*u*(d.y-a.y)+2*t*(b.y-d.y)};
+ }
+ if(path.kind==="poly"){
+  const pts=path.points;let lengths=[],total=0;
+  for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);lengths.push(d);total+=d}
+  let remain=total*t;
+  for(let i=0;i<lengths.length;i++){
+   if(remain<=lengths[i]||i===lengths.length-1){
+    const a=pts[i],b=pts[i+1],f=lengths[i]?remain/lengths[i]:0;
+    return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,dx:b.x-a.x,dy:b.y-a.y};
+   }remain-=lengths[i];
+  }
+ }
+ const a=path.a,b=path.b;
+ return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,dx:b.x-a.x,dy:b.y-a.y};
+}
+function vehicleMotion(clock,travel,index,count,dwell=.5){
+ const segment=travel+dwell,total=segment*2,offset=total*index/count,absolute=clock+offset;
+ const leg=Math.floor(absolute/segment),within=absolute-leg*segment,forward=leg%2===0;
+ const movingTime=Math.min(travel,within),progress=forward?movingTime/travel:1-movingTime/travel;
+ return {progress,forward,stopped:within>=travel,leg};
+}
+function vehicleCountFor(route,type){
+ const load=route.passengers||route.daily||type.capacity;
+ return clampValue(2+Math.floor(load/Math.max(1,type.capacity*.65)),2,5);
+}
+function routeDuration(distance,speed,kind){
+ const factor=kind==="air"?68:kind==="ship"?24:kind==="hsr"?74:kind==="rail"?48:kind==="subway"?95:kind==="bus"?36:kind==="lrt"?48:kind==="monorail"?58:kind==="ferry"?28:62;
+ return clampValue(distance/factor,5,30);
+}
+function drawVehicleGlyph(context,x,y,angle,mode,scale=1,alpha=1){
+ const icons={air:"✈",ship:"🚢",rail:"🚆",hsr:"🚄",bus:"🚌",lrt:"🚋",subway:"🚇",monorail:"🚝",ferry:"⛴",airport:"✈",port:"🚢"};
+ const colors={air:"#f5fbff",ship:"#65c7ef",rail:"#e9f6fc",hsr:"#ff9275",bus:"#f4c05e",lrt:"#a7e27d",subway:"#6ceaf4",monorail:"#c59aff",ferry:"#6cc8ff",airport:"#f5fbff",port:"#65c7ef"};
+ const icon=icons[mode]||"🚆",color=colors[mode]||"#e9f6fc";
+ context.save();context.translate(x,y);context.rotate(angle+((mode==="air"||mode==="airport")?-Math.PI/2:0));context.globalAlpha=alpha;
+ context.shadowColor=color;context.shadowBlur=12*scale;context.font=Math.max(10,22*scale)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';
+ context.textAlign="center";context.textBaseline="middle";context.fillStyle=color;context.fillText(icon,0,0);context.restore();
+}
+function registerArrival(key,motion,endpointA,endpointB,amount,color,target){
+ const previous=vehicleLegs.get(key);
+ if(previous!==undefined&&motion.leg!==previous){
+  const dest=motion.leg%2===1?endpointB:endpointA;
+  const list=target==="global"?globalArrivalEffects:localArrivalEffects;
+  list.push({x:dest.x,y:dest.y,text:"+"+money(Math.max(1200,Math.round(amount))),start:vehicleClock,color:color||"#80edcf"});
+ }
+ vehicleLegs.set(key,motion.leg);
+}
+function drawArrivalEffects(context,list,scale){
+ const alive=[];
+ list.forEach(effect=>{
+  const age=vehicleClock-effect.start;if(age>1.7)return;alive.push(effect);
+  const alpha=1-age/1.7,offset=age*24;
+  context.save();context.globalAlpha=alpha;context.font="700 "+Math.max(9,13*scale)+'px "DM Sans","Noto Sans JP",sans-serif';
+  context.textAlign="center";context.textBaseline="middle";context.lineWidth=Math.max(2,4*scale);context.strokeStyle="rgba(3,13,23,.9)";
+  context.strokeText(effect.text,effect.x,effect.y-offset);context.fillStyle=effect.color;context.fillText(effect.text,effect.x,effect.y-offset);context.restore();
+ });
+ list.length=0;list.push(...alive);
+}
+function drawGlobalVehicles(projectCity){
+ state.routes.forEach((route,index)=>{
+  const a=cities.find(c=>c.id===route.a),b=cities.find(c=>c.id===route.b);if(!a||!b)return;
+  const p=projectCity(a),q=projectCity(b);if(!p||!q)return;
+  const mode=globalRouteMode(route),path=globalRoutePath(p,q,mode),distance=Math.hypot(q[0]-p[0],q[1]-p[1]);
+  const travel=routeDuration(distance,mode==="air"?180:mode==="ship"?30:mode==="hsr"?220:110,mode);
+  const count=vehicleCountFor(route,{capacity:mode==="air"?35000:mode==="ship"?15000:18000});
+  for(let i=0;i<count;i++){
+   const dwell=(mode==="rail"||mode==="hsr")?0.45:0.8,motion=vehicleMotion(vehicleClock,travel,i,count,dwell);
+   const point=pointOnVehiclePath(path,motion.progress),direction=motion.forward?1:-1;
+   const angle=Math.atan2(point.dy*direction,point.dx*direction),key="global:"+String(route.id||route.a+"-"+route.b)+"-"+i;
+   registerArrival(key,motion,{x:p[0],y:p[1]},{x:q[0],y:q[1]},(route.daily||0)/count*.14,mode==="air"?"#ffffff":mode==="ship"?"#75d5ff":"#8debf4","global");
+   const size=1/mapScale;
+   if(mode==="air"){
+    const dx=Math.cos(angle),dy=Math.sin(angle),tail=52*size,trail=context.createLinearGradient(point.x-dx*tail,point.y-dy*tail,point.x,point.y);
+    trail.addColorStop(0,"rgba(255,255,255,0)");trail.addColorStop(1,"rgba(255,255,255,.7)");
+    context.save();context.strokeStyle=trail;context.lineWidth=2.2*size;context.beginPath();context.moveTo(point.x-dx*tail,point.y-dy*tail);context.lineTo(point.x,point.y);context.stroke();context.restore();
+   }
+   drawVehicleGlyph(context,point.x,point.y,angle,mode,size,motion.stopped?0.78:1);
+  }
+ });
+ drawArrivalEffects(ctx,globalArrivalEffects,1/mapScale);
+}
+function hasAnyVehicleRoutes(){
+ if((state.routes||[]).length)return true;
+ return Object.values(state.localRoutes||{}).some(list=>Array.isArray(list)&&list.length>0);
+}
+function ensureVehicleAnimation(){
+ if(vehicleRaf||!hasAnyVehicleRoutes())return;
+ vehicleLastTs=0;vehicleRaf=requestAnimationFrame(vehicleAnimationFrame);
+}
+function vehicleAnimationFrame(timestamp){
+ if(!vehicleLastTs)vehicleLastTs=timestamp;
+ const dt=Math.min(.06,Math.max(0,(timestamp-vehicleLastTs)/1000));vehicleLastTs=timestamp;
+ if(!state.paused&&dt>0){
+  vehicleClock+=dt*(state.speed||1);
+  if(!$("worldpage").hidden&&!$("worldMapView").hidden)drawMap();
+  if(!$("cityMapView").hidden&&localRoutesFor().length)drawCityMap();
+ }
+ if(hasAnyVehicleRoutes())vehicleRaf=requestAnimationFrame(vehicleAnimationFrame);
+ else{vehicleRaf=0;vehicleLastTs=0}
+}
 function cityMapRandom(seed){let v=seed>>>0;return ()=>{v=(v*1664525+1013904223)>>>0;return v/4294967296}}
 function cityMapLayout(c){
  if(localMapSeedCache[c.id])return localMapSeedCache[c.id];
@@ -344,33 +483,14 @@ function drawCityMap(){
  const stations=localStationsFor(c.id),routes=localRoutesFor(c.id),buildings=generateCityBuildings(c);
  routes.forEach(route=>{
   const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
-  const type=transitCatalog[route.mode]||transitCatalog.subway,dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
-  context.beginPath();context.moveTo(a.x,a.y);
-  if(route.mode==="bus"||route.mode==="lrt"){
-   // Surface services follow a street-like orthogonal path.
-   const bendX=a.x+dx*.5,bendY=a.y+dy*.5;
-   context.lineTo(bendX,a.y);context.lineTo(bendX,b.y);context.lineTo(b.x,b.y);
-  }else if(route.mode==="monorail"){
-   // Elevated line is drawn as a shallow high-level arc.
-   context.quadraticCurveTo((a.x+b.x)/2,(a.y+b.y)/2-Math.min(220,dist*.14),b.x,b.y);
-  }else if(route.mode==="ferry"){
-   // Water-bus / ferry service curves through the water corridor.
-   const layout=cityMapLayout(c),bend=layout.riverAxis===0?(a.x+b.x)/2+Math.sign(dx||1)*100:(a.y+b.y)/2+Math.sign(dy||1)*100;
-   if(layout.riverAxis===0)context.quadraticCurveTo(bend,(a.y+b.y)/2,b.x,b.y);
-   else context.quadraticCurveTo((a.x+b.x)/2,bend,b.x,b.y);
-  }else{
-   // Underground and intercity high-speed links use a direct corridor.
-   context.lineTo(b.x,b.y);
-  }
-  context.save();context.strokeStyle=type.color;context.lineWidth=route.mode==="subway"||route.mode==="hsr"?12:route.mode==="bus"?6:8;
+  const type=transitCatalog[route.mode]||transitCatalog.subway,routePath=localRoutePath(route,a,b,layout);
+  traceVehiclePath(context,routePath);context.save();context.strokeStyle=type.color;
+  context.lineWidth=(route.mode==="subway"||route.mode==="hsr")?12:(route.mode==="bus"?6:8);
   context.shadowColor=type.color;context.shadowBlur=zoom>.25?12:4;
   if(route.mode==="bus"||route.mode==="ferry")context.setLineDash([22,12]);
-  else if(route.mode==="hsr")context.setLineDash([18,7]);
-  else context.setLineDash([]);
+  else if(route.mode==="hsr")context.setLineDash([18,7]);else context.setLineDash([]);
   context.stroke();
-  if(route.mode==="monorail"||route.mode==="lrt"){
-   context.setLineDash([]);context.lineWidth=2.2;context.strokeStyle="rgba(245,251,255,.78)";context.shadowBlur=2;context.stroke();
-  }
+  if(route.mode==="monorail"||route.mode==="lrt"){context.setLineDash([]);context.lineWidth=2.2;context.strokeStyle="rgba(245,251,255,.78)";context.shadowBlur=2;context.stroke()}
   context.setLineDash([]);context.restore();
  });
  // Building footprints at close zoom.
@@ -389,18 +509,23 @@ function drawCityMap(){
   if(zoom>=.78){context.fillStyle="rgba(3,13,23,.9)";context.font="600 21px 'Noto Sans JP',sans-serif";context.textAlign="left";context.fillText(station.name||type.name,station.x+22,station.y-13)}
   if(station.id===localRouteStart){context.beginPath();context.arc(station.x,station.y,36,0,Math.PI*2);context.strokeStyle="#fff";context.lineWidth=3;context.stroke()}
  });
- // Moving vehicles reveal only at high zoom.
- if(zoom>=1.55){
-  const now=performance.now()/2800;
-  routes.forEach(route=>{
+ // Multiple vehicles travel both ways along each local route. Underground trains are translucent.
+ if(zoom>=.48){
+  routes.forEach((route,routeIndex)=>{
    const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
-   const p=(now+((route.id.length*13)%100)/100)%1,x=a.x+(b.x-a.x)*p,y=a.y+(b.y-a.y)*p;
-   context.beginPath();context.arc(x,y,10,0,Math.PI*2);context.fillStyle=(transitCatalog[route.mode]||transitCatalog.subway).color;context.shadowColor=context.fillStyle;context.shadowBlur=12;context.fill();context.shadowBlur=0;
-   context.fillStyle="#051320";context.font="bold 10px sans-serif";context.textAlign="center";context.fillText(route.mode==="bus"?"B":route.mode==="ferry"?"F":route.mode==="airport"?"✈":"M",x,y+3);
+   const type=transitCatalog[route.mode]||transitCatalog.subway,routePath=localRoutePath(route,a,b,layout);
+   const length=Math.hypot(b.x-a.x,b.y-a.y),travel=routeDuration(length,type.speed,route.mode);
+   const count=vehicleCountFor(route,type),dwell=(route.mode==="bus"||route.mode==="lrt")?0.5:(route.mode==="subway"?0.12:0.28);
+   for(let vehicle=0;vehicle<count;vehicle++){
+    const motion=vehicleMotion(vehicleClock,travel,vehicle,count,dwell),point=pointOnVehiclePath(routePath,motion.progress);
+    const direction=motion.forward?1:-1,angle=Math.atan2(point.dy*direction,point.dx*direction),key="local:"+String(route.id||routeIndex)+"-"+vehicle;
+    registerArrival(key,motion,{x:a.x,y:a.y},{x:b.x,y:b.y},(route.daily||0)/count*.16,type.color,"local");
+    drawVehicleGlyph(context,point.x,point.y,angle,route.mode,1/zoom,route.mode==="subway"?0.48:1);
+   }
   });
-  localVehicleFrame=requestAnimationFrame(()=>{localVehicleFrame=0;if(!$("cityMapView").hidden)drawCityMap()});
  }
- context.restore();drawMiniMap();
+ drawArrivalEffects(context,localArrivalEffects,1/zoom);
+ context.restore();drawMiniMap();ensureVehicleAnimation();
  $("cityMapCoords").textContent="X "+Math.round(localCityCamera.x)+" · Y "+Math.round(localCityCamera.y)+" · ZOOM "+zoom.toFixed(2)+"×";
 }
 function buildLocalStationAt(point){
@@ -633,13 +758,15 @@ function drawMap(){
   state.routes.forEach(r=>{
    const a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);if(!a||!b)return;
    const p=xy(a),q=xy(b);if(!p||!q)return;
-   ctx.beginPath();ctx.moveTo(p[0],p[1]);
-   const mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2-Math.min(48,Math.hypot(q[0]-p[0],q[1]-p[1])*.1);
-   ctx.quadraticCurveTo(mx,my,q[0],q[1]);
-   ctx.save();ctx.setLineDash([6,4]);ctx.lineDashOffset=-(performance.now()/42)%1000;
-   ctx.strokeStyle="rgba(0,242,254,.2)";ctx.lineWidth=5;ctx.shadowColor="#00f2fe";ctx.shadowBlur=11;ctx.stroke();
-   ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.8;ctx.shadowBlur=5;ctx.stroke();ctx.setLineDash([]);ctx.restore();
+   const mode=globalRouteMode(r),routePath=globalRoutePath(p,q,mode);traceVehiclePath(ctx,routePath);
+   ctx.save();ctx.lineDashOffset=-(vehicleClock*14)%1000;
+   ctx.strokeStyle=mode==="air"?"rgba(255,255,255,.24)":mode==="ship"?"rgba(78,183,237,.32)":"rgba(0,242,254,.24)";
+   ctx.lineWidth=mode==="air"?4:5;ctx.shadowColor=mode==="air"?"#ffffff":mode==="ship"?"#47b8f5":"#00f2fe";ctx.shadowBlur=11;
+   ctx.setLineDash(mode==="air"?[3,9]:mode==="ship"?[12,8]:[6,4]);ctx.stroke();
+   ctx.strokeStyle=mode==="air"?"rgba(255,255,255,.68)":mode==="ship"?"#58bce9":mode==="hsr"?"#ff9275":"#00f2fe";
+   ctx.lineWidth=1.7;ctx.shadowBlur=5;ctx.stroke();ctx.setLineDash([]);ctx.restore();
   });
+  drawGlobalVehicles(xy);
   // City dots use the cities' real longitude/latitude on this exact projection.
   const pulse=(performance.now()%1900)/1900;
   cities.forEach(city=>{
@@ -693,7 +820,7 @@ function drawMap(){
  ctx.restore();
  $("mapstatus").textContent=!window.d3?"D3 LOADING · REAL MAP PENDING":
   !world?"REAL WORLD MAP DATA LOADING":"WORLD ATLAS LAND-110M · "+cities.length+" CITIES · "+state.stations.length+" STATIONS";
- scheduleMapPulse();
+ scheduleMapPulse();ensureVehicleAnimation();
 }
 function hitCity(clientX,clientY){
  const r=canvas.getBoundingClientRect(),x=clientX-r.left,y=clientY-r.top,w=r.width,h=r.height;
