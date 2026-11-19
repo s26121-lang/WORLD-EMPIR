@@ -32,6 +32,16 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
 #routeSelect{display:none;position:fixed;z-index:8;left:50%;top:50%;transform:translate(-50%,-50%);background:#0a2030;border:1px solid #54bdd7;border-radius:10px;padding:18px;width:min(340px,90vw);box-shadow:0 15px 50px #000b}#routeSelect.show{display:block}
 @media(max-width:850px){header{height:60px;padding:9px 12px}.topstats .stat:nth-child(2),.topstats .stat:nth-child(3){display:none}#left{left:8px;top:70px;width:175px;bottom:70px}#right{right:8px;top:70px;width:210px;bottom:70px}.panelbody{padding:9px}.panelhead{padding:10px}.modegrid button{font-size:9px;padding:7px}.kpi{padding:7px}.kpi b{font-size:13px}#hint{top:66px;font-size:9px}#bottom{bottom:7px;max-width:96vw;gap:3px;padding:5px}#bottom button{padding:7px;font-size:9px}#clock{font-size:10px;padding:0 3px}.brand b{font-size:12px}.brand small{font-size:8px}}
 @media(max-width:560px){#left{width:145px}#right{width:175px}.topstats{gap:8px}.stat strong{font-size:11px}.brand{gap:6px}.logo{width:30px;height:30px}.modegrid{grid-template-columns:1fr}.airportgrid{grid-template-columns:1fr 1fr}.sectionTitle{font-size:14px}}
+
+#accountBtn{font-size:11px;border-color:#4baac4;color:#c8f5ff;white-space:nowrap}
+#authModal{display:none;position:fixed;z-index:30;inset:0;background:#020812d9;backdrop-filter:blur(9px);align-items:center;justify-content:center;padding:18px}
+#authModal.show{display:flex}
+.authbox{width:min(430px,100%);background:#0b1c2c;border:1px solid #37647d;border-radius:14px;box-shadow:0 25px 80px #000a;overflow:hidden}
+.authbody{padding:20px;display:grid;gap:12px}
+.authbody input{width:100%;padding:12px;border-radius:7px;border:1px solid #42667a;background:#071724;color:#eaf4fb;font:inherit}
+.authbody button{width:100%}
+.authnote{font-size:10px;color:#9bb4c5;line-height:1.7}
+
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Widgets/widgets.css">
 <style>
@@ -53,7 +63,7 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
 <div id="scene"></div><div class="vignette"></div>
 <header>
  <div class="brand"><div class="logo">◎</div><div><b>EARTH SIMULATOR</b><small>GLOBAL MANAGEMENT SYSTEM · 01</small></div></div>
- <div class="topstats">
+ <div class="topstats"><button id="accountBtn">ログイン / セーブ</button>
   <div class="stat"><small>WORLD TREASURY</small><strong class="money" id="money">$ 12,500,000</strong></div>
   <div class="stat"><small>PASSENGERS / DAY</small><strong id="passengers">0</strong></div>
   <div class="stat"><small>YOUR AIRPORTS</small><strong id="airportCount">0</strong></div>
@@ -107,15 +117,20 @@ button,select{font:inherit;color:inherit;background:rgba(17,39,58,.9);border:1px
  <button id="pause">Ⅱ 一時停止</button><button data-speed="1" class="active speed">×1</button><button data-speed="3" class="speed">×3</button><button data-speed="8" class="speed">×8</button>
  <button id="resetView">◎ 視点リセット</button>
 </div>
-<div id="toast"></div><div id="buildHint">空港を建設したい場所を地図上でクリック</div>
+<div id="authModal"><div class="authbox"><div class="modalhead"><b>EARTH SIMULATOR アカウント</b><button id="closeAuth">✕</button></div><div class="authbody"><div class="authnote" id="authStatus">ログインすると、空港・路線・資金をクラウドに保存できます。</div><input id="authEmail" type="email" autocomplete="email" placeholder="メールアドレス"><input id="authPassword" type="password" autocomplete="current-password" placeholder="パスワード（8文字以上）"><button class="primary" id="signInBtn">ログイン</button><button id="signUpBtn">新規登録</button><button id="googleBtn">Googleで続ける</button><button id="signOutBtn" style="display:none">ログアウト</button><div class="authnote">パスワードはSupabaseの認証機能で管理され、ゲーム内には保存しません。GoogleログインはSupabase側でGoogleプロバイダーの設定が必要です。</div></div></div></div><div id="toast"></div><div id="buildHint">空港を建設したい場所を地図上でクリック</div>
 <div id="routeSelect"><b>✈ 航空路線の設定</b><p style="font-size:11px;color:#a9c1d0;line-height:1.6">出発空港と到着空港を選択してください。空港マーカーを順番にクリックします。</p><button id="cancelRoute">キャンセル</button></div>
 <div id="modal"><div class="modalbox"><div class="modalhead"><b id="modalTitle">空港ネットワーク</b><button id="closeModal">✕</button></div><div class="modalbody" id="modalBody"></div></div></div>
 
 <script>window.CESIUM_BASE_URL="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/";</script>
 <script src="https://cdn.jsdelivr.net/npm/cesium@1.127.0/Build/Cesium/Cesium.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
+const SUPABASE_URL='https://sdchrotmfoneygctygow.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_tL8dvbkOx47QTMdmQX8LBQ_ctYpu9KJ';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let currentUser=null,saveTimer=null;
 const cities=[
  {name:'東京',country:'日本',lat:35.68,lon:139.69,code:'HND',type:'airport',pass:87000,gdp:4.2},
  {name:'大阪',country:'日本',lat:34.69,lon:135.50,code:'KIX',pass:39000,gdp:1.8},
@@ -209,6 +224,51 @@ globeHandler.setInputAction(movement=>{
 let selected=0,mode='select',routeStart=null,money=12500000,simMinutes=0,speed=1,paused=false,globalEcon=104.8,passengerTotal=0,autoFit=true;
 let ownedAirport=null,ownedAirportMarker=null,buildLocation=null,ownedRoutes=[];
 const airportMarkers=[];
+
+function openAuth(){ $('authModal').classList.add('show'); refreshAuthUI(); }
+function refreshAuthUI(){
+ const status=$('authStatus');
+ if(currentUser){status.textContent=currentUser.email+' でログイン中。セーブデータはクラウドに保存されます。';$('signInBtn').style.display='none';$('signUpBtn').style.display='none';$('googleBtn').style.display='none';$('signOutBtn').style.display='block';$('accountBtn').textContent='ログイン中 ✓';}
+ else{status.textContent='ログインすると、空港・路線・資金をクラウドに保存できます。';$('signInBtn').style.display='block';$('signUpBtn').style.display='block';$('googleBtn').style.display='block';$('signOutBtn').style.display='none';$('accountBtn').textContent='ログイン / セーブ';}
+}
+function makeSaveData(){return {version:1,money,globalEcon,simMinutes,ownedAirport,ownedRoutes};}
+async function saveCloud(showMessage=false){
+ if(!currentUser)return;
+ const {error}=await supabaseClient.from('game_saves').upsert({user_id:currentUser.id,save_data:makeSaveData(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ if(error){console.error(error);if(showMessage)toast('セーブ失敗：Supabaseのテーブル設定を確認してください');}
+ else if(showMessage)toast('クラウドにセーブしました');
+}
+async function loadCloud(){
+ if(!currentUser)return;
+ const {data,error}=await supabaseClient.from('game_saves').select('save_data').eq('user_id',currentUser.id).maybeSingle();
+ if(error){console.error(error);toast('セーブデータを読み込めませんでした');return;}
+ if(!data?.save_data){toast('新しいセーブデータです。これから自動保存します');return;}
+ const d=data.save_data;
+ if(d.version!==1)return;
+ money=Number.isFinite(d.money)?d.money:money;globalEcon=Number.isFinite(d.globalEcon)?d.globalEcon:globalEcon;simMinutes=Number.isFinite(d.simMinutes)?d.simMinutes:simMinutes;
+ ownedRoutes=Array.isArray(d.ownedRoutes)?d.ownedRoutes.filter(i=>Number.isInteger(i)&&i>=0&&i<cities.length):[];
+ if(d.ownedAirport&&Number.isFinite(d.ownedAirport.lat)&&Number.isFinite(d.ownedAirport.lon)){
+  ownedAirport=d.ownedAirport;
+  if(ownedAirportMarker)viewer.entities.remove(ownedAirportMarker._entity);
+  ownedAirportMarker=L.marker([ownedAirport.lat,ownedAirport.lon],{icon:L.divIcon({className:'',html:'<div class="own-airport-pin">★</div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1000}).addTo(airportLayer).bindTooltip(ownedAirport.name+' · YOUR AIRPORT',{permanent:true,direction:'top',offset:[0,-18],className:'airport-name'});
+  ownedAirportMarker.on('click',showOwnedAirport);
+  showOwnedAirport();
+ }
+ drawRoutes();updateStats();$('globalIndex').textContent=globalEcon.toFixed(1);toast('クラウドのセーブデータを読み込みました');
+}
+$('accountBtn').onclick=openAuth;
+$('closeAuth').onclick=()=>$('authModal').classList.remove('show');
+$('authModal').onclick=e=>{if(e.target===$('authModal'))$('authModal').classList.remove('show')};
+$('signUpBtn').onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<8){toast('メールアドレスと8文字以上のパスワードを入力してください');return;}const {error}=await supabaseClient.auth.signUp({email,password});if(error)toast(error.message);else toast('確認メールを確認して登録を完了してください');};
+$('signInBtn').onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){toast('メールアドレスとパスワードを入力してください');return;}const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)toast(error.message);else{$('authModal').classList.remove('show');toast('ログインしました');}};
+$('googleBtn').onclick=async()=>{const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});if(error)toast(error.message);};
+$('signOutBtn').onclick=async()=>{await saveCloud(false);const {error}=await supabaseClient.auth.signOut();if(error)toast(error.message);else{$('authModal').classList.remove('show');toast('ログアウトしました');}};
+supabaseClient.auth.onAuthStateChange(async(_event,session)=>{
+ currentUser=session?.user||null;refreshAuthUI();
+ if(currentUser){await loadCloud();if(saveTimer)clearInterval(saveTimer);saveTimer=setInterval(()=>saveCloud(false),20000);}
+ else{if(saveTimer)clearInterval(saveTimer);saveTimer=null;}
+});
+
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function fmt(n){return Math.round(n).toLocaleString('en-US')}
 function updateStats(){$('money').textContent='$ '+fmt(money);$('passengers').textContent=fmt(passengerTotal);$('airportCount').textContent=ownedAirport?1:0}
@@ -274,7 +334,7 @@ document.querySelectorAll('[data-layer]').forEach(s=>s.onclick=()=>{s.classList.
 if($('openAirports'))$('openAirports').onclick=openAirports;$('closeModal').onclick=()=>$('modal').classList.remove('show');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('show')};
 function showEconomy(){$('infoContent').innerHTML=`<div class="sectionTitle">世界経済ダッシュボード</div><div class="sub">GLOBAL ECONOMIC INTELLIGENCE</div><div class="kpis"><div class="kpi"><small>WORLD GDP</small><b>$105.4T</b></div><div class="kpi"><small>ECONOMY INDEX</small><b>${globalEcon.toFixed(1)}</b></div><div class="kpi"><small>POPULATION</small><b>8.16B</b></div><div class="kpi"><small>TRADE VOLUME</small><b>$32.1T</b></div></div><p style="font-size:11px;color:#a9c0ce;line-height:1.8">各国の経済活動はシミュレーション時間に応じて変化します。航空需要は都市の経済規模と連動します。</p><div class="sub">MAJOR ECONOMIES</div>${[['アメリカ','$28.8T'],['中国','$18.7T'],['ドイツ','$4.7T'],['日本','$4.2T'],['インド','$3.9T']].map(x=>'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ffffff12;font-size:11px"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('')}`;}
 let last=performance.now(),acc=0;
-function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(paused)return;simMinutes+=dt*speed*8;acc+=dt*speed;if(acc>1){acc=0;const growth=(Math.random()-.38)*.002;globalEcon=Math.max(80,Math.min(130,globalEcon+growth));if(ownedAirport){const demand=ownedRoutes.reduce((s,i)=>s+cities[i].pass,0);const target=Math.round(demand*.12);ownedAirport.pass=Math.round((ownedAirport.pass||0)*.92+target*.08);passengerTotal=ownedAirport.pass;money+=ownedAirport.pass*.018*speed*.15}else passengerTotal=0;cities.forEach(c=>{c.pass=Math.max(1000,Math.round(c.pass*(1+(globalEcon-100)*.000015+(Math.random()-.48)*.0007)))});$('globalIndex').innerHTML=globalEcon.toFixed(1)+' <span style="font-size:10px;color:var(--green)">▲ LIVE</span>';updateStats()}
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(paused)return;simMinutes+=dt*speed*8;acc+=dt*speed;if(acc>1){acc=0;const growth=(Math.random()-.38)*.002;globalEcon=Math.max(80,Math.min(130,globalEcon+growth));if(ownedAirport){const demand=ownedRoutes.reduce((s,i)=>s+cities[i].pass,0);const target=Math.round(demand*.12);ownedAirport.pass=Math.round((ownedAirport.pass||0)*.92+target*.08);passengerTotal=ownedAirport.pass;money+=ownedAirport.pass*.018*speed*.15}else passengerTotal=0;cities.forEach(c=>{c.pass=Math.max(1000,Math.round(c.pass*(1+(globalEcon-100)*.000015+(Math.random()-.48)*.0007)))});$('globalIndex').innerHTML=globalEcon.toFixed(1)+' <span style="font-size:10px;color:var(--green)">▲ LIVE</span>';updateStats();if(currentUser)saveCloud(false)}
 const total=Math.floor(simMinutes),mins=total%60,hrs=Math.floor(total/60)%24,days=Math.floor(total/1440),d=1+days%28,m=1+Math.floor(days/28)%12,y=2026+Math.floor(days/336);$('clock').textContent=`${y}年 ${String(m).padStart(2,'0')}月 ${String(d).padStart(2,'0')}日 ${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;}
 function animate(now){tick(now);requestAnimationFrame(animate)}requestAnimationFrame(animate);
 $('hint').textContent='地図をドラッグして移動 · ホイールで拡大縮小 · 都市や空港をクリック';
