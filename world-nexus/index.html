@@ -173,35 +173,20 @@ function setSpeed(n){state.speed=n;document.querySelectorAll("[data-speed]").for
 function projectSetup(){if(!ctx)return;let r=canvas.getBoundingClientRect();let w=Math.max(1,Math.floor(r.width*(devicePixelRatio||1))),h=Math.max(1,Math.floor(r.height*(devicePixelRatio||1)));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(devicePixelRatio||1,0,0,devicePixelRatio||1,0,0);return {w:r.width,h:r.height}}
 let mapScale=1,mapX=0,mapY=0,hoveredCity=null,hoveredCountry=null,mapFrame=0,lastPulseDraw=0;
 const mapTooltip=$("maptooltip");
-const fallbackLand=[
- [[-168,70],[-155,66],[-145,60],[-135,57],[-130,52],[-126,49],[-124,42],[-117,32],[-108,28],[-105,22],[-97,19],[-90,19],[-86,16],[-83,9],[-78,8],[-76,15],[-81,22],[-87,25],[-95,29],[-92,33],[-84,30],[-81,25],[-80,9],[-73,9],[-67,18],[-62,27],[-60,36],[-66,45],[-59,50],[-65,58],[-82,65],[-100,72],[-125,73],[-145,72]],
- [[-52,82],[-44,78],[-40,70],[-44,60],[-52,58],[-60,65],[-62,74]],
- [[-81,12],[-70,10],[-58,6],[-48,-2],[-42,-12],[-48,-23],[-54,-34],[-64,-55],[-72,-50],[-76,-30],[-80,-10]],
- [[-11,36],[-10,44],[-5,50],[2,55],[8,58],[18,60],[28,68],[42,68],[52,73],[75,76],[100,73],[120,68],[138,62],[155,58],[165,52],[158,46],[145,43],[135,38],[126,32],[120,24],[111,20],[106,10],[99,5],[91,7],[84,17],[78,8],[73,8],[67,24],[58,25],[50,30],[43,37],[36,42],[28,45],[20,43],[14,38],[6,36],[-1,35]],
- [[-17,35],[5,37],[26,32],[35,20],[43,11],[50,2],[44,-12],[36,-24],[29,-34],[18,-35],[10,-28],[5,-17],[-1,-5],[-8,5],[-15,15],[-17,25]],
- [[112,-11],[125,-12],[139,-16],[153,-25],[151,-37],[140,-39],[127,-34],[115,-26]],
- [[-9,58],[-5,58],[-3,54],[-5,50],[-8,51]],
- [[-25,64],[-17,66],[-13,64],[-18,63]],
- [[47,-13],[50,-16],[49,-25],[45,-25],[44,-17]],
- [[129,32],[132,34],[135,35],[138,38],[141,41],[145,44],[143,37],[139,34],[135,33],[132,32]],
- [[130,31],[133,32],[132,34],[130,33]],
- [[132,33],[134,34],[134,35],[132,34]],
- [[127,34],[130,35],[131,37],[129,38],[127,36]],
- [[120,21],[122,25],[122,29],[120,25]],
- [[121,19],[126,18],[127,13],[124,8],[121,11]],
- [[95,5],[105,5],[115,-4],[127,-4],[130,-8],[118,-9],[109,-7],[102,-3]],
- [[110,-6],[117,-7],[120,-9],[115,-10]],
- [[-8,5],[-3,5],[1,1],[-2,-5],[-6,-4]],
- [[-180,-72],[-120,-74],[-60,-76],[0,-75],[60,-76],[120,-74],[180,-72],[180,-90],[-180,-90]]
-];
-function projectSetup(){if(!ctx)return;let r=canvas.getBoundingClientRect();let dpr=Math.min(window.devicePixelRatio||1,2);let w=Math.max(1,Math.floor(r.width*dpr)),h=Math.max(1,Math.floor(r.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0);return {w:r.width,h:r.height}}
-function mapProjection(w,h){let s=Math.min(w/6.45,h/3.25);return world&&window.d3?window.d3.geoNaturalEarth1().translate([w/2,h/2]).scale(s).precision(.4):null}
-function mapXY(c,proj,w,h){return proj?proj([c.lon,c.lat]):[(c.lon+180)/360*w,(90-c.lat)/180*h]}
-function traceLand(proj,w,h){
- ctx.beginPath();
- if(proj&&world){window.d3.geoPath(proj,ctx)(world.land);return}
- fallbackLand.forEach(poly=>{poly.forEach((pt,i)=>{let p=proj?proj(pt):[(pt[0]+180)/360*w,(90-pt[1])/180*h];if(i===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1])});ctx.closePath()});
+function projectSetup(){
+ if(!ctx)return null;
+ const r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+ const w=Math.max(1,Math.floor(r.width*dpr)),h=Math.max(1,Math.floor(r.height*dpr));
+ if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ return {w:r.width,h:r.height};
 }
+function mapProjection(w,h){
+ if(!window.d3||!window.d3.geoNaturalEarth1)return null;
+ const s=Math.min(w/6.45,h/3.25);
+ return window.d3.geoNaturalEarth1().translate([w/2,h/2]).scale(s).precision(.35);
+}
+function mapXY(c,proj){return proj?proj([c.lon,c.lat]):null}
 function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function updateMapTooltip(c,clientX,clientY){
  if(!mapTooltip)return;
@@ -218,77 +203,158 @@ function updateMapTooltip(c,clientX,clientY){
  mapTooltip.classList.add("visible");
 }
 function scheduleMapPulse(){if(mapFrame||!state.stations.length)return;mapFrame=requestAnimationFrame(t=>{mapFrame=0;if(t-lastPulseDraw>=48){lastPulseDraw=t;drawMap()}else scheduleMapPulse()})}
+function roundedRect(x,y,w,h,r){
+ ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+function drawWorldGeometry(proj,w,h){
+ if(!world||!world.land||!window.d3)return false;
+ const geoPath=window.d3.geoPath(proj,ctx);
+ // Exact coastline from world-atlas land-110m TopoJSON. No hand-drawn polygons.
+ ctx.beginPath();geoPath(world.land);
+ ctx.save();ctx.shadowColor="#00f2fe";ctx.shadowBlur=22;ctx.strokeStyle="rgba(0,242,254,.46)";ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
+ const landFill=ctx.createLinearGradient(0,h*.12,0,h*.9);
+ landFill.addColorStop(0,"#26374d");landFill.addColorStop(.5,"#1e293b");landFill.addColorStop(1,"#172235");
+ ctx.fillStyle=landFill;ctx.fill();
+ ctx.strokeStyle="rgba(0,242,254,.42)";ctx.lineWidth=.7;ctx.stroke();
+ // National boundaries, for the detailed geopolitical outlines and hover highlight.
+ if(world.countries&&Array.isArray(world.countries.features)){
+  world.countries.features.forEach(feature=>{
+   ctx.beginPath();geoPath(feature);
+   const active=hoveredCountry&&String(hoveredCountry.id)===String(feature.id);
+   if(active){ctx.fillStyle="rgba(59,130,246,.72)";ctx.save();ctx.shadowColor="#3b82f6";ctx.shadowBlur=12;ctx.fill();ctx.restore()}
+   ctx.strokeStyle=active?"rgba(255,255,255,.92)":"rgba(148,163,184,.28)";
+   ctx.lineWidth=active?1.1:.42;ctx.stroke();
+  });
+ }
+ // Terrain micro-dots and contour-like elevation strokes are clipped to real land geometry.
+ ctx.save();ctx.beginPath();geoPath(world.land);ctx.clip();
+ if(!window.__wnxDotPattern){
+  const tile=document.createElement("canvas");tile.width=12;tile.height=12;
+  const t=tile.getContext("2d");t.fillStyle="rgba(0,242,254,.14)";
+  t.beginPath();t.arc(2,2,1,0,Math.PI*2);t.fill();
+  window.__wnxDotPattern=ctx.createPattern(tile,"repeat");
+ }
+ if(window.__wnxDotPattern){ctx.fillStyle=window.__wnxDotPattern;ctx.fillRect(0,0,w,h)}
+ for(let k=0;k<12;k++){
+  const yy=h*(.12+k*.066);ctx.beginPath();
+  for(let x=-20;x<=w+20;x+=8){const y=yy+Math.sin(x*.012+k*.71)*7+Math.sin(x*.027+k)*2.5;if(x===-20)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+  ctx.strokeStyle="rgba(0,242,254,.075)";ctx.lineWidth=.8;ctx.stroke();
+ }
+ ctx.restore();
+ return true;
+}
 function drawMap(){
- let size=projectSetup();if(!size||size.w<2||size.h<2)return;
- let w=size.w,h=size.h;ctx.clearRect(0,0,w,h);
- let bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,"#111a2e");bg.addColorStop(.48,"#0b1220");bg.addColorStop(1,"#060911");ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
- // Subtle deep-space atmosphere and ocean grid.
- let glow=ctx.createRadialGradient(w*.52,h*.48,20,w*.52,h*.48,w*.68);glow.addColorStop(0,"rgba(34,120,145,.18)");glow.addColorStop(1,"rgba(5,18,31,0)");ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+ const size=projectSetup();if(!size||size.w<2||size.h<2)return;
+ const w=size.w,h=size.h;ctx.clearRect(0,0,w,h);
+ const bg=ctx.createLinearGradient(0,0,0,h);
+ bg.addColorStop(0,"#111a2e");bg.addColorStop(.48,"#0b1220");bg.addColorStop(1,"#060911");
+ ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ const glow=ctx.createRadialGradient(w*.52,h*.48,20,w*.52,h*.48,w*.68);
+ glow.addColorStop(0,"rgba(34,120,145,.18)");glow.addColorStop(1,"rgba(5,18,31,0)");
+ ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
  ctx.save();ctx.translate(w/2+mapX,h/2+mapY);ctx.scale(mapScale,mapScale);ctx.translate(-w/2,-h/2);
  const proj=mapProjection(w,h);projection=proj;
- ctx.save();ctx.strokeStyle="rgba(87,166,195,.15)";ctx.lineWidth=.7;
- if(proj){ctx.beginPath();window.d3.geoPath(proj,ctx)(window.d3.geoGraticule10());ctx.stroke()}
- else {for(let lon=-180;lon<=180;lon+=30){let x=(lon+180)/360*w;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let lat=-75;lat<=75;lat+=15){let y=(90-lat)/180*h;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
- ctx.restore();
- // Country polygons: graphite-blue fill, crisp borders and the reference map's cyan edge glow.
- traceLand(proj,w,h);ctx.save();ctx.shadowColor="#00f2fe";ctx.shadowBlur=22;ctx.strokeStyle="rgba(0,242,254,.42)";ctx.lineWidth=2;ctx.stroke();ctx.restore();
- const landFill=ctx.createLinearGradient(0,h*.12,0,h*.9);landFill.addColorStop(0,"#26374d");landFill.addColorStop(.5,"#1e293b");landFill.addColorStop(1,"#172235");
- if(proj&&world&&world.land&&Array.isArray(world.land.features)){
-  world.land.features.forEach(feature=>{
-   ctx.beginPath();window.d3.geoPath(proj,ctx)(feature);
-   const active=hoveredCountry&&hoveredCountry.id===feature.id;
-   ctx.fillStyle=active?"#3b82f6":landFill;
-   if(active){ctx.save();ctx.shadowColor="#3b82f6";ctx.shadowBlur=13;ctx.fill();ctx.restore()}else ctx.fill();
-   ctx.strokeStyle=active?"rgba(255,255,255,.9)":"#334155";ctx.lineWidth=active?1.15:.55;ctx.stroke();
+ if(proj){
+  const geoPath=window.d3.geoPath(proj,ctx);
+  ctx.save();ctx.strokeStyle="rgba(87,166,195,.15)";ctx.lineWidth=.7;
+  ctx.beginPath();geoPath(window.d3.geoGraticule10());ctx.stroke();ctx.restore();
+  drawWorldGeometry(proj,w,h);
+  const xy=c=>mapXY(c,proj);
+  // All routes and cities use the same Natural Earth projection as the actual land geometry.
+  state.routes.forEach(r=>{
+   const a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);if(!a||!b)return;
+   const p=xy(a),q=xy(b);if(!p||!q)return;
+   ctx.beginPath();ctx.moveTo(p[0],p[1]);
+   const mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2-Math.min(48,Math.hypot(q[0]-p[0],q[1]-p[1])*.1);
+   ctx.quadraticCurveTo(mx,my,q[0],q[1]);
+   ctx.save();ctx.setLineDash([6,4]);ctx.lineDashOffset=-(performance.now()/42)%1000;
+   ctx.strokeStyle="rgba(0,242,254,.2)";ctx.lineWidth=5;ctx.shadowColor="#00f2fe";ctx.shadowBlur=11;ctx.stroke();
+   ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.8;ctx.shadowBlur=5;ctx.stroke();ctx.setLineDash([]);ctx.restore();
   });
- }else{traceLand(proj,w,h);ctx.fillStyle=landFill;ctx.fill();traceLand(proj,w,h);ctx.strokeStyle="#334155";ctx.lineWidth=.75;ctx.stroke()}
- if(proj&&world&&world.borders){ctx.beginPath();window.d3.geoPath(proj,ctx)(world.borders);ctx.strokeStyle="rgba(148,163,184,.28)";ctx.lineWidth=.5;ctx.stroke()}
- // Elevation texture: a clipped micro-dot matrix plus fine contour-like curves.
- ctx.save();traceLand(proj,w,h);ctx.clip();
- if(!window.__wnxDotPattern){let tile=document.createElement("canvas");tile.width=12;tile.height=12;let t=tile.getContext("2d");t.fillStyle="rgba(0,242,254,.14)";t.beginPath();t.arc(2,2,1,0,Math.PI*2);t.fill();window.__wnxDotPattern=ctx.createPattern(tile,"repeat")}
- ctx.fillStyle=window.__wnxDotPattern;ctx.fillRect(0,0,w,h);
- for(let k=0;k<13;k++){let yy=h*(.12+k*.065);ctx.beginPath();for(let x=-20;x<=w+20;x+=8){let y=yy+Math.sin(x*.012+k*.71)*7+Math.sin(x*.027+k)*2.5;if(x===-20)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.strokeStyle="rgba(0,242,254,.075)";ctx.lineWidth=.8;ctx.stroke()}
+  // City dots use the cities' real longitude/latitude on this exact projection.
+  const pulse=(performance.now()%1900)/1900;
+  cities.forEach(city=>{
+   const p=xy(city);if(!p||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;
+   const selected=city.id===state.selected,hovered=hoveredCity&&hoveredCity.id===city.id,station=state.stations.includes(city.id);
+   if(station){
+    for(let ring=0;ring<2;ring++){
+     const phase=(pulse+ring*.5)%1,radius=7+phase*19;
+     ctx.beginPath();ctx.arc(p[0],p[1],radius,0,Math.PI*2);
+     ctx.strokeStyle="rgba(245,195,112,"+(1-phase)*.55+")";ctx.lineWidth=1.25;
+     ctx.shadowColor="#f2c477";ctx.shadowBlur=8;ctx.stroke();
+    }
+    ctx.shadowBlur=0;
+   }
+   ctx.beginPath();ctx.arc(p[0],p[1],selected||hovered?5.1:station?4.3:2.7,0,Math.PI*2);
+   ctx.fillStyle=selected?"#ffffff":station?"#ffcf7b":city.fictional?"#c2a7ff":"#80ead8";
+   ctx.shadowColor=station?"#f3be69":city.fictional?"#b39bff":"#00f2fe";
+   ctx.shadowBlur=selected||hovered||station?13:7;ctx.fill();ctx.shadowBlur=0;
+   ctx.strokeStyle=selected?"#00f2fe":"rgba(5,23,37,.9)";ctx.lineWidth=1;ctx.stroke();
+  });
+  // Avoid clutter: only selected, hovered and owned cities get collision-aware badges.
+  const labelTargets=cities.filter(city=>city.id===state.selected||
+   (hoveredCity&&city.id===hoveredCity.id)||state.stations.includes(city.id))
+   .sort((a,b)=>(a.id===state.selected?-2:state.stations.includes(a.id)?-1:0)-
+                (b.id===state.selected?-2:state.stations.includes(b.id)?-1:0));
+  const occupied=[];
+  labelTargets.forEach(city=>{
+   const p=xy(city);if(!p)return;
+   ctx.font="600 10px 'Noto Sans JP',sans-serif";
+   const bw=ctx.measureText(city.name).width+14,bh=20;
+   const choices=[[10,-25],[10,8],[-bw-10,-25],[-bw-10,8],[-bw/2,-34],[-bw/2,18]];
+   let chosen=null;
+   for(const offset of choices){
+    const x=Math.max(3,Math.min(w-bw-3,p[0]+offset[0]));
+    const y=Math.max(3,Math.min(h-bh-3,p[1]+offset[1]));
+    const box={x,y,w:bw,h:bh};
+    if(!occupied.some(o=>box.x<o.x+o.w+3&&box.x+box.w+3>o.x&&box.y<o.y+o.h+2&&box.y+box.h+2>o.y)){chosen=box;break}
+   }
+   if(!chosen)return;occupied.push(chosen);roundedRect(chosen.x,chosen.y,bw,bh,5);
+   ctx.fillStyle="rgba(3,13,23,.84)";ctx.fill();
+   ctx.strokeStyle=city.id===state.selected?"rgba(0,242,254,.72)":"rgba(112,154,174,.4)";
+   ctx.lineWidth=.8;ctx.stroke();ctx.fillStyle="#effaff";ctx.textBaseline="middle";ctx.textAlign="left";
+   ctx.fillText(city.name,chosen.x+7,chosen.y+bh/2);
+  });
+ }else{
+  // Until D3 loads, display only the ocean grid. Never substitute inaccurate hand-drawn land.
+  ctx.strokeStyle="rgba(87,166,195,.15)";ctx.lineWidth=.7;
+  for(let x=0;x<=w;x+=w/12){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+  for(let y=0;y<=h;y+=h/6){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ }
  ctx.restore();
- // Thin coordinate crosshairs and subtle edge vignette.
- ctx.strokeStyle="rgba(106,179,201,.07)";ctx.lineWidth=1;for(let x=0;x<w;x+=96){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
- const xy=c=>mapXY(c,proj,w,h);
- // Route network behind stations and city lights.
- state.routes.forEach(r=>{let a=cities.find(c=>c.id===r.a),b=cities.find(c=>c.id===r.b);if(!a||!b)return;let p=xy(a),q=xy(b);ctx.beginPath();ctx.moveTo(p[0],p[1]);let mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2-Math.min(48,Math.hypot(q[0]-p[0],q[1]-p[1])*.1);ctx.quadraticCurveTo(mx,my,q[0],q[1]);ctx.save();ctx.setLineDash([6,4]);ctx.lineDashOffset=-(performance.now()/42)%1000;ctx.strokeStyle="rgba(0,242,254,.2)";ctx.lineWidth=5;ctx.shadowColor="#00f2fe";ctx.shadowBlur=11;ctx.stroke();ctx.strokeStyle="#00f2fe";ctx.lineWidth=1.8;ctx.shadowBlur=5;ctx.stroke();ctx.setLineDash([]);ctx.restore()});
- // City lights: quiet points for ordinary cities, animated rings for owned stations.
- const pulse=(performance.now()%1900)/1900;
- cities.forEach(c=>{let p=xy(c),isSelected=c.id===state.selected,isHover=hoveredCity&&hoveredCity.id===c.id,station=state.stations.includes(c.id);
-  if(station){for(let ring=0;ring<2;ring++){let phase=(pulse+ring*.5)%1,rad=7+phase*19;ctx.beginPath();ctx.arc(p[0],p[1],rad,0,Math.PI*2);ctx.strokeStyle="rgba(245,195,112,"+(1-phase)*.55+")";ctx.lineWidth=1.25;ctx.shadowColor="#f2c477";ctx.shadowBlur=8;ctx.stroke()}ctx.shadowBlur=0}
-  ctx.beginPath();ctx.arc(p[0],p[1],isSelected||isHover?5.1:station?4.3:2.7,0,Math.PI*2);ctx.fillStyle=isSelected?"#ffffff":station?"#ffcf7b":c.fictional?"#c2a7ff":"#80ead8";ctx.shadowColor=station?"#f3be69":c.fictional?"#b39bff":"#64e2dc";ctx.shadowBlur=isSelected||isHover||station?13:7;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=isSelected?"#00f2fe":"rgba(5,23,37,.9)";ctx.lineWidth=1;ctx.stroke();
- });
- // Labels are limited to selected, hovered and owned cities. Place them without collisions.
- const labelTargets=cities.filter(c=>c.id===state.selected||(hoveredCity&&c.id===hoveredCity.id)||state.stations.includes(c.id)).sort((a,b)=>(a.id===state.selected?-2:state.stations.includes(a.id)?-1:0)-(b.id===state.selected?-2:state.stations.includes(b.id)?-1:0));
- const occupied=[];
- labelTargets.forEach(c=>{let p=xy(c);ctx.font="600 10px 'Noto Sans JP',sans-serif";let tw=ctx.measureText(c.name).width,bw=tw+14,bh=20;let choices=[[10,-25],[10,8],[-bw-10,-25],[-bw-10,8],[-(bw/2),-34],[-(bw/2),18]];let chosen=null;
-  for(let off of choices){let x=Math.max(3,Math.min(w-bw-3,p[0]+off[0])),y=Math.max(3,Math.min(h-bh-3,p[1]+off[1]));let box={x,y,w:bw,h:bh};if(!occupied.some(o=>box.x<o.x+o.w+3&&box.x+box.w+3>o.x&&box.y<o.y+o.h+2&&box.y+box.h+2>o.y)){chosen=box;break}}
-  if(!chosen)return;occupied.push(chosen);roundedRect(chosen.x,chosen.y,bw,bh,5);ctx.fillStyle="rgba(3,13,23,.82)";ctx.fill();ctx.strokeStyle=c.id===state.selected?"rgba(89,218,233,.7)":"rgba(112,154,174,.4)";ctx.lineWidth=.8;ctx.stroke();ctx.fillStyle="#effaff";ctx.textBaseline="middle";ctx.textAlign="left";ctx.fillText(c.name,chosen.x+7,chosen.y+bh/2);
- });
- ctx.restore();
- $("mapstatus").textContent=(world?"WORLD ATLAS · ":"TACTICAL VECTOR MAP · ")+cities.length+" CITIES · "+state.stations.length+" STATIONS";
+ $("mapstatus").textContent=!window.d3?"D3 LOADING · REAL MAP PENDING":
+  !world?"REAL WORLD MAP DATA LOADING":"WORLD ATLAS LAND-110M · "+cities.length+" CITIES · "+state.stations.length+" STATIONS";
  scheduleMapPulse();
 }
-function hitCity(clientX,clientY){let r=canvas.getBoundingClientRect(),x=clientX-r.left,y=clientY-r.top,w=r.width,h=r.height,proj=mapProjection(w,h),best=null,dist=14;for(let c of cities){let p=mapXY(c,proj,w,h),sx=(p[0]-w/2)*mapScale+w/2+mapX,sy=(p[1]-h/2)*mapScale+h/2+mapY,d=Math.hypot(sx-x,sy-y);if(d<dist){dist=d;best=c}}return best}
+function hitCity(clientX,clientY){
+ const r=canvas.getBoundingClientRect(),x=clientX-r.left,y=clientY-r.top,w=r.width,h=r.height;
+ const proj=mapProjection(w,h);if(!proj)return null;
+ let best=null,dist=14;
+ for(const city of cities){const p=mapXY(city,proj);if(!p)continue;
+  const sx=(p[0]-w/2)*mapScale+w/2+mapX,sy=(p[1]-h/2)*mapScale+h/2+mapY;
+  const d=Math.hypot(sx-x,sy-y);if(d<dist){dist=d;best=city}
+ }
+ return best;
+}
 function hitCountry(clientX,clientY){
- if(!projection||!world||!world.land||!Array.isArray(world.land.features)||!window.d3.geoContains||!projection.invert)return null;
+ if(!projection||!world||!world.countries||!Array.isArray(world.countries.features)||!window.d3.geoContains||!projection.invert)return null;
  const r=canvas.getBoundingClientRect(),x=clientX-r.left,y=clientY-r.top,w=r.width,h=r.height;
  const localX=(x-w/2-mapX)/mapScale+w/2,localY=(y-h/2-mapY)/mapScale+h/2;
  const coords=projection.invert([localX,localY]);if(!coords)return null;
- return world.land.features.find(feature=>window.d3.geoContains(feature,coords))||null;
+ return world.countries.features.find(feature=>window.d3.geoContains(feature,coords))||null;
 }
 canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,ox:mapX,oy:mapY,moved:false};canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener("pointermove",e=>{
- if(drag){let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>4)drag.moved=true;if(drag.moved){mapX=drag.ox+dx;mapY=drag.oy+dy;canvas.classList.add("drag");updateMapTooltip(null);drawMap()}return}
- const c=hitCity(e.clientX,e.clientY),country=hitCountry(e.clientX,e.clientY);
- if((c&&c.id)!==(hoveredCity&&hoveredCity.id)||(country&&country.id)!==(hoveredCountry&&hoveredCountry.id)){
-  hoveredCity=c;hoveredCountry=country;drawMap();
+ if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>4)drag.moved=true;
+  if(drag.moved){mapX=drag.ox+dx;mapY=drag.oy+dy;canvas.classList.add("drag");updateMapTooltip(null);drawMap()}return}
+ const city=hitCity(e.clientX,e.clientY),country=hitCountry(e.clientX,e.clientY);
+ if((city&&city.id)!==(hoveredCity&&hoveredCity.id)||(country&&country.id)!==(hoveredCountry&&hoveredCountry.id)){
+  hoveredCity=city;hoveredCountry=country;drawMap();
  }
- if(c)updateMapTooltip(c,e.clientX,e.clientY);else updateMapTooltip(null);
+ if(city)updateMapTooltip(city,e.clientX,e.clientY);else updateMapTooltip(null);
 });
-canvas.addEventListener("pointerup",e=>{if(!drag)return;let moved=drag.moved;drag=null;canvas.classList.remove("drag");if(!moved){let c=hitCity(e.clientX,e.clientY);if(c)handleCity(c.id)}});
+canvas.addEventListener("pointerup",e=>{if(!drag)return;const moved=drag.moved;drag=null;canvas.classList.remove("drag");
+ if(!moved){const city=hitCity(e.clientX,e.clientY);if(city)handleCity(city.id)}});
 canvas.addEventListener("pointerleave",()=>{if(!drag){hoveredCity=null;hoveredCountry=null;updateMapTooltip(null);drawMap()}});
 canvas.addEventListener("pointercancel",()=>{drag=null;canvas.classList.remove("drag")});
 function zoom(f){mapScale=Math.max(.8,Math.min(3.5,mapScale*f));drawMap()}
@@ -303,21 +369,40 @@ $("modalcancel").onclick=()=>$("modal").classList.remove("open");$("modalok").on
 $("newgame").onclick=()=>confirm("新しいゲームを開始","現在の進行状況をリセットします。保存していないデータは失われます。",()=>{state=JSON.parse(JSON.stringify(base));cities.forEach((c,i)=>{let original=[14000000,2750000,1970000,9400000,24800000,5900000,12400000,3600000,8900000,2100000,3700000,8800000,3900000,12300000,4400000,5300000,180000,95000,125000];c.pop=original[i]});routeStart=null;mapScale=1;mapX=0;mapY=0;$("news").innerHTML="<div class='newsitem'>新しい会社を設立しました。<small>DAY 1 · SYSTEM</small></div>";render();drawMap();save(true);notify("新しいゲームを開始しました")});
 window.addEventListener("resize",drawMap);
 function loadScript(src){return new Promise((resolve,reject)=>{let script=document.createElement("script"),done=false,timer=setTimeout(()=>finish(new Error("script timeout")),8000);function finish(err){if(done)return;done=true;clearTimeout(timer);if(err){script.remove();reject(err)}else resolve()}script.src=src;script.async=true;script.onload=()=>finish();script.onerror=()=>finish(new Error("script load failed"));document.head.appendChild(script)})}
-async function loadWorld(){try{
- // The hand-drawn map is rendered immediately. Load the detailed map libraries in the background.
- await Promise.all([
-  loadScript("https://cdn.jsdelivr.net/npm/topojson-client@3"),
-  loadScript("https://cdn.jsdelivr.net/npm/d3-geo@3")
- ]);
- let controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
- let topoRes;try{topoRes=await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",{signal:controller.signal})}finally{clearTimeout(timeout)}
- if(!topoRes.ok)throw Error("map data unavailable");
- let topo=await topoRes.json();
- if(!window.topojson||!window.d3)throw Error("map libraries unavailable");
- let countries=window.topojson.feature(topo,topo.objects.countries);
- world={land:countries,borders:window.topojson.mesh(topo,topo.objects.countries,(a,b)=>a!==b)};
- $("mapstatus").textContent="WORLD MAP DATA READY";drawMap();
- }catch(e){world=null;$("mapstatus").textContent="ILLUSTRATED MAP MODE · OFFLINE READY";drawMap()}
+async function loadWorld(){
+ try{
+  $("mapstatus").textContent="D3 / TOPOJSON LIBRARIES LOADING";
+  await Promise.all([
+   loadScript("https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"),
+   loadScript("https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js")
+  ]);
+  if(!window.d3||!window.d3.geoNaturalEarth1||!window.topojson||!window.topojson.feature)throw Error("Map libraries unavailable");
+  $("mapstatus").textContent="WORLD ATLAS LAND DATA LOADING";
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),20000);
+  let landResponse,countriesResponse;
+  try{
+   [landResponse,countriesResponse]=await Promise.all([
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json",{signal:controller.signal,cache:"force-cache"}),
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",{signal:controller.signal,cache:"force-cache"})
+   ]);
+  }finally{clearTimeout(timeout)}
+  if(!landResponse.ok)throw Error("land-110m.json HTTP "+landResponse.status);
+  if(!countriesResponse.ok)throw Error("countries-110m.json HTTP "+countriesResponse.status);
+  const [landTopo,countriesTopo]=await Promise.all([landResponse.json(),countriesResponse.json()]);
+  if(!landTopo.objects||!landTopo.objects.land)throw Error("land-110m TopoJSON object missing");
+  if(!countriesTopo.objects||!countriesTopo.objects.countries)throw Error("countries-110m TopoJSON object missing");
+  const land=window.topojson.feature(landTopo,landTopo.objects.land);
+  const countries=window.topojson.feature(countriesTopo,countriesTopo.objects.countries);
+  const borders=window.topojson.mesh(countriesTopo,countriesTopo.objects.countries,(a,b)=>a!==b);
+  world={land:land,countries:countries,borders:borders};
+  $("mapstatus").textContent="WORLD ATLAS LAND-110M READY";
+  drawMap();
+ }catch(error){
+  world=null;
+  $("mapstatus").textContent="REAL MAP LOAD FAILED · "+(error&&error.message?error.message:"UNKNOWN ERROR");
+  drawMap();
+ }
 }
 function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
 init();
