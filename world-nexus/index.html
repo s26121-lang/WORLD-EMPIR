@@ -158,9 +158,9 @@ function render(){
  if(!$("cityMapView").hidden){renderCityMapUI();drawCityMap()}
 }
 
-let isCityMapOpen=false;
+let isCityMapOpen=false,localMapCityId=null;
 function openCityMap(){
- isCityMapOpen=true;localMapMode="view";localRouteStart=null;
+ isCityMapOpen=true;localMapMode="view";localRouteStart=null;if(localMapCityId!==state.selected){localCityCamera={x:800,y:850,zoom:.34};localMapCityId=state.selected;}
  $("worldMapView").hidden=true;$("cityMapView").hidden=false;
  const c=city();
  $("localBreadcrumbName").textContent=c.name;
@@ -272,14 +272,15 @@ function renderCityMapUI(){
  $("localStationCount").textContent=stations.length;$("localRouteCount").textContent=routes.length;$("localBuildingCount").textContent=buildings.length;
  $("localEconomyValue").textContent=c.econ+" / 100";$("localDemandValue").textContent=c.demand+" / 5";
  const type=transitCatalog[$("localTransportType").value]||transitCatalog.subway;
- $("localBuildCost").textContent=money(type.cost);
- $("localBuildSpec").textContent="維持費 "+money(type.maintenance)+"/日 · 輸送力 "+num(type.capacity)+"/日 · "+type.speed+" km/h";
+ const building=buildingCatalog[$("localBuildingType").value];
+ if(localMapMode==="building"&&building){$("localBuildCost").textContent=money(building.cost);$("localBuildSpec").textContent="乗客需要 "+num(building.demand)+" 人/日 · "+building.zone}
+ else{$("localBuildCost").textContent=money(type.cost);$("localBuildSpec").textContent="維持費 "+money(type.maintenance)+"/日 · 輸送力 "+num(type.capacity)+"/日 · "+type.speed+" km/h"}
  $("localBuildStation").classList.toggle("primary",localMapMode==="station");
  $("localBuildRoute").classList.toggle("primary",localMapMode==="route");
  $("localBuildBuilding").classList.toggle("primary",localMapMode==="building");
  $("localMapHint").textContent=localMapMode==="station"?"選択した交通施設を置く場所をクリック。建設コストは上部に表示。":
   localMapMode==="route"?(localRouteStart?"接続先となる2つ目の交通施設をクリックしてください。":"路線の起点となる交通施設をクリックしてください。"):
-  localMapMode==="building"?"選択した建物を配置する場所をクリックしてください。":"ドラッグで移動、ホイールまたは＋／−でズーム。ズームインすると建物・駅名・車両が表示されます。";
+  localMapMode==="building"?"選択した建物を配置する場所をクリックしてください。":"ドラッグで移動、ホイールまたは＋／−でズーム。縮小時は地区・幹線道路、拡大時は街路や建物・車両が表示されます。";
  $("cityMapCoords").textContent="X "+Math.round(localCityCamera.x)+" · Y "+Math.round(localCityCamera.y)+" · ZOOM "+localCityCamera.zoom.toFixed(2)+"×";
 }
 function drawMiniMap(){
@@ -335,7 +336,7 @@ function drawCityMap(){
  context.strokeStyle="rgba(82,192,213,.42)";context.lineWidth=3;
  for(let i=1;i<8;i++){const x=i*CITY_WORLD_SIZE/8,y=i*CITY_WORLD_SIZE/8;context.beginPath();context.moveTo(x,0);context.lineTo(x,CITY_WORLD_SIZE);context.stroke();context.beginPath();context.moveTo(0,y);context.lineTo(CITY_WORLD_SIZE,y);context.stroke()}
  // LOD: local streets.
- if(zoom>=.34){
+ if(zoom>=.62){
   context.strokeStyle="rgba(112,159,183,.13)";context.lineWidth=4;
   for(let x=100;x<CITY_WORLD_SIZE;x+=95){context.beginPath();context.moveTo(x,0);context.lineTo(x,CITY_WORLD_SIZE);context.stroke()}
   for(let y=100;y<CITY_WORLD_SIZE;y+=95){context.beginPath();context.moveTo(0,y);context.lineTo(CITY_WORLD_SIZE,y);context.stroke()}
@@ -351,12 +352,12 @@ function drawCityMap(){
   context.stroke();context.setLineDash([]);context.shadowBlur=0;
  });
  // Building footprints at close zoom.
- if(zoom>=.72){
+ if(zoom>=.82){
   buildings.forEach(b=>{
    const def=buildingCatalog[b.type];if(!def)return;
    context.fillStyle=def.color+"aa";context.strokeStyle=def.color;context.lineWidth=zoom>1.25?3:1.5;
    context.fillRect(b.x,b.y,b.w,b.h);context.strokeRect(b.x,b.y,b.w,b.h);
-   if(zoom>=1.25){context.fillStyle="rgba(3,13,23,.85)";context.font="17px sans-serif";context.textAlign="center";context.fillText(def.icon,b.x+b.w/2,b.y+b.h/2+6)}
+   if(zoom>=1.4){context.fillStyle="rgba(3,13,23,.85)";context.font="17px sans-serif";context.textAlign="center";context.fillText(def.icon,b.x+b.w/2,b.y+b.h/2+6)}
   });
  }
  stations.forEach(station=>{
@@ -367,7 +368,7 @@ function drawCityMap(){
   if(station.id===localRouteStart){context.beginPath();context.arc(station.x,station.y,36,0,Math.PI*2);context.strokeStyle="#fff";context.lineWidth=3;context.stroke()}
  });
  // Moving vehicles reveal only at high zoom.
- if(zoom>=1.15){
+ if(zoom>=1.55){
   const now=performance.now()/2800;
   routes.forEach(route=>{
    const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
@@ -386,7 +387,7 @@ function buildLocalStationAt(point){
  if((typeId==="airport"||typeId==="port")&&stations.some(s=>s.type===typeId)){notify(type.name+"はこの都市に1か所までです");return}
  const station={id:"local-"+c.id+"-"+Date.now().toString(36)+"-"+(stations.length+1),name:type.name+" "+(stations.length+1),type:typeId,x:point.x,y:point.y,worldUnits:true};
  state.money-=type.cost;stations.push(station);state.xp+=type.kind==="hub"?55:18;
- if(type.kind==="hub"){c.econ=Math.min(100,c.econ+1);c.demand=Math.min(5,c.demand+1)}
+ if(type.kind==="hub"){c.econ=Math.min(100,c.econ+1);c.demand=Math.min(5,c.demand+1);if(!state.stations.includes(c.id)){state.stations.push(c.id);addNews(c.name+"が世界ネットワークの広域ハブとして接続されました。")}}
  addNews(c.name+"に"+type.name+"を建設しました。");save(true);render();renderCityMapUI();drawCityMap();notify(type.name+"を建設しました。");
 }
 function nearbyBuildingDemand(point,buildings,range=560){
@@ -456,8 +457,8 @@ function switchPage(name){
  const data={world:["GLOBAL OPERATIONS / 01","世界ネットワーク","地球規模の交通網を築き、都市と都市をつなごう。"],transport:["TRANSPORT MANAGEMENT / 02","交通ネットワーク","駅・路線・輸送収益を管理しよう。"],cities:["CITY INTELLIGENCE / 03","都市開発","世界の都市の人口・経済・交通需要を確認しよう。"],company:["CORPORATE FINANCE / 04","企業経営","資金・企業価値・日々の収支を確認しよう。"]}[name];
  $("eyebrow").textContent=data[0];$("pagetitle").textContent=data[1];$("pagesub").textContent=data[2];
 }
-function save(silent){try{if(!state.localStations)state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];localStorage.setItem("worldNexusSaveV2",JSON.stringify({state,cities}));if(!silent)notify("セーブデータを保存しました")}catch(e){if(!silent)notify("保存に失敗しました")}}
-function load(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(!raw){notify("セーブデータがありません");return}let obj=JSON.parse(raw);if(!obj.state||!Array.isArray(obj.state.stations)||!Array.isArray(obj.state.routes))throw Error("invalid");state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(Array.isArray(obj.cities))obj.cities.forEach(saved=>{let c=cities.find(x=>x.id===saved.id);if(c&&Number.isFinite(saved.pop))c.pop=saved.pop});render();drawMap();notify("セーブデータをロードしました")}catch(e){notify("データを読み込めませんでした")}}
+function save(silent){try{if(!state.localStations)state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(!state.localBuildings)state.localBuildings={};localStorage.setItem("worldNexusSaveV2",JSON.stringify({state,cities}));if(!silent)notify("セーブデータを保存しました")}catch(e){if(!silent)notify("保存に失敗しました")}}
+function load(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(!raw){notify("セーブデータがありません");return}let obj=JSON.parse(raw);if(!obj.state||!Array.isArray(obj.state.stations)||!Array.isArray(obj.state.routes))throw Error("invalid");state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(!state.localBuildings||typeof state.localBuildings!=="object")state.localBuildings={};if(Array.isArray(obj.cities))obj.cities.forEach(saved=>{let c=cities.find(x=>x.id===saved.id);if(c&&Number.isFinite(saved.pop))c.pop=saved.pop});render();drawMap();notify("セーブデータをロードしました")}catch(e){notify("データを読み込めませんでした")}}
 function confirm(title,text,action){$("modaltitle").textContent=title;$("modaltext").textContent=text;modalAction=action;$("modal").classList.add("open")}
 function buildStation(id){let c=cities.find(x=>x.id===id);if(!c)return;if(state.stations.includes(id)){notify("この都市にはすでに駅があります");return}let cost=c.fictional?22000000:35000000;if(state.money<cost){notify("資金不足：必要額 "+money(cost));return}state.money-=cost;state.stations.push(id);state.xp+=30;state.mode="select";addNews(c.name+"に新しい駅が完成しました。");render();drawMap();save(true);notify(c.name+"に駅を建設しました！")}
 function connectRoute(id){
@@ -761,7 +762,7 @@ async function loadWorld(){
   drawMap();
  }
 }
-function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
+function init(){try{let raw=localStorage.getItem("worldNexusSaveV2");if(raw){let obj=JSON.parse(raw);if(obj.state)state=Object.assign({},base,obj.state);if(!state.localStations||typeof state.localStations!=="object")state.localStations={};if(!Array.isArray(state.localRoutes))state.localRoutes=[];if(!state.localBuildings||typeof state.localBuildings!=="object")state.localBuildings={};if(Array.isArray(obj.cities))obj.cities.forEach(s=>{let c=cities.find(x=>x.id===s.id);if(c&&Number.isFinite(s.pop))c.pop=s.pop})}}catch(e){}render();drawMap();loadWorld();setSpeed(1)}
 init();
 })();
 </script>
