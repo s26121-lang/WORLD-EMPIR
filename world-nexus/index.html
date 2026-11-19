@@ -344,12 +344,34 @@ function drawCityMap(){
  const stations=localStationsFor(c.id),routes=localRoutesFor(c.id),buildings=generateCityBuildings(c);
  routes.forEach(route=>{
   const a=stations.find(s=>s.id===route.a),b=stations.find(s=>s.id===route.b);if(!a||!b)return;
-  const type=transitCatalog[route.mode]||transitCatalog.subway;
+  const type=transitCatalog[route.mode]||transitCatalog.subway,dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
   context.beginPath();context.moveTo(a.x,a.y);
-  if(route.mode==="bus"||route.mode==="lrt"){const mid=(a.x+b.x)/2;context.lineTo(mid,a.y);context.lineTo(mid,b.y)}else context.lineTo(b.x,b.y);
-  context.strokeStyle=type.color;context.lineWidth=route.mode==="subway"||route.mode==="hsr"?12:8;context.shadowColor=type.color;context.shadowBlur=zoom>.25?12:4;
-  if(route.mode==="bus"||route.mode==="ferry")context.setLineDash([22,12]);else context.setLineDash([]);
-  context.stroke();context.setLineDash([]);context.shadowBlur=0;
+  if(route.mode==="bus"||route.mode==="lrt"){
+   // Surface services follow a street-like orthogonal path.
+   const bendX=a.x+dx*.5,bendY=a.y+dy*.5;
+   context.lineTo(bendX,a.y);context.lineTo(bendX,b.y);context.lineTo(b.x,b.y);
+  }else if(route.mode==="monorail"){
+   // Elevated line is drawn as a shallow high-level arc.
+   context.quadraticCurveTo((a.x+b.x)/2,(a.y+b.y)/2-Math.min(220,dist*.14),b.x,b.y);
+  }else if(route.mode==="ferry"){
+   // Water-bus / ferry service curves through the water corridor.
+   const layout=cityMapLayout(c),bend=layout.riverAxis===0?(a.x+b.x)/2+Math.sign(dx||1)*100:(a.y+b.y)/2+Math.sign(dy||1)*100;
+   if(layout.riverAxis===0)context.quadraticCurveTo(bend,(a.y+b.y)/2,b.x,b.y);
+   else context.quadraticCurveTo((a.x+b.x)/2,bend,b.x,b.y);
+  }else{
+   // Underground and intercity high-speed links use a direct corridor.
+   context.lineTo(b.x,b.y);
+  }
+  context.save();context.strokeStyle=type.color;context.lineWidth=route.mode==="subway"||route.mode==="hsr"?12:route.mode==="bus"?6:8;
+  context.shadowColor=type.color;context.shadowBlur=zoom>.25?12:4;
+  if(route.mode==="bus"||route.mode==="ferry")context.setLineDash([22,12]);
+  else if(route.mode==="hsr")context.setLineDash([18,7]);
+  else context.setLineDash([]);
+  context.stroke();
+  if(route.mode==="monorail"||route.mode==="lrt"){
+   context.setLineDash([]);context.lineWidth=2.2;context.strokeStyle="rgba(245,251,255,.78)";context.shadowBlur=2;context.stroke();
+  }
+  context.setLineDash([]);context.restore();
  });
  // Building footprints at close zoom.
  if(zoom>=.82){
@@ -357,7 +379,7 @@ function drawCityMap(){
    const def=buildingCatalog[b.type];if(!def)return;
    context.fillStyle=def.color+"aa";context.strokeStyle=def.color;context.lineWidth=zoom>1.25?3:1.5;
    context.fillRect(b.x,b.y,b.w,b.h);context.strokeRect(b.x,b.y,b.w,b.h);
-   if(zoom>=1.4){context.fillStyle="rgba(3,13,23,.85)";context.font="17px sans-serif";context.textAlign="center";context.fillText(def.icon,b.x+b.w/2,b.y+b.h/2+6)}
+   if(zoom>=1.4){context.fillStyle="rgba(3,13,23,.85)";context.font="17px sans-serif";context.textAlign="center";context.fillText(def.icon,b.x+b.w/2,b.y+b.h/2+6)}if(zoom>=1.75){context.fillStyle="#d9edf6";context.font="12px sans-serif";context.textAlign="center";context.fillText(def.name,b.x+b.w/2,b.y+b.h+17)}
   });
  }
  stations.forEach(station=>{
